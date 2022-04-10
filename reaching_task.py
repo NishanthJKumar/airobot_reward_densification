@@ -247,3 +247,13 @@ register(
 )
 
 # TODO: add necessary predicate classifiers
+def at_predicate(goal_or_subgoal, env):
+    if goal_or_subgoal == "goal":
+        return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2], env._goal_pos[:2]) < env._dist_threshold
+    elif goal_or_subgoal == "subgoal":
+        for pos in env._subgoal_pos:
+            if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
+                return True
+        return False
+    else:
+        raise ValueError("goal_or_subgoal should be either 'goal' or 'subgoal'.")
