@@ -7,8 +7,19 @@ from gym.wrappers.monitoring import video_recorder
 import copy
 from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan
 from reaching_task import URRobotGym
+from gym.envs.registration import registry, register
 
 NUM_BLOCKS = 2
+
+module_name = __name__
+
+env_name = 'URReacher-v1'
+if env_name in registry.env_specs:
+    del registry.env_specs[env_name]
+register(
+    id=env_name,
+    entry_point=f'{module_name}:URRobotGym',
+)
 
 env_name = 'URReacher-v1'
 env = gym.make(env_name)
@@ -21,7 +32,6 @@ env.env.stack_only = True
 
 def print_predicates(env):
     predicates = Predicates().get_predicates()
-    print(predicates)
     objects = ['claw', 'subgoal', 'goal']
     for predicate in predicates["0-arity"]:
         print(predicate.__name__, predicate(env))
@@ -33,15 +43,15 @@ def print_predicates(env):
     
     for predicate in predicates["2-arity"]:
         for obj1 in ['claw']:
-            for obj2 in  ['subgoal', 'goal']:
+            for obj2 in ['subgoal', 'goal']:
                 print(predicate.__name__, [obj1, obj2], predicate(env, obj1, obj2))  
 
 #env.render()
-print_predicates(env)
-state_grounded_atoms = get_state_grounded_atoms(env)
+print_predicates(env.env)
+state_grounded_atoms = get_state_grounded_atoms(env.env)
 print("State:", state_grounded_atoms)
-op_name = 'pickup'
-params = ['object0']
+op_name = 'move-to-subgoal'
+params = ['claw', 'subgoal']
 print("Apply", op_name, params)
 next_grounded_state_atoms = apply_grounded_operator(state_grounded_atoms, op_name, params)
 print("Next State:", next_grounded_state_atoms)

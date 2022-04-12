@@ -14,8 +14,8 @@ class Predicates:
 
     # TODO: add necessary predicate classifiers
     def at(self, env, gripper, loc):
-        if self.is_goal(loc, env):
-            return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2], env._goal_pos[:2]) < env._dist_threshold
+        if self.is_goal(env, loc):
+            return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._goal_pos[:2]) < env._dist_threshold
         else: 
             if loc == "subgoal":
                 for pos in env._subgoal_pos:
@@ -23,7 +23,7 @@ class Predicates:
                         return True
                 return False
             else:
-                raise ValueError("loc should be either 'goal' or 'subgoal'.")
+                raise ValueError(f"loc should be either 'goal' or 'subgoal' not '{loc}'")
 
     def is_goal(self, env, loc):
         return loc == "goal"
