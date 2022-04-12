@@ -55,7 +55,7 @@ def get_state_grounded_atoms(env):
 def apply_grounded_operator(state_grounded_atoms, op_name, params):
     for o in domprob.ground_operator(op_name):
         if params == list(o.variable_list.values()) and o.precondition_pos.issubset(state_grounded_atoms):
-            next_state_grounded_atoms = state_grounded_atoms
+            next_state_grounded_atoms = copy.deepcopy(state_grounded_atoms)
             for effect in o.effect_pos:
                 next_state_grounded_atoms.append(effect)
             for effect in o.effect_neg:
@@ -70,8 +70,6 @@ def apply_grounded_plan(state_grounded_atoms, plan):
         op_name = ground_operator[0]
         params = list([ground_operator[1]] if len(ground_operator[1]) == 2 else ground_operator[1:])
         plan_grounded_atoms.append(apply_grounded_operator(plan_grounded_atoms[-1], op_name, params))
-        print("pga:", plan_grounded_atoms[-1])
-        # TODO (wmcclinton) Fix
     return plan_grounded_atoms
 
 

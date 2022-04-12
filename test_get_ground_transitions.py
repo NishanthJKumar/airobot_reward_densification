@@ -59,7 +59,7 @@ with open('sas_plan.1') as f:
     plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
 print()
 print("Plan:", plan)
-state_grounded_atoms = get_state_grounded_atoms(env)
+state_grounded_atoms = get_state_grounded_atoms(env.env)
 plan_grounded_atoms = apply_grounded_plan(state_grounded_atoms, plan)
 for i, step in enumerate(plan_grounded_atoms):
     if i != 0:
