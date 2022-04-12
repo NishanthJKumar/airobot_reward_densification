@@ -1,6 +1,6 @@
 (define (domain reaching)
     
-    (:requirements :typing :strips :equality)
+    (:requirements :typing :negative-preconditions :strips :equality)
     
     (:types 
         gripper - object 
@@ -13,8 +13,8 @@
     )
 
     (:action move-to-subgoal
-        :parameter (?g - gripper ?loc - location)
-        :precondtition (and
+        :parameters (?g - gripper ?loc - location)
+        :precondition (and
             (not (is_goal ?loc))
             (not (at ?g ?loc))
         )
@@ -24,7 +24,7 @@
     )
 
     (:action move-to-goal
-        :parameter (?g - gripper ?loc ?goal - location)
+        :parameters (?g - gripper ?loc ?goal - location)
         :precondition (and
             (at ?g ?loc)
             (is_goal ?goal)
