@@ -110,21 +110,20 @@ class URRobotGym(gym.Env):
                                                            rgba=[0.5, 0.5, 0.5, 0.8])
 
         # create balls at subgoal locations
-        if self._use_subgoal:
-            self._subgoal_pos = np.array([[0.24, 0.15, 1.0], [0.76, 0.15, 1.0]])
-            self._subgoal_urdf_id = []
-            for pos in self._subgoal_pos:
-                self._subgoal_urdf_id.append(self.robot.pb_client.load_geom('sphere', size=0.04, mass=0,
-                                                                            base_pos=pos,
-                                                                            rgba=[0, 0.8, 0.8, 0.8]))
-            # disable the collision checking between the robot and the subgoal balls
-            for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
-                for sg in self._subgoal_urdf_id:
-                    self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id,
-                                                                sg,
-                                                                i,
-                                                                -1,
-                                                                enableCollision=0)
+        self._subgoal_pos = np.array([[0.24, 0.15, 1.0], [0.76, 0.15, 1.0]])
+        self._subgoal_urdf_id = []
+        for pos in self._subgoal_pos:
+            self._subgoal_urdf_id.append(self.robot.pb_client.load_geom('sphere', size=0.04, mass=0,
+                                                                        base_pos=pos,
+                                                                        rgba=[0, 0.8, 0.8, 0.8]))
+        # disable the collision checking between the robot and the subgoal balls
+        for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
+            for sg in self._subgoal_urdf_id:
+                self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id,
+                                                            sg,
+                                                            i,
+                                                            -1,
+                                                            enableCollision=0)
 
         self._action_bound = 1.0
         self._ee_pos_scale = 0.02
