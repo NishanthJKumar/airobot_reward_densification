@@ -34,6 +34,66 @@ from easyrl.utils.common import load_from_json
 from base64 import b64encode
 from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan
 
+def play_video(video_dir, video_file=None):
+    if video_file is None:
+        video_dir = Path(video_dir)
+        video_files = list(video_dir.glob(f'**/render_video.mp4'))
+        video_files.sort()
+        video_file = video_files[-1]
+    else:
+        video_file = Path(video_file)
+    compressed_file = video_file.parent.joinpath('comp.mp4')
+    os.system(f"ffmpeg -i {video_file} -filter:v 'setpts=2.0*PTS' -vcodec libx264 {compressed_file.as_posix()}")
+    mp4 = open(compressed_file.as_posix(),'rb').read()
+    data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
+    display(HTML("""
+    <video width=400 controls>
+        <source src="%s" type="video/mp4">
+    </video>
+    """ % data_url))
+
+
+# read tf log file
+def read_tf_log(log_dir):
+    log_dir = Path(log_dir)
+    log_files = list(log_dir.glob(f'**/events.*'))
+    if len(log_files) < 1:
+        return None
+    log_file = log_files[0]
+    event_acc = EventAccumulator(log_file.as_posix())
+    event_acc.Reload()
+    tags = event_acc.Tags()
+    try:
+        scalar_success = event_acc.Scalars('train/episode_success')
+        success_rate = [x.value for x in scalar_success]
+        steps = [x.step for x in scalar_success]
+        scalar_return = event_acc.Scalars('train/episode_return/mean')
+        returns = [x.value for x in scalar_return]
+    except:
+        return None
+    return steps, returns, success_rate
+
+
+def plot_curves(data_dict, title):
+    # {label: [x, y]}
+    fig, ax = plt.subplots(figsize=(4, 3))
+    labels = data_dict.keys()
+    for label, data in data_dict.items():
+        x = data[0]
+        y = data[1]
+        ax.plot(x, y, label=label)
+    ax.set_title(title)
+    ax.legend()
+
+def check_collision_rate(log_dir):
+    log_dir = Path(log_dir)
+    log_files = list(log_dir.glob(f'**/info.json'))
+    log_files.sort()
+    log_file = log_files[-1]
+    info_data = load_from_json(log_file)
+    collisions = [v['collision'] for k, v in info_data.items()]
+    return np.mean(collisions)
+
 class URRobotGym(gym.Env):
     def __init__(self,
                  action_repeat=10,
@@ -246,18 +306,91 @@ register(
     entry_point=f'{module_name}:URRobotGym',
 )
 
-# TODO: add necessary predicate classifiers
-def at_predicate(gripper, loc, env):
-    if is_goal(loc, env):
-        return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2], env._goal_pos[:2]) < env._dist_threshold
-    else: 
-        if loc == "subgoal":
-            for pos in env._subgoal_pos:
-                if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
-                    return True
-            return False
-        else:
-            raise ValueError("loc should be either 'goal' or 'subgoal'.")
+# DO NOT MODIFY THIS
+def train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False,
+              max_steps=200000):
+    set_config('ppo')
+    cfg.alg.num_envs = 1
+    cfg.alg.episode_steps = 100
+    cfg.alg.max_steps = max_steps
+    cfg.alg.deque_size = 20
+    cfg.alg.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    cfg.alg.env_name = 'URPusher-v1' if push_exp else 'URReacher-v1'
+    cfg.alg.save_dir = Path.cwd().absolute().joinpath('data').as_posix()
+    cfg.alg.save_dir += '/'
+    if push_exp:
+        cfg.alg.save_dir += 'push'
+    else:
+        cfg.alg.save_dir += 'sparse' if use_sparse_reward else 'dense'
+        cfg.alg.save_dir += f'_ob_{str(with_obstacle)}'
+        cfg.alg.save_dir += f'_sg_{str(use_subgoal)}'
+        cfg.alg.save_dir += f'_col_{str(apply_collision_penalty)}'
+    setattr(cfg.alg, 'diff_cfg', dict(save_dir=cfg.alg.save_dir))
 
-def is_goal(loc, env):
-    return loc == "goal"
+    print(f'====================================')
+    print(f'      Device:{cfg.alg.device}')
+    print(f'      Total number of steps:{cfg.alg.max_steps}')
+    print(f'====================================')
+
+    set_random_seed(cfg.alg.seed)
+    env_kwargs=dict(use_sparse_reward=use_sparse_reward,
+                    with_obstacle=with_obstacle,
+                    use_subgoal=use_subgoal,
+                    apply_collision_penalty=apply_collision_penalty) if not push_exp else dict()
+    env = make_vec_env(cfg.alg.env_name,
+                       cfg.alg.num_envs,
+                       seed=cfg.alg.seed,
+                       env_kwargs=env_kwargs)
+    env.reset()
+    ob_size = env.observation_space.shape[0]
+
+    actor_body = MLP(input_size=ob_size,
+                     hidden_sizes=[64],
+                     output_size=64,
+                     hidden_act=nn.Tanh,
+                     output_act=nn.Tanh)
+
+    critic_body = MLP(input_size=ob_size,
+                     hidden_sizes=[64],
+                     output_size=64,
+                     hidden_act=nn.Tanh,
+                     output_act=nn.Tanh)
+    if isinstance(env.action_space, gym.spaces.Discrete):
+        act_size = env.action_space.n
+        actor = CategoricalPolicy(actor_body,
+                                 in_features=64,
+                                 action_dim=act_size)
+    elif isinstance(env.action_space, gym.spaces.Box):
+        act_size = env.action_space.shape[0]
+        actor = DiagGaussianPolicy(actor_body,
+                                   in_features=64,
+                                   action_dim=act_size,
+                                   tanh_on_dist=cfg.alg.tanh_on_dist,
+                                   std_cond_in=cfg.alg.std_cond_in)
+    else:
+        raise TypeError(f'Unknown action space type: {env.action_space}')
+
+    critic = ValueNet(critic_body, in_features=64)
+    agent = PPOAgent(actor=actor, critic=critic, env=env)
+    runner = EpisodicRunner(agent=agent, env=env)
+    engine = PPOEngine(agent=agent,
+                       runner=runner)
+    engine.train()
+    stat_info, raw_traj_info = engine.eval(render=False,
+                                           save_eval_traj=True,
+                                           eval_num=1,
+                                           sleep_time=0.0)
+    pprint.pprint(stat_info)
+    return cfg.alg.save_dir
+
+# call train_ppo, just set the argument flag properly
+# save_dir = train_ppo(use_sparse_reward=True, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False, max_steps=200000)
+
+#### TODO: plot return and success rate curves
+# steps, returns, success_rate = read_tf_log(save_dir)
+# data_dict = {}
+# data_dict["return"] = [steps, returns]
+# plot_curves(data_dict, "Reaching Task without Obstacles - Sparse Reward")
+# data_dict = {}
+# data_dict["success_rate"] = [steps, success_rate]
+# plot_curves(data_dict, "Reaching Task without Obstacles - Sparse Reward")

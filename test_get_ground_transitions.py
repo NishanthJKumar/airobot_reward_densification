@@ -5,7 +5,7 @@ from gym.wrappers.monitor import Monitor
 import fetch_block_construction
 from gym.wrappers.monitoring import video_recorder
 import copy
-from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan
+from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan, get_reward
 from reaching_task import URRobotGym
 from gym.envs.registration import registry, register
 
@@ -65,3 +65,13 @@ for i, step in enumerate(plan_grounded_atoms):
     if i != 0:
         print(plan[i-1])
     print("State Sequence:", step)
+
+# Test reward fucntion
+state = env.reset()
+previous_state_grounded_atoms = get_state_grounded_atoms(env.env)
+action = env.action_space.sample()
+state, reward, done, info = env.step(action)
+next_state_grounded_atoms = get_state_grounded_atoms(env.env)
+shaped_reward = get_reward(env, state, action, previous_state_grounded_atoms, next_state_grounded_atoms, plan_grounded_atoms)
+print(shaped_reward)
+
