@@ -32,7 +32,7 @@ from easyrl.utils.common import set_random_seed
 from easyrl.utils.gym_util import make_vec_env
 from easyrl.utils.common import load_from_json
 from base64 import b64encode
-from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan
+# from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan
 
 def play_video(video_dir, video_file=None):
     if video_file is None:
@@ -384,7 +384,7 @@ def train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, a
     return cfg.alg.save_dir
 
 # call train_ppo, just set the argument flag properly
-# save_dir = train_ppo(use_sparse_reward=True, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False, max_steps=200000)
+save_dir = train_ppo(use_sparse_reward=True, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False, max_steps=200000)
 
 #### TODO: plot return and success rate curves
 # steps, returns, success_rate = read_tf_log(save_dir)
