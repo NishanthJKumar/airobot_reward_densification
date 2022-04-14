@@ -1,4 +1,4 @@
-name: 6484_dqn
+name: 6484_final_proj
 channels:
   - pytorch
   - conda-forge
@@ -115,7 +115,7 @@ dependencies:
     - absl-py==1.0.0
     - airobot==0.1
     - alabaster==0.7.12
-    - antlr4-python3-runtime==4.10
+    - antlr4-python3-runtime==4.9.3
     - babel==2.9.1
     - cachetools==5.0.0
     - catkin-pkg==0.4.24

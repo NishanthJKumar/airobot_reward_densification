@@ -32,7 +32,7 @@ from easyrl.utils.common import set_random_seed
 from easyrl.utils.gym_util import make_vec_env
 from easyrl.utils.common import load_from_json
 from base64 import b64encode
-# from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan
+from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan
 
 def play_video(video_dir, video_file=None):
     if video_file is None:
