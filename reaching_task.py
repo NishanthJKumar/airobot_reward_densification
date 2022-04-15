@@ -34,8 +34,10 @@ from easyrl.utils.common import load_from_json
 from base64 import b64encode
 from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan, get_shaped_reward
 from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
+from IPython import display
+from IPython.display import HTML
 
-def play_video(video_dir, video_file=None):
+def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
         video_dir = Path(video_dir)
         video_files = list(video_dir.glob(f'**/render_video.mp4'))
@@ -43,15 +45,7 @@ def play_video(video_dir, video_file=None):
         video_file = video_files[-1]
     else:
         video_file = Path(video_file)
-    compressed_file = video_file.parent.joinpath('comp.mp4')
-    os.system(f"ffmpeg -i {video_file} -filter:v 'setpts=2.0*PTS' -vcodec libx264 {compressed_file.as_posix()}")
-    mp4 = open(compressed_file.as_posix(),'rb').read()
-    data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-    display(HTML("""
-    <video width=400 controls>
-        <source src="%s" type="video/mp4">
-    </video>
-    """ % data_url))
+    os.system(f"vlc --rate {str(play_rate + 0.01)} {video_file}")
 
 
 # read tf log file
@@ -364,7 +358,8 @@ def train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, a
     return cfg.alg.save_dir
 
 # call train_ppo, just set the argument flag properly
-save_dir = train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False, max_steps=200000)
+save_dir = train_ppo(use_sparse_reward=True, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False, max_steps=200000)
+save_dir = '/home/wbm3/Documents/GitHub/airobot_reward_densification/data/dense_ob_False_sg_False_col_False/'
 play_video(save_dir)
 #### TODO: plot return and success rate curves
 # steps, returns, success_rate = read_tf_log(save_dir)
