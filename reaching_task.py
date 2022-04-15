@@ -32,7 +32,7 @@ from easyrl.utils.common import set_random_seed
 from easyrl.utils.gym_util import make_vec_env
 from easyrl.utils.common import load_from_json
 from base64 import b64encode
-from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan
+from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan, get_shaped_reward
 
 def play_video(video_dir, video_file=None):
     if video_file is None:
@@ -98,9 +98,9 @@ class URRobotGym(gym.Env):
     def __init__(self,
                  action_repeat=10,
                  use_sparse_reward=False,
-                 use_subgoal=False,
-                 with_obstacle=True,
-                 apply_collision_penalty=False,
+                 use_subgoal = False,
+                 apply_collision_penalty = False,
+                 with_obstacle = False,
                  # Set 'gui' to False if you are using Colab, otherwise the session will crash as Colab does not support X window
                  # You can set it to True for debugging purpose if you are running the notebook on a local machine.
                  gui=False,
@@ -218,29 +218,20 @@ class URRobotGym(gym.Env):
     def _get_reward(self, state, action, collision):
         dist_to_goal = np.linalg.norm(state - self._goal_pos[:2])
         success = dist_to_goal < self._dist_threshold
-        if self._use_sparse_reward:
-            #### TODO: Q1 design a sparse reward
-            pass
-            
-        elif self._use_subgoal:
-            reward = self._get_reward_with_subgoal(state)
-        else:
-            #### TODO: Q2 design a dense reward based on only the state and the goal position (no other information)
-            pass
-
-        if self._apply_collision_penalty:
-            #### TODO: Q4 apply a collision penalty
-            pass
-    
+        if not self._use_sparse_reward:
+            previous_state_grounded_atoms = get_state_grounded_atoms(self)
+            action = self.action_space.sample()
+            # TODO Can't do this
+            #state, reward, done, info = self.step(action)
+            #
+            next_state_grounded_atoms = get_state_grounded_atoms(self)
+            shaped_reward = get_shaped_reward(self, state, action, previous_state_grounded_atoms, next_state_grounded_atoms, plan_grounded_atoms)
+            print(shaped_reward)
+            quit()
+                
         reward = 1.0
         info = dict(success=success)
         return reward, info
-
-    def _get_reward_with_subgoal(self, state):
-        #### TODO: Q5 design a reward based on the state, goal and subgoal positions
-        reward = 1.0
-
-        return reward
 
     def _get_obs(self):
         gripper_pos = self.robot.arm.get_ee_pose()[0][:2]
@@ -384,7 +375,7 @@ def train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, a
     return cfg.alg.save_dir
 
 # call train_ppo, just set the argument flag properly
-save_dir = train_ppo(use_sparse_reward=True, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False, max_steps=200000)
+save_dir = train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False, max_steps=200000)
 
 #### TODO: plot return and success rate curves
 # steps, returns, success_rate = read_tf_log(save_dir)

@@ -48,5 +48,11 @@
   "diff_cfg": {
     "save_dir": "/home/wbm3/Documents/GitHub/airobot_reward_densification/data/sparse_ob_False_sg_False_col_False"
   },
-  "git_info": null
+  "git_info": {
+    "directory": "/home/wbm3/Documents/GitHub/easyrl",
+    "code_diff": "",
+    "code_diff_staged": "",
+    "commit_hash": "a0add65d55fdda13380f831fefc48d81515e5175",
+    "branch_name": "sac"
+  }
 }

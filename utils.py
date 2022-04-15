@@ -72,9 +72,11 @@ def apply_grounded_plan(state_grounded_atoms, plan):
         plan_grounded_atoms.append(apply_grounded_operator(plan_grounded_atoms[-1], op_name, params))
     return plan_grounded_atoms
 
-def get_reward(env, state, action, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
-    dist_to_goal = np.linalg.norm(state - env.env._goal_pos[:2])
-    success = dist_to_goal < env.env._dist_threshold
+def get_shaped_reward(env, state, action, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
+    import ipdb; ipdb.set_trace()
+
+    dist_to_goal = np.linalg.norm(state - env._goal_pos[:2])
+    success = dist_to_goal < env._dist_threshold
     reward = 1 if success else 0
 
     def phi(state_grounded_atoms):
