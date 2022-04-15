@@ -365,7 +365,7 @@ def train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, a
 
 # call train_ppo, just set the argument flag properly
 save_dir = train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False, max_steps=200000)
-
+play_video(save_dir)
 #### TODO: plot return and success rate curves
 # steps, returns, success_rate = read_tf_log(save_dir)
 # data_dict = {}
