@@ -33,6 +33,7 @@ from easyrl.utils.gym_util import make_vec_env
 from easyrl.utils.common import load_from_json
 from base64 import b64encode
 from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan, get_shaped_reward
+from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
 
 def play_video(video_dir, video_file=None):
     if video_file is None:
@@ -216,21 +217,9 @@ class URRobotGym(gym.Env):
         return state, reward, done, info
 
     def _get_reward(self, state, action, collision):
-        dist_to_goal = np.linalg.norm(state - self._goal_pos[:2])
-        success = dist_to_goal < self._dist_threshold
-        if not self._use_sparse_reward:
-            previous_state_grounded_atoms = get_state_grounded_atoms(self)
-            action = self.action_space.sample()
-            # TODO Can't do this
-            #state, reward, done, info = self.step(action)
-            #
-            next_state_grounded_atoms = get_state_grounded_atoms(self)
-            shaped_reward = get_shaped_reward(self, state, action, previous_state_grounded_atoms, next_state_grounded_atoms, plan_grounded_atoms)
-            print(shaped_reward)
-            quit()
-                
-        reward = 1.0
-        info = dict(success=success)
+        reward = None
+        info = {}
+        info['collision'] = None
         return reward, info
 
     def _get_obs(self):
@@ -363,7 +352,7 @@ def train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, a
 
     critic = ValueNet(critic_body, in_features=64)
     agent = PPOAgent(actor=actor, critic=critic, env=env)
-    runner = EpisodicRunner(agent=agent, env=env)
+    runner = ShapedRewardEpisodicRunner('sas_plan.1', agent=agent, env=env)
     engine = PPOEngine(agent=agent,
                        runner=runner)
     engine.train()
