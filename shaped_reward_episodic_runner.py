@@ -72,7 +72,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             next_state_grounded_atoms = get_state_grounded_atoms(env.envs[0])
             plan_grounded_atoms = apply_grounded_plan(previous_state_grounded_atoms, self.plan)
             reward, info = get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, plan_grounded_atoms)
-            #import ipdb; ipdb.set_trace()
+            # import ipdb; ipdb.set_trace()
             reward = np.array([reward])
             info.update(env_info[0])
             info = [info]

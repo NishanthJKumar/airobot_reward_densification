@@ -9,6 +9,7 @@ import pddlpy
 
 domprob = pddlpy.DomainProblem('goal-subgoal-domain.pddl', 'goal-subgoal-problem.pddl')
 NUM_BLOCKS = 2
+max_plan_step_reached = 0
 
 class Predicates:
 
@@ -72,21 +73,23 @@ def apply_grounded_plan(state_grounded_atoms, plan):
         plan_grounded_atoms.append(apply_grounded_operator(plan_grounded_atoms[-1], op_name, params))
     return plan_grounded_atoms
 
+def phi(state_grounded_atoms, plan):
+        for i, grounded_atoms in enumerate(plan[max_plan_step_reached:]):
+            if grounded_atoms == state_grounded_atoms:
+                return i + max_plan_step_reached
+        return max_plan_step_reached
+
 def get_shaped_reward(env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
+    global max_plan_step_reached
     dist_to_goal = np.linalg.norm(state - env._goal_pos[:2])
     success = dist_to_goal < env._dist_threshold
     reward = 1 if success else 0
 
-    def phi(state_grounded_atoms):
-        for i, grounded_atoms in enumerate(plan):
-            if grounded_atoms == state_grounded_atoms:
-                return i
-        return 0
+    prev_phi = phi(previous_state_grounded_atoms, plan)
+    if max_plan_step_reached < prev_phi:
+        max_plan_step_reached = prev_phi
 
-    f = phi(next_state_grounded_atoms) - phi(previous_state_grounded_atoms)
+    f = phi(next_state_grounded_atoms, plan) - phi(previous_state_grounded_atoms, plan)
     reward = reward + f
     info = dict(success=success)
     return reward, info
-
-
-

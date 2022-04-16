@@ -260,7 +260,7 @@ class URRobotGym(gym.Env):
             collision = True
         return collision
 
-    def render(self, _, **kwargs):
+    def render(self, mode, **kwargs):
         robot_base = self.robot.arm.robot_base_pos
         self.robot.cam.setup_camera(
             focus_pt=robot_base, dist=2, yaw=85, pitch=-20, roll=0
@@ -364,9 +364,9 @@ def train_ppo(
 
 # call train_ppo, just set the argument flag properly
 save_dir = train_ppo(
-    with_obstacle=False,
+    with_obstacle=True,
     push_exp=False,
-    max_steps=200000,
+    max_steps=300000,
 )
 play_video(save_dir)
 #### TODO: plot return and success rate curves
