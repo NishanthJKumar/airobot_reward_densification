@@ -23,9 +23,10 @@ from easyrl.utils.common import set_random_seed, load_from_json
 from easyrl.utils.gym_util import make_vec_env
 from base64 import b64encode
 from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
+from IPython import display
+from IPython.display import HTML
 
-
-def play_video(video_dir, video_file=None):
+def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
         video_dir = Path(video_dir)
         video_files = list(video_dir.glob(f"**/render_video.mp4"))
@@ -33,22 +34,7 @@ def play_video(video_dir, video_file=None):
         video_file = video_files[-1]
     else:
         video_file = Path(video_file)
-    compressed_file = video_file.parent.joinpath("comp.mp4")
-    os.system(
-        f"ffmpeg -i {video_file} -filter:v 'setpts=2.0*PTS' -vcodec libx264 {compressed_file.as_posix()}"
-    )
-    mp4 = open(compressed_file.as_posix(), "rb").read()
-    data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-    display(
-        HTML(
-            """
-    <video width=400 controls>
-        <source src="%s" type="video/mp4">
-    </video>
-    """
-            % data_url
-        )
-    )
+    os.system(f"vlc --rate {str(play_rate + 0.01)} {video_file}")
 
 
 # read tf log file
