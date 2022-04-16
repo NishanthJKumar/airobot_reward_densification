@@ -2,16 +2,10 @@ import os
 import torch
 import gym
 import pprint
-import pybullet as p
-import pybullet_data as pd
-import airobot as ar
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import animation
 from IPython.display import HTML
-from matplotlib import pylab
 from airobot import Robot
-from airobot.utils.common import quat2euler
 from airobot.utils.common import euler2quat
 from gym import spaces
 from gym.envs.registration import registry, register
@@ -19,45 +13,48 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 from torch import nn
 from pathlib import Path
 from easyrl.agents.ppo_agent import PPOAgent
-from easyrl.configs import cfg
-from easyrl.configs import set_config
-from easyrl.configs.command_line import cfg_from_cmd
+from easyrl.configs import cfg, set_config
 from easyrl.engine.ppo_engine import PPOEngine
 from easyrl.models.categorical_policy import CategoricalPolicy
 from easyrl.models.diag_gaussian_policy import DiagGaussianPolicy
 from easyrl.models.mlp import MLP
 from easyrl.models.value_net import ValueNet
-from easyrl.runner.nstep_runner import EpisodicRunner
-from easyrl.utils.common import set_random_seed
+from easyrl.utils.common import set_random_seed, load_from_json
 from easyrl.utils.gym_util import make_vec_env
-from easyrl.utils.common import load_from_json
 from base64 import b64encode
-from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan, get_shaped_reward
 from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
+
 
 def play_video(video_dir, video_file=None):
     if video_file is None:
         video_dir = Path(video_dir)
-        video_files = list(video_dir.glob(f'**/render_video.mp4'))
+        video_files = list(video_dir.glob(f"**/render_video.mp4"))
         video_files.sort()
         video_file = video_files[-1]
     else:
         video_file = Path(video_file)
-    compressed_file = video_file.parent.joinpath('comp.mp4')
-    os.system(f"ffmpeg -i {video_file} -filter:v 'setpts=2.0*PTS' -vcodec libx264 {compressed_file.as_posix()}")
-    mp4 = open(compressed_file.as_posix(),'rb').read()
+    compressed_file = video_file.parent.joinpath("comp.mp4")
+    os.system(
+        f"ffmpeg -i {video_file} -filter:v 'setpts=2.0*PTS' -vcodec libx264 {compressed_file.as_posix()}"
+    )
+    mp4 = open(compressed_file.as_posix(), "rb").read()
     data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-    display(HTML("""
+    display(
+        HTML(
+            """
     <video width=400 controls>
         <source src="%s" type="video/mp4">
     </video>
-    """ % data_url))
+    """
+            % data_url
+        )
+    )
 
 
 # read tf log file
 def read_tf_log(log_dir):
     log_dir = Path(log_dir)
-    log_files = list(log_dir.glob(f'**/events.*'))
+    log_files = list(log_dir.glob(f"**/events.*"))
     if len(log_files) < 1:
         return None
     log_file = log_files[0]
@@ -65,10 +62,10 @@ def read_tf_log(log_dir):
     event_acc.Reload()
     tags = event_acc.Tags()
     try:
-        scalar_success = event_acc.Scalars('train/episode_success')
+        scalar_success = event_acc.Scalars("train/episode_success")
         success_rate = [x.value for x in scalar_success]
         steps = [x.step for x in scalar_success]
-        scalar_return = event_acc.Scalars('train/episode_return/mean')
+        scalar_return = event_acc.Scalars("train/episode_return/mean")
         returns = [x.value for x in scalar_return]
     except:
         return None
@@ -86,118 +83,122 @@ def plot_curves(data_dict, title):
     ax.set_title(title)
     ax.legend()
 
+
 def check_collision_rate(log_dir):
     log_dir = Path(log_dir)
-    log_files = list(log_dir.glob(f'**/info.json'))
+    log_files = list(log_dir.glob(f"**/info.json"))
     log_files.sort()
     log_file = log_files[-1]
     info_data = load_from_json(log_file)
-    collisions = [v['collision'] for k, v in info_data.items()]
+    collisions = [v["collision"] for k, v in info_data.items()]
     return np.mean(collisions)
 
+
 class URRobotGym(gym.Env):
-    def __init__(self,
-                 action_repeat=10,
-                 use_sparse_reward=False,
-                 use_subgoal = False,
-                 apply_collision_penalty = False,
-                 with_obstacle = False,
-                 # Set 'gui' to False if you are using Colab, otherwise the session will crash as Colab does not support X window
-                 # You can set it to True for debugging purpose if you are running the notebook on a local machine.
-                 gui=False,
-                 max_episode_length=25,
-                 dist_threshold=0.05):
+    def __init__(
+        self,
+        action_repeat=10,
+        with_obstacle=False,
+        # Set 'gui' to False if you are using Colab, otherwise the session will crash as Colab does not support X window
+        # You can set it to True for debugging purpose if you are running the notebook on a local machine.
+        gui=False,
+        max_episode_length=25,
+        dist_threshold=0.05,
+    ):
         self._action_repeat = action_repeat
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
-        self._use_sparse_reward = use_sparse_reward
-        self._use_subgoal = use_subgoal
-        self._apply_collision_penalty = apply_collision_penalty
         self._with_obstacle = with_obstacle
-        print(f'================================================')
-        print(f'Use sparse reward:{self._use_sparse_reward}')
-        print(f'Use subgoal:{self._use_subgoal}')
-        print(f'With obstacle in the scene:{self._with_obstacle}')
-        print(f'Apply collision penalty:{self._apply_collision_penalty}')
-        print(f'================================================')
+        print(f"================================================")
+        print(f"With obstacle in the scene:{self._with_obstacle}")
+        print(f"================================================")
 
-        self._xy_bounds = np.array([[0.23, 0.78],  # [xmin, xmax]
-                                    [-0.35, 0.3]])  # [ymin, ymax]
-        self.robot = Robot('ur5e_stick',
-                           pb_cfg={'gui': gui,
-                                   'realtime': False,
-                                   'opengl_render': torch.cuda.is_available()})
-        self._arm_reset_pos = np.array([-0.38337763,
-                                        -2.02650575,
-                                        -2.01989619,
-                                        -0.64477803,
-                                        1.571439041,
-                                        -0.38331266])
-        self._table_id = self.robot.pb_client.load_urdf('table/table.urdf',
-                                                        [.5, 0, 0.4],
-                                                        euler2quat([0, 0, np.pi / 2]),
-                                                        scaling=0.9)
+        self._xy_bounds = np.array(
+            [[0.23, 0.78], [-0.35, 0.3]]  # [xmin, xmax]
+        )  # [ymin, ymax]
+        self.robot = Robot(
+            "ur5e_stick",
+            pb_cfg={
+                "gui": gui,
+                "realtime": False,
+                "opengl_render": torch.cuda.is_available(),
+            },
+        )
+        self._arm_reset_pos = np.array(
+            [
+                -0.38337763,
+                -2.02650575,
+                -2.01989619,
+                -0.64477803,
+                1.571439041,
+                -0.38331266,
+            ]
+        )
+        self._table_id = self.robot.pb_client.load_urdf(
+            "table/table.urdf",
+            [0.5, 0, 0.4],
+            euler2quat([0, 0, np.pi / 2]),
+            scaling=0.9,
+        )
 
         # create a ball at the start location (for visualization purpose)
         self._start_pos = np.array([0.45, -0.32, 1.0])
-        self._start_urdf_id = self.robot.pb_client.load_geom('sphere', size=0.04, mass=0,
-                                                             base_pos=self._start_pos,
-                                                             rgba=[1, 1, 0, 0.8])
+        self._start_urdf_id = self.robot.pb_client.load_geom(
+            "sphere", size=0.04, mass=0, base_pos=self._start_pos, rgba=[1, 1, 0, 0.8]
+        )
 
         # create a ball at the goal location
         self._goal_pos = np.array([0.5, 0.26, 1.0])
-        self._goal_urdf_id = self.robot.pb_client.load_geom('sphere', size=0.04, mass=0,
-                                                            base_pos=self._goal_pos,
-                                                            rgba=[1, 0, 0, 0.8])
+        self._goal_urdf_id = self.robot.pb_client.load_geom(
+            "sphere", size=0.04, mass=0, base_pos=self._goal_pos, rgba=[1, 0, 0, 0.8]
+        )
 
         # disable the collision checking between the robot and the ball at the goal location
         for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
-            self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id,
-                                                        self._goal_urdf_id,
-                                                        i,
-                                                        -1,
-                                                        enableCollision=0)
+            self.robot.pb_client.setCollisionFilterPair(
+                self.robot.arm.robot_id, self._goal_urdf_id, i, -1, enableCollision=0
+            )
         # disable the collision checking between the robot and the ball at the start location
         for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
-            self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id,
-                                                        self._start_urdf_id,
-                                                        i,
-                                                        -1,
-                                                        enableCollision=0)
+            self.robot.pb_client.setCollisionFilterPair(
+                self.robot.arm.robot_id, self._start_urdf_id, i, -1, enableCollision=0
+            )
 
         # create an obstacle
         if self._with_obstacle:
-            self._wall_id = self.robot.pb_client.load_geom('box', size=[0.18, 0.01, 0.1], mass=0,
-                                                           base_pos=[0.5, 0.15, 1.0],
-                                                           rgba=[0.5, 0.5, 0.5, 0.8])
+            self._wall_id = self.robot.pb_client.load_geom(
+                "box",
+                size=[0.18, 0.01, 0.1],
+                mass=0,
+                base_pos=[0.5, 0.15, 1.0],
+                rgba=[0.5, 0.5, 0.5, 0.8],
+            )
 
         # create balls at subgoal locations
         self._subgoal_pos = np.array([[0.24, 0.15, 1.0], [0.76, 0.15, 1.0]])
         self._subgoal_urdf_id = []
         for pos in self._subgoal_pos:
-            self._subgoal_urdf_id.append(self.robot.pb_client.load_geom('sphere', size=0.04, mass=0,
-                                                                        base_pos=pos,
-                                                                        rgba=[0, 0.8, 0.8, 0.8]))
+            self._subgoal_urdf_id.append(
+                self.robot.pb_client.load_geom(
+                    "sphere", size=0.04, mass=0, base_pos=pos, rgba=[0, 0.8, 0.8, 0.8]
+                )
+            )
         # disable the collision checking between the robot and the subgoal balls
         for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
             for sg in self._subgoal_urdf_id:
-                self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id,
-                                                            sg,
-                                                            i,
-                                                            -1,
-                                                            enableCollision=0)
+                self.robot.pb_client.setCollisionFilterPair(
+                    self.robot.arm.robot_id, sg, i, -1, enableCollision=0
+                )
 
         self._action_bound = 1.0
         self._ee_pos_scale = 0.02
         self._action_high = np.array([self._action_bound] * 2)
-        self.action_space = spaces.Box(low=-self._action_high,
-                                       high=self._action_high,
-                                       dtype=np.float32)
-        state_low = np.full(len(self._get_obs()), -float('inf'))
-        state_high = np.full(len(self._get_obs()), float('inf'))
-        self.observation_space = spaces.Box(state_low,
-                                            state_high,
-                                            dtype=np.float32)
+        self.action_space = spaces.Box(
+            low=-self._action_high, high=self._action_high, dtype=np.float32
+        )
+        state_low = np.full(len(self._get_obs()), -float("inf"))
+        state_high = np.full(len(self._get_obs()), float("inf"))
+        self.observation_space = spaces.Box(state_low, state_high, dtype=np.float32)
         self.reset()
 
     def reset(self):
@@ -212,14 +213,16 @@ class URRobotGym(gym.Env):
         self._t += 1
         state = self._get_obs()
         done = self._t >= self._max_episode_length
-        reward, info = self._get_reward(state=state, action=action, collision=float(collision))
-        info['collision'] = collision
+        reward, info = self._get_reward(
+            state=state, action=action, collision=float(collision)
+        )
+        info["collision"] = collision
         return state, reward, done, info
 
     def _get_reward(self, state, action, collision):
         reward = None
         info = {}
-        info['collision'] = None
+        info["collision"] = None
         return reward, info
 
     def _get_obs(self):
@@ -228,9 +231,15 @@ class URRobotGym(gym.Env):
         return state
 
     def _check_collision_with_wall(self):
-        if hasattr(self, '_wall_id'):
-            return len(self.robot.pb_client.getContactPoints(self.robot.arm.robot_id, 
-                                                             self._wall_id, 10, -1)) > 0
+        if hasattr(self, "_wall_id"):
+            return (
+                len(
+                    self.robot.pb_client.getContactPoints(
+                        self.robot.arm.robot_id, self._wall_id, 10, -1
+                    )
+                )
+                > 0
+            )
         else:
             return False
 
@@ -239,23 +248,25 @@ class URRobotGym(gym.Env):
         if not isinstance(action, np.ndarray):
             action = np.array(action).flatten()
         if action.size != 2:
-            raise ValueError('Action should be [d_x, d_y].')
+            raise ValueError("Action should be [d_x, d_y].")
         # we set dz=0
         action = np.append(action, 0)
-        pos, quat, rot_mat, euler = self.robot.arm.get_ee_pose()
+        pos, _, _, _ = self.robot.arm.get_ee_pose()
         pos += action[:3] * self._ee_pos_scale
         pos[2] = self._ref_ee_pos[2]
         # if the new position is out of the bounds, then we don't apply the action
-        if not np.logical_and(np.all(pos[:2] >= self._xy_bounds[:, 0]),
-                              np.all(pos[:2] <= self._xy_bounds[:, 1])):
+        if not np.logical_and(
+            np.all(pos[:2] >= self._xy_bounds[:, 0]),
+            np.all(pos[:2] <= self._xy_bounds[:, 1]),
+        ):
             return False
-        
+
         # move the end-effector to the new position
         jnt_pos = self.robot.arm.compute_ik(pos, ori=self._ref_ee_ori)
         for step in range(self._action_repeat):
             self.robot.arm.set_jpos(jnt_pos)
             self.robot.pb_client.stepSimulation()
-        
+
         # if collision occurs, we reset the robot back to its original pose (before apply_action)
         collision = False
         if self._check_collision_with_wall():
@@ -263,108 +274,114 @@ class URRobotGym(gym.Env):
             collision = True
         return collision
 
-
-    def render(self, mode, **kwargs):
+    def render(self, _, **kwargs):
         robot_base = self.robot.arm.robot_base_pos
-        self.robot.cam.setup_camera(focus_pt=robot_base,
-                                    dist=2,
-                                    yaw=85,
-                                    pitch=-20,
-                                    roll=0)
-        rgb, _ = self.robot.cam.get_images(get_rgb=True,
-                                           get_depth=False)
+        self.robot.cam.setup_camera(
+            focus_pt=robot_base, dist=2, yaw=85, pitch=-20, roll=0
+        )
+        rgb, _ = self.robot.cam.get_images(get_rgb=True, get_depth=False)
         return rgb
 
 
 module_name = __name__
 
-env_name = 'URReacher-v1'
+env_name = "URReacher-v1"
 if env_name in registry.env_specs:
     del registry.env_specs[env_name]
 register(
     id=env_name,
-    entry_point=f'{module_name}:URRobotGym',
+    entry_point=f"{module_name}:URRobotGym",
 )
 
 # DO NOT MODIFY THIS
-def train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False,
-              max_steps=200000):
-    set_config('ppo')
+def train_ppo(
+    with_obstacle=False,
+    push_exp=False,
+    max_steps=200000,
+):
+    set_config("ppo")
     cfg.alg.num_envs = 1
     cfg.alg.episode_steps = 100
     cfg.alg.max_steps = max_steps
     cfg.alg.deque_size = 20
-    cfg.alg.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    cfg.alg.env_name = 'URPusher-v1' if push_exp else 'URReacher-v1'
-    cfg.alg.save_dir = Path.cwd().absolute().joinpath('data').as_posix()
-    cfg.alg.save_dir += '/'
+    cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
+    cfg.alg.env_name = "URPusher-v1" if push_exp else "URReacher-v1"
+    cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
+    cfg.alg.save_dir += "/"
     if push_exp:
-        cfg.alg.save_dir += 'push'
+        cfg.alg.save_dir += "push"
     else:
-        cfg.alg.save_dir += 'sparse' if use_sparse_reward else 'dense'
-        cfg.alg.save_dir += f'_ob_{str(with_obstacle)}'
-        cfg.alg.save_dir += f'_sg_{str(use_subgoal)}'
-        cfg.alg.save_dir += f'_col_{str(apply_collision_penalty)}'
-    setattr(cfg.alg, 'diff_cfg', dict(save_dir=cfg.alg.save_dir))
+        cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
+        cfg.alg.save_dir += str(cfg.alg.seed)
+    setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
-    print(f'====================================')
-    print(f'      Device:{cfg.alg.device}')
-    print(f'      Total number of steps:{cfg.alg.max_steps}')
-    print(f'====================================')
+    print(f"====================================")
+    print(f"      Device:{cfg.alg.device}")
+    print(f"      Total number of steps:{cfg.alg.max_steps}")
+    print(f"====================================")
 
     set_random_seed(cfg.alg.seed)
-    env_kwargs=dict(use_sparse_reward=use_sparse_reward,
-                    with_obstacle=with_obstacle,
-                    use_subgoal=use_subgoal,
-                    apply_collision_penalty=apply_collision_penalty) if not push_exp else dict()
-    env = make_vec_env(cfg.alg.env_name,
-                       cfg.alg.num_envs,
-                       seed=cfg.alg.seed,
-                       env_kwargs=env_kwargs)
+    env_kwargs = (
+        dict(
+            with_obstacle=with_obstacle,
+        )
+        if not push_exp
+        else dict()
+    )
+    env = make_vec_env(
+        cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
+    )
     env.reset()
     ob_size = env.observation_space.shape[0]
 
-    actor_body = MLP(input_size=ob_size,
-                     hidden_sizes=[64],
-                     output_size=64,
-                     hidden_act=nn.Tanh,
-                     output_act=nn.Tanh)
+    actor_body = MLP(
+        input_size=ob_size,
+        hidden_sizes=[64],
+        output_size=64,
+        hidden_act=nn.Tanh,
+        output_act=nn.Tanh,
+    )
 
-    critic_body = MLP(input_size=ob_size,
-                     hidden_sizes=[64],
-                     output_size=64,
-                     hidden_act=nn.Tanh,
-                     output_act=nn.Tanh)
+    critic_body = MLP(
+        input_size=ob_size,
+        hidden_sizes=[64],
+        output_size=64,
+        hidden_act=nn.Tanh,
+        output_act=nn.Tanh,
+    )
     if isinstance(env.action_space, gym.spaces.Discrete):
         act_size = env.action_space.n
-        actor = CategoricalPolicy(actor_body,
-                                 in_features=64,
-                                 action_dim=act_size)
+        actor = CategoricalPolicy(actor_body, in_features=64, action_dim=act_size)
     elif isinstance(env.action_space, gym.spaces.Box):
         act_size = env.action_space.shape[0]
-        actor = DiagGaussianPolicy(actor_body,
-                                   in_features=64,
-                                   action_dim=act_size,
-                                   tanh_on_dist=cfg.alg.tanh_on_dist,
-                                   std_cond_in=cfg.alg.std_cond_in)
+        actor = DiagGaussianPolicy(
+            actor_body,
+            in_features=64,
+            action_dim=act_size,
+            tanh_on_dist=cfg.alg.tanh_on_dist,
+            std_cond_in=cfg.alg.std_cond_in,
+        )
     else:
-        raise TypeError(f'Unknown action space type: {env.action_space}')
+        raise TypeError(f"Unknown action space type: {env.action_space}")
 
     critic = ValueNet(critic_body, in_features=64)
     agent = PPOAgent(actor=actor, critic=critic, env=env)
-    runner = ShapedRewardEpisodicRunner('sas_plan.1', agent=agent, env=env)
-    engine = PPOEngine(agent=agent,
-                       runner=runner)
+    runner = ShapedRewardEpisodicRunner("sas_plan.1", agent=agent, env=env)
+    engine = PPOEngine(agent=agent, runner=runner)
     engine.train()
-    stat_info, raw_traj_info = engine.eval(render=False,
-                                           save_eval_traj=True,
-                                           eval_num=1,
-                                           sleep_time=0.0)
+    stat_info, _ = engine.eval(
+        render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
+    )
     pprint.pprint(stat_info)
     return cfg.alg.save_dir
 
+
 # call train_ppo, just set the argument flag properly
-save_dir = train_ppo(use_sparse_reward=False, use_subgoal=False, with_obstacle=False, apply_collision_penalty=False, push_exp=False, max_steps=200000)
+save_dir = train_ppo(
+    with_obstacle=False,
+    push_exp=False,
+    max_steps=200000,
+)
 play_video(save_dir)
 #### TODO: plot return and success rate curves
 # steps, returns, success_rate = read_tf_log(save_dir)
