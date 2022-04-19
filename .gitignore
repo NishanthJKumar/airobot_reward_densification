@@ -1,6 +1,9 @@
 # Unnecessary trained weights + easyrl things
 /data
 
+# Unnecessary FD things
+output.sas
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

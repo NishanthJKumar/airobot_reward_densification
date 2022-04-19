@@ -13,42 +13,51 @@ max_plan_step_reached = 0
 
 class Predicates:
 
-    # TODO: add necessary predicate classifiers
     def at(self, env, gripper, loc):
         if self.is_goal(env, loc):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._goal_pos[:2]) < env._dist_threshold
-        else: 
-            if loc == "subgoal":
-                for pos in env._subgoal_pos:
-                    if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
-                        return True
-                return False
-            else:
-                raise ValueError(f"loc should be either 'goal' or 'subgoal' not '{loc}'")
+        elif self.is_subgoal1(env, loc): 
+            for pos in env._subgoal1_pos:
+                if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
+                    return True
+            return False
+        elif self.is_subgoal2(env, loc):
+            for pos in env._subgoal2_pos:
+                if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
+                    return True
+            return False
+        else:
+            raise ValueError(f"loc should be either 'goal' or 'subgoal' not '{loc}'")
 
     def is_goal(self, env, loc):
         return loc == "goal"
+    
+    def is_subgoal1(self, env, loc):
+        return loc == "subgoal1"
+
+    def is_subgoal2(self, env, loc):
+        return loc == "subgoal2"
 
     def get_predicates(self):
-        return {"0-arity": [], "1-arity": [self.is_goal], "2-arity": [self.at]}
+        return {"0-arity": [], "1-arity": [self.is_goal, self.is_subgoal1, self.is_subgoal2], "2-arity": [self.at]}
 
 
 def get_state_grounded_atoms(env):
     state_grounded_atoms = []
 
     predicates = Predicates().get_predicates()
-    objects = ['claw', 'subgoal', 'goal']
+    objects = ['claw', 'subgoal1', 'subgoal2', 'goal']
     for predicate in predicates["0-arity"]:
         state_grounded_atoms.append([(predicate.__name__,), predicate(env)])
 
     for predicate in predicates["1-arity"]:
         for obj in objects:
-            if obj in ['subgoal', 'goal']:
+            if obj in ['subgoal1', 'subgoal2', 'goal']:
                 state_grounded_atoms.append([(predicate.__name__, obj), predicate(env, obj)])
     
     for predicate in predicates["2-arity"]:
         for obj1 in ['claw']:
-            for obj2 in  ['subgoal', 'goal']:
+            for obj2 in  ['subgoal1', 'subgoal2', 'goal']:
                 state_grounded_atoms.append([(predicate.__name__, obj1, obj2), predicate(env, obj1, obj2)]) 
 
     return [atom[0] for atom in state_grounded_atoms if atom[1]]
@@ -91,5 +100,6 @@ def get_shaped_reward(env, state, previous_state_grounded_atoms, next_state_grou
 
     f = phi(next_state_grounded_atoms, plan) - phi(previous_state_grounded_atoms, plan)
     reward = reward + f
+    # reward = -dist_to_goal
     info = dict(success=success)
     return reward, info

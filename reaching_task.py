@@ -161,7 +161,8 @@ class URRobotGym(gym.Env):
             )
 
         # create balls at subgoal locations
-        self._subgoal_pos = np.array([[0.24, 0.15, 1.0], [0.76, 0.15, 1.0]])
+        self._subgoal2_pos = np.array([[0.24, 0.15, 1.0], [0.76, 0.15, 1.0]])
+        self._subgoal1_pos = np.array([[0.36, -0.3, 1.0], [0.64, -0.3, 1.0]])
         self._subgoal_urdf_id = []
         for pos in self._subgoal_pos:
             self._subgoal_urdf_id.append(
@@ -207,8 +208,9 @@ class URRobotGym(gym.Env):
 
     def _get_reward(self, state, action, collision):
         reward = None
-        info = {}
-        info["collision"] = None
+        dist_to_goal = np.linalg.norm(state - self._goal_pos[:2])
+        success = dist_to_goal < self._dist_threshold
+        info = {'success': success}
         return reward, info
 
     def _get_obs(self):
@@ -366,7 +368,7 @@ def train_ppo(
 save_dir = train_ppo(
     with_obstacle=True,
     push_exp=False,
-    max_steps=300000,
+    max_steps=200000,
 )
 play_video(save_dir)
 #### TODO: plot return and success rate curves
