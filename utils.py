@@ -7,7 +7,10 @@ from gym.wrappers.monitoring import video_recorder
 import copy
 import pddlpy
 
-domprob = pddlpy.DomainProblem('goal-subgoal-domain.pddl', 'goal-subgoal-problem.pddl')
+# Only one Subgoal.
+# domprob = pddlpy.DomainProblem('goal-subgoal-domain.pddl', 'goal-subgoal-problem.pddl')
+# Multiple Subgoals.
+domprob = pddlpy.DomainProblem('goal-multiple-subgoal-domain.pddl', 'goal-multiple-subgoal-problem.pddl')
 NUM_BLOCKS = 2
 max_plan_step_reached = 0
 
