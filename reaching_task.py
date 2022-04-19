@@ -354,7 +354,7 @@ def train_ppo(
 
     critic = ValueNet(critic_body, in_features=64)
     agent = PPOAgent(actor=actor, critic=critic, env=env)
-    runner = ShapedRewardEpisodicRunner("sas_plan.1", agent=agent, env=env)
+    runner = ShapedRewardEpisodicRunner("sas_plan", agent=agent, env=env)
     engine = PPOEngine(agent=agent, runner=runner)
     engine.train()
     stat_info, _ = engine.eval(
