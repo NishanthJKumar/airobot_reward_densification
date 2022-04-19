@@ -161,8 +161,9 @@ class URRobotGym(gym.Env):
             )
 
         # create balls at subgoal locations
+        self._subgoal3_pos = np.array([[0.36, 0.15, 1.0], [0.64, 0.2, 1.0]])
         self._subgoal2_pos = np.array([[0.24, 0.15, 1.0], [0.76, 0.15, 1.0]])
-        self._subgoal1_pos = np.array([[0.36, -0.3, 1.0], [0.64, -0.3, 1.0]])
+        self._subgoal1_pos = np.array([[0.36, 0.0, 1.0], [0.64, 0.0, 1.0]])
         self._subgoal_urdf_id = []
         for pos in self._subgoal1_pos:
             self._subgoal_urdf_id.append(
@@ -171,6 +172,12 @@ class URRobotGym(gym.Env):
                 )
             )
         for pos in self._subgoal2_pos:
+            self._subgoal_urdf_id.append(
+                self.robot.pb_client.load_geom(
+                    "sphere", size=0.04, mass=0, base_pos=pos, rgba=[0, 0.8, 0.8, 0.8]
+                )
+            )
+        for pos in self._subgoal3_pos:
             self._subgoal_urdf_id.append(
                 self.robot.pb_client.load_geom(
                     "sphere", size=0.04, mass=0, base_pos=pos, rgba=[0, 0.8, 0.8, 0.8]
