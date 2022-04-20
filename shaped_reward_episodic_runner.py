@@ -8,7 +8,8 @@ from easyrl.utils.data import StepData
 from easyrl.utils.data import Trajectory
 from easyrl.utils.gym_util import get_render_images
 from easyrl.utils.torch_util import torch_to_np
-from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan, get_shaped_reward
+from utils import GroundingUtils
+import os
 
 class ShapedRewardEpisodicRunner(BasicRunner):
     """
@@ -16,10 +17,16 @@ class ShapedRewardEpisodicRunner(BasicRunner):
     It assumes the environment is automatically reset if done=True
     """
 
-    def __init__(self, plan_file_name, *args, **kwargs):
+    def __init__(self, domain_file_name, problem_file_name, *args, **kwargs):
         super(ShapedRewardEpisodicRunner, self).__init__(*args, **kwargs)
+        self.domain_file_name = domain_file_name
+        self.problem_file_name = problem_file_name
+        os.system('./fast-downward.py --alias seq-sat-lama-2011 {domain_file_name} {problem_file_name}')
+        plan_file_name = "sas_plan"
         with open(plan_file_name) as f:
+            # TODO (wmcclinton) automatically genetate plan_file from folder
             self.plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
+        self.g_utils = GroundingUtils(self.domain_file_name, self.problem_file_name)
 
     @torch.no_grad()
     def __call__(self, time_steps, sample=True, evaluation=False,
@@ -67,11 +74,11 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                                                             sample=sample,
                                                             **action_kwargs)
 
-            previous_state_grounded_atoms = get_state_grounded_atoms(env.envs[0])
+            previous_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
             next_ob, _, done, env_info = env.step(action)
-            next_state_grounded_atoms = get_state_grounded_atoms(env.envs[0])
-            plan_grounded_atoms = apply_grounded_plan(previous_state_grounded_atoms, self.plan)
-            reward, info = get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, plan_grounded_atoms)
+            next_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
+            plan_grounded_atoms = self.g_utils.apply_grounded_plan(previous_state_grounded_atoms, self.plan)
+            reward, info = self.g_utils.get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, plan_grounded_atoms)
             reward = np.array([reward])
             info.update(env_info[0])
             info = [info]
