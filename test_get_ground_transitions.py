@@ -5,7 +5,7 @@ from gym.wrappers.monitor import Monitor
 import fetch_block_construction
 from gym.wrappers.monitoring import video_recorder
 import copy
-from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan, get_shaped_reward
+from predicates import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan, get_shaped_reward
 from envs.reaching_env.reaching_task import URRobotGym
 from gym.envs.registration import registry, register
 
