@@ -1,7 +1,7 @@
 import argparse
 from reaching_task import URRobotGym
 from easyrl.utils.gym_util import make_vec_env
-from utils import Predicates
+from grid_problem_predicates import Predicates
 from gym.envs.registration import registry, register
 
 parser = argparse.ArgumentParser()
@@ -26,7 +26,7 @@ env = make_vec_env(env_name, 1, seed=0, env_kwargs=env_kwargs)
 obs = env.reset()
 
 # Set up the header of the problem file.
-problem = "(define (problem task)\n\t(:domain reaching-task)\n\t(:objects claw - gripper "
+problem = "(define (problem task)\n\t(:domain reaching-grid)\n\t(:objects claw - gripper "
 for loc in range(2 ** env.envs[0]._granularity):
     problem += "loc" + str(loc) + " "
 problem += "goal - location)\n\t(:init\n\t\t"
@@ -40,9 +40,15 @@ for predicate in predicates["1-arity"]:
     if (predicate(env.envs[0], "goal")):
         problem += "(" + predicate.__name__ + " goal)\n\t\t"
 for predicate in predicates["2-arity"]:
-    for loc in range(2 ** env.envs[0]._granularity):
-        if (predicate(env.envs[0], "claw", "loc" + str(loc))):
-            problem += "(" + predicate.__name__ + " claw loc" + str(loc) + ")\n\t\t"
+    if (predicate.__name__ == "at"):
+        for loc in range(2 ** env.envs[0]._granularity):
+            if (predicate(env.envs[0], "claw", "loc" + str(loc))):
+                problem += "(" + predicate.__name__ + " claw loc" + str(loc) + ")\n\t\t"
+    elif (predicate.__name__ == "neighbors"):
+        for loc1 in range(2 ** env.envs[0]._granularity):
+            for loc2 in range(2 ** env.envs[0]._granularity):
+                if (loc1 != loc2 and predicate(env.envs[0], "loc" + str(loc1), "loc" + str(loc2))):
+                    problem += "(" + predicate.__name__ + " loc" + str(loc1) + " loc" + str(loc2) + ")\n\t\t"
 
 problem += "\n\t)\n\t(:goal (and \n\t\t(at claw goal))\n\t)\n)"
 

@@ -74,6 +74,7 @@ def get_state_grounded_atoms(env):
             if obj in ['goal'] + loc_objects:
                 state_grounded_atoms.append([(predicate.__name__, obj), predicate(env, obj)])
     
+    #TODO (vp): This needs to change since the neighbors predicate is over locations and not claw.
     for predicate in predicates["2-arity"]:
         for obj1 in ['claw']:
             for obj2 in  ['goal'] + loc_objects:
