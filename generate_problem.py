@@ -25,7 +25,24 @@ env_kwargs = (dict(with_obstacle=True, granularity=args.granularity))
 env = make_vec_env(env_name, 1, seed=0, env_kwargs=env_kwargs)
 obs = env.reset()
 
+problem = "(define (problem task)\n\t(:domain reaching-task)\n\t(:objects claw - gripper "
+for loc in range(2 ** env.envs[0]._granularity):
+    problem += "loc" + str(loc) + " "
+problem += "goal - location)\n\t(:init\n\t\t"
+
 predicates = Predicates().get_predicates()
+for predicate in predicates["0-arity"]:
+    if (predicate(env.envs[0])):
+        problem += "(" + predicate.__name__ + ")\n\t\t"
+for predicate in predicates["1-arity"]:
+    if (predicate(env.envs[0], "goal")):
+        problem += "(" + predicate.__name__ + " goal)\n\t\t"
 for predicate in predicates["2-arity"]:
     for loc in range(2 ** env.envs[0]._granularity):
-        print(predicate.__name__, ["claw", "loc" + str(loc)], predicate(env.envs[0], "claw", "loc" + str(loc)))
+        if (predicate(env.envs[0], "claw", "loc" + str(loc))):
+            problem += "(" + predicate.__name__ + " claw loc" + str(loc) + ")\n\t\t"
+
+problem += "\n\t)\n\t(:goal (and \n\t\t(at claw goal))\n\t)\n)"
+
+with open("reaching-grid-problem" + str(env.envs[0]._granularity) + ".pddl", "w") as f:
+    f.write(problem)
