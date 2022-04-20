@@ -88,6 +88,7 @@ class URRobotGym(gym.Env):
         # Set 'gui' to False if you are using Colab, otherwise the session will crash as Colab does not support X window
         # You can set it to True for debugging purpose if you are running the notebook on a local machine.
         gui=False,
+        granularity=3,
         max_episode_length=25,
         dist_threshold=0.05,
     ):
@@ -95,6 +96,7 @@ class URRobotGym(gym.Env):
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
         self._with_obstacle = with_obstacle
+        self._granularity = granularity
         print(f"================================================")
         print(f"With obstacle in the scene:{self._with_obstacle}")
         print(f"================================================")
@@ -378,12 +380,12 @@ def train_ppo(
 
 
 # call train_ppo, just set the argument flag properly
-save_dir = train_ppo(
-    with_obstacle=True,
-    push_exp=False,
-    max_steps=200000,
-)
-play_video(save_dir)
+# save_dir = train_ppo(
+#     with_obstacle=True,
+#     push_exp=False,
+#     max_steps=200000,
+# )
+# play_video(save_dir)
 #### TODO: plot return and success rate curves
 # steps, returns, success_rate = read_tf_log(save_dir)
 # data_dict = {}

@@ -19,38 +19,28 @@ class Predicates:
     def at(self, env, gripper, loc):
         if self.is_goal(env, loc):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._goal_pos[:2]) < env._dist_threshold
-        elif self.is_subgoal1(env, loc): 
-            for pos in env._subgoal1_pos:
-                if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
-                    return True
-            return False
-        elif self.is_subgoal2(env, loc):
-            for pos in env._subgoal2_pos:
-                if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
-                    return True
-            return False
-        elif self.is_subgoal3(env, loc):
-            for pos in env._subgoal3_pos:
-                if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
-                    return True
-            return False
+        elif "loc" in loc:
+            loc_index = int(loc[len("loc"):])
+            if env._granularity % 2 == 0:
+                rows, cols = env._granularity, env._granularity
+            else:
+                rows, cols = env._granularity - 1, 2 ** env._granularity / (env._granularity - 1)
+            loc_x, loc_y = loc_index // cols, loc_index % cols
+            xmin, ymin = env._xy_bounds[:, 0]
+            xmax, ymax = env._xy_bounds[:, 1]
+            x_lower_bound = xmin + (xmax - xmin) / rows * loc_x
+            x_upper_bound = xmin + (xmax - xmin) / rows * (loc_x + 1)
+            y_lower_bound = ymin + (ymax - ymin) / cols * loc_y
+            y_upper_bound = ymin + (ymax - ymin) / cols * (loc_y + 1)
+            return (x_lower_bound <= env.robot.arm.get_ee_pose()[0][0] <= x_upper_bound) and (y_lower_bound <= env.robot.arm.get_ee_pose()[0][1] <= y_upper_bound)
         else:
-            raise ValueError(f"loc should be either 'goal' or 'subgoal' not '{loc}'")
+            raise ValueError(f"loc should be either 'goal' or must start with 'loc' not '{loc}'")
 
     def is_goal(self, env, loc):
         return loc == "goal"
     
-    def is_subgoal1(self, env, loc):
-        return loc == "subgoal1"
-
-    def is_subgoal2(self, env, loc):
-        return loc == "subgoal2"
-
-    def is_subgoal3(self, env, loc):
-        return loc == "subgoal3"
-
     def get_predicates(self):
-        return {"0-arity": [], "1-arity": [self.is_goal, self.is_subgoal1, self.is_subgoal2, self.is_subgoal3], "2-arity": [self.at]}
+        return {"0-arity": [], "1-arity": [self.is_goal], "2-arity": [self.at]}
 
 
 def get_state_grounded_atoms(env):
