@@ -25,11 +25,13 @@ env_kwargs = (dict(with_obstacle=True, granularity=args.granularity))
 env = make_vec_env(env_name, 1, seed=0, env_kwargs=env_kwargs)
 obs = env.reset()
 
+# Set up the header of the problem file.
 problem = "(define (problem task)\n\t(:domain reaching-task)\n\t(:objects claw - gripper "
 for loc in range(2 ** env.envs[0]._granularity):
     problem += "loc" + str(loc) + " "
 problem += "goal - location)\n\t(:init\n\t\t"
 
+# Set up the initial state of the problem file.
 predicates = Predicates().get_predicates()
 for predicate in predicates["0-arity"]:
     if (predicate(env.envs[0])):
