@@ -1,4 +1,5 @@
 import argparse
+import numpy as np
 from reaching_task import URRobotGym
 from easyrl.utils.gym_util import make_vec_env
 from grid_problem_predicates import Predicates
@@ -44,8 +45,13 @@ def occupied(env, entity, loc):
     if entity == "obstacle":
         wall_min_x, wall_min_y = 0.5 - (0.18/2), 0.15 - (0.01/2)
         wall_max_x, wall_max_y = 0.5 + (0.18/2), 0.15 + (0.01/2)
-        if (x_upper_bound < wall_min_x or x_lower_bound > wall_max_x) and (y_upper_bound < wall_min_y or y_lower_bound > wall_max_y):
+        if (x_upper_bound < wall_min_x or x_lower_bound > wall_max_x) and (y_upper_bound < wall_min_y or y_lower_bound > wall_max_y):     
             return False
+        elif (wall_min_x < x_lower_bound < wall_max_x or wall_min_x < x_upper_bound < wall_max_x):
+            if (y_upper_bound < wall_min_y or y_lower_bound > wall_max_y):
+                return False
+            else:
+                return True
         else:
             return True
     elif entity == "goal":
@@ -79,7 +85,7 @@ for predicate in predicates["2-arity"]:
     elif (predicate.__name__ == "neighbors"):
         for loc1 in range(2 ** env.envs[0]._granularity):
             for loc2 in range(2 ** env.envs[0]._granularity):
-                if (loc1 != loc2 and predicate(env.envs[0], "loc" + str(loc1), "loc" + str(loc2)) and (not occupied(env.envs[0], "obstacle", "loc" + str(loc)))):
+                if (loc1 != loc2 and predicate(env.envs[0], "loc" + str(loc1), "loc" + str(loc2)) and (not occupied(env.envs[0], "obstacle", "loc" + str(loc1))) and (not occupied(env.envs[0], "obstacle", "loc" + str(loc2)))):
                     problem += "(" + predicate.__name__ + " loc" + str(loc1) + " loc" + str(loc2) + ")\n\t\t"
 
 
