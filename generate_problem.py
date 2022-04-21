@@ -45,7 +45,7 @@ def occupied(env, entity, loc):
     if entity == "obstacle":
         wall_min_x, wall_min_y = 0.5 - (0.18/2), 0.15 - (0.01/2)
         wall_max_x, wall_max_y = 0.5 + (0.18/2), 0.15 + (0.01/2)
-        if (x_upper_bound < wall_min_x or x_lower_bound > wall_max_x) and (y_upper_bound < wall_min_y or y_lower_bound > wall_max_y):     
+        if (x_upper_bound < wall_min_x or x_lower_bound > wall_max_x) or (y_upper_bound < wall_min_y or y_lower_bound > wall_max_y):     
             return False
         elif (wall_min_x < x_lower_bound < wall_max_x or wall_min_x < x_upper_bound < wall_max_x):
             if (y_upper_bound < wall_min_y or y_lower_bound > wall_max_y):
