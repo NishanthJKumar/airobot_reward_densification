@@ -93,7 +93,7 @@ path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False
-with_obstacle=False
+with_obstacle=True
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
 max_steps=200000
 
@@ -103,7 +103,7 @@ cfg.alg.episode_steps = 100
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
-cfg.alg.eval = True #False
+cfg.alg.eval = False
 cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = False
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
