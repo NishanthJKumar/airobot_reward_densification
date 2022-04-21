@@ -24,7 +24,8 @@
 		(neighbors loc6 loc7)
 		(neighbors loc7 loc3)
 		(neighbors loc7 loc6)
-		
+        (neighbors loc7 goal)
+        (neighbors goal loc7)
 	)
 	(:goal (and 
 		(at claw goal))
