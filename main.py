@@ -71,7 +71,7 @@ def train_ppo(
     
     return cfg.alg.save_dir
 
-# TODO:
+# Structure of the remainder of this file:
 # 1. Take in input on whether we're training or evaling
 # 2. Take in input on environment
 # 3. Take in input on the kind of shaping that we want.
@@ -79,9 +79,11 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-domain_file_path = "/home/njk/Documents/GitHub/airobot_reward_densification/envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-domain.pddl"
-problem_file_path = "/home/njk/Documents/GitHub/airobot_reward_densification/envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-problem.pddl"
 classifiers = MultipleSubgoalsClassfiers()
+# domain_file_path = "/home/njk/Documents/GitHub/airobot_reward_densification/envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-domain.pddl"
+# problem_file_path = "/home/njk/Documents/GitHub/airobot_reward_densification/envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-problem.pddl"
+domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
+path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False
@@ -99,12 +101,11 @@ cfg.alg.eval = False
 cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = False
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
-cfg.alg.save_dir += "/"
+cfg.alg.save_dir += "/" + f"{env_name}"
 if push_exp:
-    cfg.alg.save_dir += "push"
-else:
-    cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
-    cfg.alg.save_dir += str(cfg.alg.seed)
+    cfg.alg.save_dir += "_push"
+cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
+cfg.alg.save_dir += str(cfg.alg.seed)
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
@@ -124,8 +125,7 @@ env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
 
-grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers) #TODO pass in grounding utils
-
+grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder) #TODO pass in grounding utils
 save_dir = train_ppo(
     cfg=cfg,
     env_name="URPusher-v1" if push_exp else "URReacher-v1",

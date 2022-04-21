@@ -8,12 +8,12 @@ max_plan_step_reached = 0
 
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
-        video_dir = Path(video_dir)
+        video_dir = os.Path(video_dir)
         video_files = list(video_dir.glob(f"**/render_video.mp4"))
         video_files.sort()
         video_file = video_files[-1]
     else:
-        video_file = Path(video_file)
+        video_file = os.Path(video_file)
     os.system(f"vlc --rate {str(play_rate + 0.01)} {video_file}")
 
 # read tf log file
@@ -50,7 +50,7 @@ def plot_curves(data_dict, title):
 
 class GroundingUtils:
 
-    def __init__(self, domain_file_path, problem_file_path, vec_env, classifiers):
+    def __init__(self, domain_file_path, problem_file_path, vec_env, classifiers, path_to_fd_folder):
         self.domain_file_path = domain_file_path
         # TODO: make problem file automatically instead of taking in
         # right now. This can be done by just running the classifiers
@@ -62,8 +62,8 @@ class GroundingUtils:
         # NOTE: In the future, we should be generaitng this problem_file_path
         # within this init method.
         self.domprob = pddlpy.DomainProblem(domain_file_path, problem_file_path)
-        os.system('./fast-downward.py --alias seq-sat-lama-2011 {domain_file_path} {problem_file_path}')
-        plan_file_name = "sas_plan"
+        os.system(f'python {path_to_fd_folder}/fast-downward.py --alias seq-sat-lama-2011 {domain_file_path} {problem_file_path}')
+        plan_file_name = "sas_plan.1"
         with open(plan_file_name) as f:
             # TODO (wmcclinton) automatically genetate plan_file from folder
             self.plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]

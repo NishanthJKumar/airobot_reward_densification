@@ -3,6 +3,7 @@ import gym
 from envs.base_classifiers_class import BaseClassifiers
 gym.logger.set_level(gym.logger.DEBUG)
 import numpy as np
+import os
 
 # Only one Subgoal.
 # domprob = pddlpy.DomainProblem('goal-subgoal-domain.pddl', 'goal-subgoal-problem.pddl')
@@ -50,3 +51,5 @@ class MultipleSubgoalsClassfiers(BaseClassifiers):
         # This needs to specify typed predicates
         return {"0-arity": [], "1-arity": [(self.is_goal, "location"), (self.is_subgoal1, "location"), (self.is_subgoal2, "location"), (self.is_subgoal3, "location")], "2-arity": [(self.at, "gripper", "location")]}
 
+    def get_path_to_domain_and_problem_files(self):
+        return (os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-domain.pddl"), os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-problem.pddl"))

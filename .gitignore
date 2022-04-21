@@ -2,6 +2,7 @@
 /data
 
 # Unnecessary FD things
+sas_plan.1
 output.sas
 
 # Byte-compiled / optimized / DLL files
