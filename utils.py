@@ -1,70 +1,84 @@
-
-import gym
-gym.logger.set_level(gym.logger.DEBUG)
-import numpy as np
-from gym.wrappers.monitor import Monitor
-from gym.wrappers.monitoring import video_recorder
-import copy
+from typing import List
 import pddlpy
+import numpy as np
+import copy
+import os
+import glob
 
-# Only one Subgoal.
-# domprob = pddlpy.DomainProblem('goal-subgoal-domain.pddl', 'goal-subgoal-problem.pddl')
-# Multiple Subgoals.
-NUM_BLOCKS = 2
 max_plan_step_reached = 0
 
-class Predicates:
+def play_video(video_dir, video_file=None, play_rate=0.2):
+    if video_file is None:
+        video_files = list(glob.glob(video_dir + "/eval/**/render_video.mp4"))
+        video_files.sort()
+        video_file = video_files[-1]
+    else:
+        video_file = os.Path(video_file)
+    os.system(f"vlc --rate {str(play_rate + 0.01)} {video_file}")
 
-    def at(self, env, gripper, loc):
-        if self.is_goal(env, loc):
-            return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._goal_pos[:2]) < env._dist_threshold
-        elif self.is_subgoal1(env, loc): 
-            for pos in env._subgoal1_pos:
-                if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
-                    return True
-            return False
-        elif self.is_subgoal2(env, loc):
-            for pos in env._subgoal2_pos:
-                if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
-                    return True
-            return False
-        elif self.is_subgoal3(env, loc):
-            for pos in env._subgoal3_pos:
-                if np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - pos[:2]) < env._dist_threshold:
-                    return True
-            return False
-        else:
-            raise ValueError(f"loc should be either 'goal' or 'subgoal' not '{loc}'")
+# read tf log file
+def read_tf_log(log_dir):
+    log_dir = Path(log_dir)
+    log_files = list(log_dir.glob(f"**/events.*"))
+    if len(log_files) < 1:
+        return None
+    log_file = log_files[0]
+    event_acc = EventAccumulator(log_file.as_posix())
+    event_acc.Reload()
+    tags = event_acc.Tags()
+    try:
+        scalar_success = event_acc.Scalars("train/episode_success")
+        success_rate = [x.value for x in scalar_success]
+        steps = [x.step for x in scalar_success]
+        scalar_return = event_acc.Scalars("train/episode_return/mean")
+        returns = [x.value for x in scalar_return]
+    except:
+        return None
+    return steps, returns, success_rate
 
-    def is_goal(self, env, loc):
-        return loc == "goal"
-    
-    def is_subgoal1(self, env, loc):
-        return loc == "subgoal1"
 
-    def is_subgoal2(self, env, loc):
-        return loc == "subgoal2"
-
-    def is_subgoal3(self, env, loc):
-        return loc == "subgoal3"
-
-    def get_typed_predicates(self):
-        # TODO can this be read from domain file?
-        # This needs to specify typed predicates
-        return {"0-arity": [], "1-arity": [(self.is_goal, "location"), (self.is_subgoal1, "location"), (self.is_subgoal2, "location"), (self.is_subgoal3, "location")], "2-arity": [(self.at, "gripper", "location")]}
-
+def plot_curves(data_dict, title):
+    # {label: [x, y]}
+    fig, ax = plt.subplots(figsize=(4, 3))
+    labels = data_dict.keys()
+    for label, data in data_dict.items():
+        x = data[0]
+        y = data[1]
+        ax.plot(x, y, label=label)
+    ax.set_title(title)
+    ax.legend()
 
 class GroundingUtils:
 
-    def __init__(self, domain_file_name, problem_file_name):
-        self.domprob = pddlpy.DomainProblem(domain_file_name, problem_file_name)
+    def __init__(self, domain_file_path, problem_file_path, vec_env, classifiers, path_to_fd_folder):
+        self.domain_file_path = domain_file_path
+        # TODO: make problem file automatically instead of taking in
+        # right now. This can be done by just running the classifiers
+        # on the vec_env and generating the initial state!
+        self.problem_file_path = problem_file_path
+        self.vec_env = vec_env
+        self.classifiers = classifiers
+
+        # NOTE: In the future, we should be generaitng this problem_file_path
+        # within this init method.
+        self.domprob = pddlpy.DomainProblem(domain_file_path, problem_file_path)
+        os.system(f'python {path_to_fd_folder}/fast-downward.py --alias seq-sat-lama-2011 {domain_file_path} {problem_file_path}')
+        plan_file_name = "sas_plan.1"
+        with open(plan_file_name) as f:
+            # TODO (wmcclinton) automatically genetate plan_file from folder
+            self.plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
+        
 
     def get_state_grounded_atoms(self, env):
         state_grounded_atoms = []
 
-        predicates = Predicates().get_typed_predicates()
+        predicates = self.classifiers.get_typed_predicates()
         # TODO (wmcclinton) get objects with types from pddl
         objects = [(obj, obj_type) for obj, obj_type in self.domprob.problem.objects.items()]
+        
+        # TODO: make this cleaner so that we can automatically get things up to
+        # whatever arity defined in the file.
+        # TODO: protect against these keys not existing.
         for predicate in predicates["0-arity"]:
             state_grounded_atoms.append([(predicate[0].__name__,), predicate[0](env)])
 
@@ -122,3 +136,4 @@ class GroundingUtils:
         # reward = -dist_to_goal
         info = dict(success=success)
         return reward, info
+

@@ -1,5 +1,0 @@
-(move-to-subgoal1 claw subgoal1)
-(move-to-subgoal2 claw subgoal1 subgoal2)
-(move-to-subgoal3 claw subgoal2 subgoal3)
-(move-to-goal claw subgoal3 goal)
-; cost = 4 (unit cost)

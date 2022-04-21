@@ -8,7 +8,6 @@ from easyrl.utils.data import StepData
 from easyrl.utils.data import Trajectory
 from easyrl.utils.gym_util import get_render_images
 from easyrl.utils.torch_util import torch_to_np
-from utils import GroundingUtils
 import os
 
 class ShapedRewardEpisodicRunner(BasicRunner):
@@ -17,16 +16,10 @@ class ShapedRewardEpisodicRunner(BasicRunner):
     It assumes the environment is automatically reset if done=True
     """
 
-    def __init__(self, domain_file_name, problem_file_name, *args, **kwargs):
+    def __init__(self, g_utils, *args, **kwargs):
         super(ShapedRewardEpisodicRunner, self).__init__(*args, **kwargs)
-        self.domain_file_name = domain_file_name
-        self.problem_file_name = problem_file_name
-        os.system('./fast-downward.py --alias seq-sat-lama-2011 {domain_file_name} {problem_file_name}')
-        plan_file_name = "sas_plan"
-        with open(plan_file_name) as f:
-            # TODO (wmcclinton) automatically genetate plan_file from folder
-            self.plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
-        self.g_utils = GroundingUtils(self.domain_file_name, self.problem_file_name)
+        self.g_utils = g_utils
+        self.plan = self.g_utils.plan
 
     @torch.no_grad()
     def __call__(self, time_steps, sample=True, evaluation=False,
