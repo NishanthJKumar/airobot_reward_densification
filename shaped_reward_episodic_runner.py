@@ -8,7 +8,8 @@ from easyrl.utils.data import StepData
 from easyrl.utils.data import Trajectory
 from easyrl.utils.gym_util import get_render_images
 from easyrl.utils.torch_util import torch_to_np
-from utils import Predicates, apply_grounded_operator, get_state_grounded_atoms, apply_grounded_plan, get_shaped_reward
+from grid_problem_predicates import Predicates, get_state_grounded_atoms
+from utils import apply_grounded_plan, get_shaped_reward
 
 class ShapedRewardEpisodicRunner(BasicRunner):
     """
