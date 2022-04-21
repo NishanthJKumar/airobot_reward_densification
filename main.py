@@ -66,14 +66,14 @@ def train_ppo(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir)
+        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     else:
         engine.train()
         stat_info, _ = engine.eval(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir)
+        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     
     return cfg.alg.save_dir
 
@@ -103,7 +103,7 @@ cfg.alg.episode_steps = 100
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
-cfg.alg.eval = False
+cfg.alg.eval = True #False
 cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = False
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()

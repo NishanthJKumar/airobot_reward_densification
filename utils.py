@@ -3,13 +3,13 @@ import pddlpy
 import numpy as np
 import copy
 import os
+import glob
 
 max_plan_step_reached = 0
 
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
-        video_dir = os.Path(video_dir)
-        video_files = list(video_dir.glob(f"**/render_video.mp4"))
+        video_files = list(glob.glob(video_dir + "/eval/**/render_video.mp4"))
         video_files.sort()
         video_file = video_files[-1]
     else:
