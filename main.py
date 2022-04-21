@@ -66,8 +66,14 @@ def train_ppo(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
+        play_video(cfg.alg.save_dir)
     else:
         engine.train()
+        stat_info, _ = engine.eval(
+            render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
+        )
+        pprint.pprint(stat_info)
+        play_video(cfg.alg.save_dir)
     
     return cfg.alg.save_dir
 
@@ -131,7 +137,6 @@ save_dir = train_ppo(
     env_name="URPusher-v1" if push_exp else "URReacher-v1",
     grounding_utils=grounding_utils,
 )
-play_video(save_dir)
 
 #### TODO: plot return and success rate curves
 # steps, returns, success_rate = read_tf_log(save_dir)
