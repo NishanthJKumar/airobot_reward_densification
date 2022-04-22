@@ -299,6 +299,7 @@ register(
 # DO NOT MODIFY THIS
 def train_ppo(
     with_obstacle=False,
+    granularity=3,
     push_exp=False,
     max_steps=200000,
 ):
@@ -327,6 +328,7 @@ def train_ppo(
     env_kwargs = (
         dict(
             with_obstacle=with_obstacle,
+            granularity=granularity,
         )
         if not push_exp
         else dict()
@@ -334,6 +336,7 @@ def train_ppo(
     env = make_vec_env(
         cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
     )
+    print(env.envs[0]._granularity)
     env.reset()
     ob_size = env.observation_space.shape[0]
 
@@ -382,6 +385,7 @@ def train_ppo(
 # call train_ppo, just set the argument flag properly
 save_dir = train_ppo(
     with_obstacle=True,
+    granularity=5,
     push_exp=False,
     max_steps=200000,
 )

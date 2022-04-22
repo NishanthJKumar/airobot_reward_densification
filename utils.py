@@ -10,7 +10,8 @@ import pddlpy
 # Only one Subgoal.
 # domprob = pddlpy.DomainProblem('goal-subgoal-domain.pddl', 'goal-subgoal-problem.pddl')
 # Multiple Subgoals.
-domprob = pddlpy.DomainProblem('goal-multiple-subgoal-domain.pddl', 'goal-multiple-subgoal-problem.pddl')
+# domprob = pddlpy.DomainProblem('goal-multiple-subgoal-domain.pddl', 'goal-multiple-subgoal-problem.pddl')
+domprob = pddlpy.DomainProblem('reaching-grid-domain.pddl', 'reaching-grid-problem5.pddl')
 NUM_BLOCKS = 2
 max_plan_step_reached = 0
 
@@ -65,6 +66,7 @@ def get_state_grounded_atoms(env):
 
 def apply_grounded_operator(state_grounded_atoms, op_name, params):
     for o in domprob.ground_operator(op_name):
+        # This if condition is not triggered after reset it seems. Need to figure out why?
         if params == list(o.variable_list.values()) and o.precondition_pos.issubset(state_grounded_atoms):
             next_state_grounded_atoms = copy.deepcopy(state_grounded_atoms)
             for effect in o.effect_pos:
@@ -80,7 +82,10 @@ def apply_grounded_plan(state_grounded_atoms, plan):
     for ground_operator in plan:
         op_name = ground_operator[0]
         params = list([ground_operator[1]] if len(ground_operator[1]) == 2 else ground_operator[1:])
-        plan_grounded_atoms.append(apply_grounded_operator(plan_grounded_atoms[-1], op_name, params))
+        try:
+            plan_grounded_atoms.append(apply_grounded_operator(plan_grounded_atoms[-1], op_name, params))
+        except TypeError:
+            import ipdb; ipdb.set_trace()
     return plan_grounded_atoms
 
 def phi(state_grounded_atoms, plan):
