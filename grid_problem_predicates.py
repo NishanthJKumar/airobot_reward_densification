@@ -1,5 +1,7 @@
 import pddlpy
 import numpy as np
+from cachetools import cached
+from cachetools.keys import hashkey
 
 # Only one Subgoal.
 # domprob = pddlpy.DomainProblem('goal-subgoal-domain.pddl', 'goal-subgoal-problem.pddl')
@@ -72,6 +74,9 @@ class Predicates:
 
         return False
 
+    # NOTE: Important to make things efficient! Every time we have a constant
+    # predicate, we should cache it.
+    @cached(cache={}, key = lambda self, env, loc1, loc2: hashkey(loc1, loc2))
     def neighbors(self, env, loc1, loc2):
         if "loc" in loc1 and "loc" in loc2:
             loc1_index = int(loc1[len("loc"):])
@@ -125,18 +130,16 @@ def get_state_grounded_atoms(env):
             if obj in ['goal'] + loc_objects:
                 state_grounded_atoms.append([(predicate.__name__, obj), predicate(env, obj)])
 
-    # print("loc_objects = ", loc_objects)
-    #TODO (vp): This needs to change since the neighbors predicate is over locations and not claw.
     for predicate in predicates["2-arity"]:
         if predicate.__name__ == "at":
             for obj in ['goal'] + loc_objects:
                 state_grounded_atoms.append([(predicate.__name__, "claw", obj), predicate(env, "claw", obj)])
-        elif predicate.__name__ == "neighbors":
-            for obj1 in loc_objects:
-                for obj2 in loc_objects:
-                    state_grounded_atoms.append([(predicate.__name__, obj1, obj2), predicate(env, obj1, obj2)])
-            for obj in loc_objects:
-                state_grounded_atoms.append([(predicate.__name__, obj, "goal"), predicate(env, obj, "goal")])
-                state_grounded_atoms.append([(predicate.__name__, "goal", obj), predicate(env, "goal", obj)])
+        # elif predicate.__name__ == "neighbors":
+        #     for obj1 in loc_objects:
+        #         for obj2 in loc_objects:
+        #             state_grounded_atoms.append([(predicate.__name__, obj1, obj2), predicate(env, obj1, obj2)])
+        #     for obj in loc_objects:
+        #         state_grounded_atoms.append([(predicate.__name__, obj, "goal"), predicate(env, obj, "goal")])
+        #         state_grounded_atoms.append([(predicate.__name__, "goal", obj), predicate(env, "goal", obj)])
 
     return [atom[0] for atom in state_grounded_atoms if atom[1]]

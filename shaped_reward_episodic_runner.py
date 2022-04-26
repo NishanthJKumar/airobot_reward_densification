@@ -21,6 +21,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
         super(ShapedRewardEpisodicRunner, self).__init__(*args, **kwargs)
         with open(plan_file_name) as f:
             self.plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
+        self.plan_grounded_atoms = None
 
     @torch.no_grad()
     def __call__(self, time_steps, sample=True, evaluation=False,
@@ -70,13 +71,16 @@ class ShapedRewardEpisodicRunner(BasicRunner):
 
             previous_state_grounded_atoms = get_state_grounded_atoms(env.envs[0])
             next_ob, _, done, env_info = env.step(action)
+            if self.plan_grounded_atoms is None:
+                # This is the first time we're calling the function, so
+                # we can compute the plan_grounded_atoms.
+                self.plan_grounded_atoms = apply_grounded_plan(previous_state_grounded_atoms, self.plan)
             next_state_grounded_atoms = get_state_grounded_atoms(env.envs[0])
-            plan_grounded_atoms = apply_grounded_plan(previous_state_grounded_atoms, self.plan)
-            reward, info = get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, plan_grounded_atoms)
+            reward, info = get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms)
             reward = np.array([reward])
             info.update(env_info[0])
             info = [info]
-            
+
             next_ob = next_ob#['observation']
 
             if render_image:
