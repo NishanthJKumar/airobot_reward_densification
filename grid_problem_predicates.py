@@ -30,7 +30,8 @@ class Predicates:
             x_upper_bound = xmin + (xmax - xmin) / rows * (loc_x + 1)
             y_lower_bound = ymin + (ymax - ymin) / cols * loc_y
             y_upper_bound = ymin + (ymax - ymin) / cols * (loc_y + 1)
-            return (x_lower_bound <= env.robot.arm.get_ee_pose()[0][0] <= x_upper_bound) and (y_lower_bound <= env.robot.arm.get_ee_pose()[0][1] <= y_upper_bound)
+            at_location =  (x_lower_bound <= env.robot.arm.get_ee_pose()[0][0] <= x_upper_bound) and (y_lower_bound <= env.robot.arm.get_ee_pose()[0][1] <= y_upper_bound)
+            return at_location
         else:
             raise ValueError(f"loc should be either 'goal' or must start with 'loc' not '{loc}'")
 
@@ -134,12 +135,12 @@ def get_state_grounded_atoms(env):
         if predicate.__name__ == "at":
             for obj in ['goal'] + loc_objects:
                 state_grounded_atoms.append([(predicate.__name__, "claw", obj), predicate(env, "claw", obj)])
-        # elif predicate.__name__ == "neighbors":
-        #     for obj1 in loc_objects:
-        #         for obj2 in loc_objects:
-        #             state_grounded_atoms.append([(predicate.__name__, obj1, obj2), predicate(env, obj1, obj2)])
-        #     for obj in loc_objects:
-        #         state_grounded_atoms.append([(predicate.__name__, obj, "goal"), predicate(env, obj, "goal")])
-        #         state_grounded_atoms.append([(predicate.__name__, "goal", obj), predicate(env, "goal", obj)])
+        elif predicate.__name__ == "neighbors":
+            for obj1 in loc_objects:
+                for obj2 in loc_objects:
+                    state_grounded_atoms.append([(predicate.__name__, obj1, obj2), predicate(env, obj1, obj2)])
+            for obj in loc_objects:
+                state_grounded_atoms.append([(predicate.__name__, obj, "goal"), predicate(env, obj, "goal")])
+                state_grounded_atoms.append([(predicate.__name__, "goal", obj), predicate(env, "goal", obj)])
 
     return [atom[0] for atom in state_grounded_atoms if atom[1]]

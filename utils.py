@@ -89,10 +89,14 @@ def apply_grounded_plan(state_grounded_atoms, plan):
     return plan_grounded_atoms
 
 def phi(state_grounded_atoms, plan):
-        for i, grounded_atoms in enumerate(plan[max_plan_step_reached:]):
-            if grounded_atoms == state_grounded_atoms:
-                return i + max_plan_step_reached
-        return max_plan_step_reached
+    for i, grounded_atoms in enumerate(plan[max_plan_step_reached:]):
+        if set(grounded_atoms) == set(state_grounded_atoms):
+            return i + max_plan_step_reached
+    return max_plan_step_reached
+
+def reset_max_plan_step_reached():
+    global max_plan_step_reached
+    max_plan_step_reached = 0
 
 def get_shaped_reward(env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
     global max_plan_step_reached
@@ -105,7 +109,7 @@ def get_shaped_reward(env, state, previous_state_grounded_atoms, next_state_grou
         max_plan_step_reached = prev_phi
 
     f = phi(next_state_grounded_atoms, plan) - phi(previous_state_grounded_atoms, plan)
+    
     reward = reward + f
-    # reward = -dist_to_goal
     info = dict(success=success)
     return reward, info

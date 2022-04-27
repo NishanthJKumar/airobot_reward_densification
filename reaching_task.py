@@ -26,6 +26,8 @@ from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
 from IPython import display
 from IPython.display import HTML
 
+NUM_EPISODE_STEPS = 100
+
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
         video_dir = Path(video_dir)
@@ -89,7 +91,7 @@ class URRobotGym(gym.Env):
         # You can set it to True for debugging purpose if you are running the notebook on a local machine.
         gui=False,
         granularity=3,
-        max_episode_length=25,
+        max_episode_length=NUM_EPISODE_STEPS,
         dist_threshold=0.05,
     ):
         self._action_repeat = action_repeat
@@ -160,6 +162,28 @@ class URRobotGym(gym.Env):
                 mass=0,
                 base_pos=[0.5, 0.15, 1.0],
                 rgba=[0.5, 0.5, 0.5, 0.8],
+            )
+
+        self._ball_urdf_ids = []
+        # Spawn a ball at every grid location
+        for loc_index in [0,1,2,3,4,5,6,7,8,15]: #range(2 ** self._granularity):
+            if self._granularity % 2 == 0:
+                square = int(np.sqrt(2 ** self._granularity))
+                rows, cols = square, square
+            else:
+                square = int(np.sqrt(2 ** (self._granularity - 1)))
+                rows, cols = square, int((2 ** self._granularity) / square)
+            loc_x, loc_y = loc_index // cols, loc_index % cols
+            xmin, ymin = self._xy_bounds[:, 0]
+            xmax, ymax = self._xy_bounds[:, 1]
+            x_lower_bound = xmin + (xmax - xmin) / rows * loc_x
+            x_upper_bound = xmin + (xmax - xmin) / rows * (loc_x + 1)
+            y_lower_bound = ymin + (ymax - ymin) / cols * loc_y
+            y_upper_bound = ymin + (ymax - ymin) / cols * (loc_y + 1)
+            self._ball_urdf_ids.append(
+                self.robot.pb_client.load_geom(
+                    "sphere", size=0.04, mass=0, base_pos=np.array([x_lower_bound, y_lower_bound, 1.0]), rgba=[0, 0.8, 0.8, 0.8]
+                )
             )
 
         # # create balls at subgoal locations
@@ -305,7 +329,7 @@ def train_ppo(
 ):
     set_config("ppo")
     cfg.alg.num_envs = 1
-    cfg.alg.episode_steps = 100
+    cfg.alg.episode_steps = NUM_EPISODE_STEPS
     cfg.alg.max_steps = max_steps
     cfg.alg.deque_size = 20
     cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -317,6 +341,7 @@ def train_ppo(
     else:
         cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
         cfg.alg.save_dir += str(cfg.alg.seed)
+        cfg.alg.save_dir += f"_gran{str(granularity)}"
     setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
     print(f"====================================")
@@ -376,7 +401,7 @@ def train_ppo(
     engine = PPOEngine(agent=agent, runner=runner)
     engine.train()
     stat_info, _ = engine.eval(
-        render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
+        render=True, save_eval_traj=True, eval_num=1, sleep_time=0.0
     )
     pprint.pprint(stat_info)
     return cfg.alg.save_dir

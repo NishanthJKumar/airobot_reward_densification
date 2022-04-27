@@ -9,7 +9,7 @@ from easyrl.utils.data import Trajectory
 from easyrl.utils.gym_util import get_render_images
 from easyrl.utils.torch_util import torch_to_np
 from grid_problem_predicates import Predicates, get_state_grounded_atoms
-from utils import apply_grounded_plan, get_shaped_reward
+from utils import apply_grounded_plan, get_shaped_reward, reset_max_plan_step_reached
 
 class ShapedRewardEpisodicRunner(BasicRunner):
     """
@@ -52,6 +52,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             all_dones = np.zeros(env.num_envs, dtype=bool)
         else:
             all_dones = None
+        
         for t in range(time_steps):
             if render:
                 env.render()
@@ -71,11 +72,18 @@ class ShapedRewardEpisodicRunner(BasicRunner):
 
             previous_state_grounded_atoms = get_state_grounded_atoms(env.envs[0])
             next_ob, _, done, env_info = env.step(action)
+
+            # If done is true, we need to reset the max_plan_steps_reached variable that
+            # we keep track of.
+            if done:
+                reset_max_plan_step_reached()
+
             if self.plan_grounded_atoms is None:
                 # This is the first time we're calling the function, so
                 # we can compute the plan_grounded_atoms.
                 self.plan_grounded_atoms = apply_grounded_plan(previous_state_grounded_atoms, self.plan)
             next_state_grounded_atoms = get_state_grounded_atoms(env.envs[0])
+
             reward, info = get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms)
             reward = np.array([reward])
             info.update(env_info[0])
@@ -87,6 +95,9 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 for img, inf in zip(imgs, info):
                     inf['render_image'] = deepcopy(img)
 
+            # NOTE: true_done tells us whether the goal was actually reached.
+            # If done is True but true_done is False, then the episode terminated due
+            # to timeout.
             true_next_ob, true_done, all_dones = self.get_true_done_next_ob(next_ob,
                                                                             done,
                                                                             reward,
