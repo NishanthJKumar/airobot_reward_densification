@@ -196,4 +196,5 @@ dependencies:
     - werkzeug==2.1.1
     - widgetsnbextension==3.6.0
     - yacs==0.1.8
+    - cachetools==5.0.0
 prefix: /home/njk/miniconda3/envs/6484_dqn

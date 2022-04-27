@@ -68,6 +68,9 @@ class GroundingUtils:
             # TODO (wmcclinton) automatically genetate plan_file from folder
             self.plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
         
+    def reset_max_plan_step_reached():
+        global max_plan_step_reached
+        max_plan_step_reached = 0
 
     def get_state_grounded_atoms(self, env):
         state_grounded_atoms = []
@@ -116,10 +119,13 @@ class GroundingUtils:
         return plan_grounded_atoms
 
     def phi(self, state_grounded_atoms, plan):
-            for i, grounded_atoms in enumerate(plan[max_plan_step_reached:]):
-                if grounded_atoms == state_grounded_atoms:
-                    return i + max_plan_step_reached
-            return max_plan_step_reached
+        global max_plan_step_reached
+        for i, grounded_atoms in enumerate(plan[max_plan_step_reached:]):
+            # NOTE: using set() is very important here to remove potential duplicates
+            # and make the comparison agnostic to order!
+            if set(grounded_atoms) == set(state_grounded_atoms):
+                return i + max_plan_step_reached
+        return max_plan_step_reached
 
     def get_shaped_reward(self, env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
         global max_plan_step_reached
