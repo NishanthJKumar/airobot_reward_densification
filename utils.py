@@ -107,9 +107,11 @@ def get_shaped_reward(env, state, previous_state_grounded_atoms, next_state_grou
     prev_phi = phi(previous_state_grounded_atoms, plan)
     if max_plan_step_reached < prev_phi:
         max_plan_step_reached = prev_phi
+        # if max_plan_step_reached >= 9:
+        #     import ipdb; ipdb.set_trace()
 
     f = phi(next_state_grounded_atoms, plan) - phi(previous_state_grounded_atoms, plan)
-    
+
     reward = reward + f
     info = dict(success=success)
     return reward, info

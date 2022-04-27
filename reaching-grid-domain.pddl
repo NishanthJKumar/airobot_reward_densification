@@ -38,7 +38,6 @@
         )
         :effect (and 
             (at ?g ?to)
-            (not (at ?g ?from))
         )
     )
 )

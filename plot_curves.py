@@ -36,7 +36,7 @@ def plot_curves(data_dict, title):
 #### 
 # 
 # TODO: plot return and success rate curves
-steps, returns, success_rate = read_tf_log('data/working')
+steps, returns, success_rate = read_tf_log('data/ob_True0_gran5')
 plot_rewards_dict = {'returns': [steps, returns]}
 plot_curves(plot_rewards_dict, 'Sparse Reward Returns')
 plt.show()

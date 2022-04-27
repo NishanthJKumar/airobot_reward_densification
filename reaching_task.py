@@ -26,7 +26,8 @@ from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
 from IPython import display
 from IPython.display import HTML
 
-NUM_EPISODE_STEPS = 100
+NUM_EPISODE_STEPS = 250
+EVAL_INTERVAL = 30
 
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
@@ -332,6 +333,7 @@ def train_ppo(
     cfg.alg.episode_steps = NUM_EPISODE_STEPS
     cfg.alg.max_steps = max_steps
     cfg.alg.deque_size = 20
+    cfg.alg.eval_interval = EVAL_INTERVAL
     cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
     cfg.alg.env_name = "URPusher-v1" if push_exp else "URReacher-v1"
     cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
