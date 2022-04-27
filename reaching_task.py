@@ -26,8 +26,8 @@ from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
 from IPython import display
 from IPython.display import HTML
 
-NUM_EPISODE_STEPS = 250
-EVAL_INTERVAL = 30
+NUM_EPISODE_STEPS = 500
+EVAL_INTERVAL = 40
 
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
