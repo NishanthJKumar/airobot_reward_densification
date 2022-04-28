@@ -29,7 +29,7 @@
     )
 
     (:action push-box
-        :parameter (?g - gripper ?b - box ?from ?to - location)
+        :parameters (?g - gripper ?b - box ?from ?to - location)
         :precondition (and
             (not (object_at ?b ?to))
             (not (robot_at ?g ?to))

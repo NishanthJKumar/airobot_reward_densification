@@ -7,6 +7,10 @@
         (robot_at claw claw_start)
     )
 	(:goal (and 
-		(object_at box goal))
+		(object_at box1 goal))
 	)
 )
+
+
+; move-to-location claw claw_start box_start
+; push-box claw box box_start goal
