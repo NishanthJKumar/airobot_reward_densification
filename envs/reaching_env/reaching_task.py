@@ -26,6 +26,7 @@ from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
 from IPython import display
 from IPython.display import HTML
 
+
 def check_collision_rate(log_dir):
     log_dir = Path(log_dir)
     log_files = list(log_dir.glob(f"**/info.json"))
@@ -46,11 +47,13 @@ class URRobotGym(gym.Env):
         gui=False,
         max_episode_length=25,
         dist_threshold=0.05,
+        granularity=5,
     ):
         self._action_repeat = action_repeat
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
         self._with_obstacle = with_obstacle
+        self._granularity = granularity
         print(f"================================================")
         print(f"With obstacle in the scene:{self._with_obstacle}")
         print(f"================================================")

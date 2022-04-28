@@ -20,6 +20,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
         super(ShapedRewardEpisodicRunner, self).__init__(*args, **kwargs)
         self.g_utils = g_utils
         self.plan = self.g_utils.plan
+        self.plan_grounded_atoms = None
 
     @torch.no_grad()
     def __call__(self, time_steps, sample=True, evaluation=False,
@@ -69,9 +70,14 @@ class ShapedRewardEpisodicRunner(BasicRunner):
 
             previous_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
             next_ob, _, done, env_info = env.step(action)
+            if done:
+                self.g_utils.reset_max_plan_step_reached()
+            if self.plan_grounded_atoms is None:
+                # This is the first time we're calling the function, so
+                # we can compute the plan_grounded_atoms.
+                self.plan_grounded_atoms = self.g_utils.apply_grounded_plan(previous_state_grounded_atoms, self.plan)
             next_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
-            plan_grounded_atoms = self.g_utils.apply_grounded_plan(previous_state_grounded_atoms, self.plan)
-            reward, info = self.g_utils.get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, plan_grounded_atoms)
+            reward, info = self.g_utils.get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms)
             reward = np.array([reward])
             info.update(env_info[0])
             info = [info]
@@ -82,6 +88,9 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 for img, inf in zip(imgs, info):
                     inf['render_image'] = deepcopy(img)
 
+            # NOTE: true_done tells us whether the goal was actually reached.
+            # If done is True but true_done is False, then the episode terminated due
+            # to timeout.
             true_next_ob, true_done, all_dones = self.get_true_done_next_ob(next_ob,
                                                                             done,
                                                                             reward,
