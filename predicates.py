@@ -11,7 +11,6 @@ import pddlpy
 # domprob = pddlpy.DomainProblem('goal-subgoal-domain.pddl', 'goal-subgoal-problem.pddl')
 # Multiple Subgoals.
 NUM_BLOCKS = 2
-max_plan_step_reached = 0
 
 class Predicates:
 

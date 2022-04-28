@@ -68,6 +68,9 @@ class GroundingUtils:
             # TODO (wmcclinton) automatically genetate plan_file from folder
             self.plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
         
+    def reset_max_plan_step_reached(self):
+        global max_plan_step_reached
+        max_plan_step_reached = 0
 
     def get_state_grounded_atoms(self, env):
         state_grounded_atoms = []
@@ -90,6 +93,8 @@ class GroundingUtils:
         for predicate in predicates["2-arity"]:
             for obj1 in objects:
                 for obj2 in objects:
+                    if obj1 == obj2:
+                        continue
                     if obj1[1] == predicate[1] and obj2[1] == predicate[2]:
                         state_grounded_atoms.append([(predicate[0].__name__, obj1[0], obj2[0]), predicate[0](env, obj1[0], obj2[0])]) 
 
@@ -116,10 +121,13 @@ class GroundingUtils:
         return plan_grounded_atoms
 
     def phi(self, state_grounded_atoms, plan):
-            for i, grounded_atoms in enumerate(plan[max_plan_step_reached:]):
-                if grounded_atoms == state_grounded_atoms:
-                    return i + max_plan_step_reached
-            return max_plan_step_reached
+        global max_plan_step_reached
+        for i, grounded_atoms in enumerate(plan[max_plan_step_reached:]):
+            # NOTE: using set() is very important here to remove potential duplicates
+            # and make the comparison agnostic to order!
+            if set(grounded_atoms) == set(state_grounded_atoms):
+                return i + max_plan_step_reached
+        return max_plan_step_reached
 
     def get_shaped_reward(self, env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
         global max_plan_step_reached
@@ -131,9 +139,19 @@ class GroundingUtils:
         if max_plan_step_reached < prev_phi:
             max_plan_step_reached = prev_phi
 
+            # if max_plan_step_reached >= 9:
+            #     print(env._t)
+            #     print(dist_to_goal)
+            #     import ipdb; ipdb.set_trace()
+
         f = self.phi(next_state_grounded_atoms, plan) - self.phi(previous_state_grounded_atoms, plan)
         reward = reward + f
         # reward = -dist_to_goal
         info = dict(success=success)
+
+        # if dist_to_goal <= 0.1:
+        #     print(env._t)
+        #     import ipdb; ipdb.set_trace()
+
         return reward, info
 

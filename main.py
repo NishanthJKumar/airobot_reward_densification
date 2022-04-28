@@ -5,7 +5,7 @@ from easyrl.models.categorical_policy import CategoricalPolicy
 from easyrl.models.diag_gaussian_policy import DiagGaussianPolicy
 from easyrl.models.mlp import MLP
 from easyrl.models.value_net import ValueNet
-from easyrl.utils.common import set_random_seed, load_from_json
+from easyrl.utils.common import set_random_seed
 from easyrl.utils.gym_util import make_vec_env
 from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
 from torch import nn
@@ -17,6 +17,7 @@ import envs.reaching_env.reaching_task
 from utils import play_video, GroundingUtils
 import gym
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
+from envs.reaching_env.grid_based.grid_based import GridBasedClassifiers
 
 def train_ppo(
     cfg=None,
@@ -85,9 +86,7 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-classifiers = MultipleSubgoalsClassfiers()
-# domain_file_path = "/home/njk/Documents/GitHub/airobot_reward_densification/envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-domain.pddl"
-# problem_file_path = "/home/njk/Documents/GitHub/airobot_reward_densification/envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-problem.pddl"
+classifiers = GridBasedClassifiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
@@ -99,7 +98,6 @@ max_steps=200000
 
 set_config("ppo")
 cfg.alg.num_envs = 1
-cfg.alg.episode_steps = 100
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -112,6 +110,8 @@ if push_exp:
     cfg.alg.save_dir += "_push"
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
 cfg.alg.save_dir += str(cfg.alg.seed)
+cfg.alg.episode_steps = 250
+cfg.alg.eval_interval = 10
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
@@ -127,6 +127,7 @@ env_kwargs = (
     if not push_exp
     else dict()
 )
+env_kwargs.update(dict(max_episode_length = cfg.alg.episode_steps, granularity = 5))
 env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
