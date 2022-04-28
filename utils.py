@@ -139,9 +139,19 @@ class GroundingUtils:
         if max_plan_step_reached < prev_phi:
             max_plan_step_reached = prev_phi
 
+            # if max_plan_step_reached >= 9:
+            #     print(env._t)
+            #     print(dist_to_goal)
+            #     import ipdb; ipdb.set_trace()
+
         f = self.phi(next_state_grounded_atoms, plan) - self.phi(previous_state_grounded_atoms, plan)
         reward = reward + f
         # reward = -dist_to_goal
         info = dict(success=success)
+
+        # if dist_to_goal <= 0.1:
+        #     print(env._t)
+        #     import ipdb; ipdb.set_trace()
+
         return reward, info
 

@@ -19,6 +19,7 @@
             (at ?g ?from)
             (not (at ?g ?to))
             (not (is_goal ?to))
+            (not (is_goal ?from))
             (neighbors ?from ?to)
         )
         :effect (and
