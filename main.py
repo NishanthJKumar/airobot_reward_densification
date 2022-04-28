@@ -98,7 +98,6 @@ max_steps=200000
 
 set_config("ppo")
 cfg.alg.num_envs = 1
-cfg.alg.episode_steps = 100
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
