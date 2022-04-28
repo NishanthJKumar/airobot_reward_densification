@@ -28,8 +28,8 @@ class URRobotPusherGym(gym.Env):
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
 
-        self._xy_bounds = np.array([0.23, 0.78], # [xmin, xmax]
-                                   [-0.35, 0.3]) # [ymin, ymax]
+        self._xy_bounds = np.array([[0.23, 0.78], # [xmin, xmax]
+                                   [-0.35, 0.3]]) # [ymin, ymax]
 
         self.robot = Robot('ur5e_stick',
                            pb_cfg={'gui': gui,
@@ -107,7 +107,7 @@ class URRobotPusherGym(gym.Env):
             for sg in self._subgoal_urdf_id:
                 self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id, sg, i, -1, enableCollision=0)
         for sg in self._subgoal_urdf_id:
-            self.robot.pb.setCollisionFilterPair(self._box_id, sg, -1, -1, enableCollision=0)
+            self.robot.pb_client.setCollisionFilterPair(self._box_id, sg, -1, -1, enableCollision=0)
 
     def reset(self):
         self.robot.arm.set_jpos(self._arm_reset_pos, ignore_physics=True)

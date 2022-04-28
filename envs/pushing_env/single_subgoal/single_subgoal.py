@@ -15,22 +15,22 @@ class SingleSubgoalClassfiers(BaseClassifiers):
         elif self.is_subgoal0(env, loc):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._subgoal0_pos[:2]) < env._dist_threshold
         elif self.is_subgoal1(env, loc):
-            return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._subgoal1_pos[:2]) < env._dist_threshold:
+            return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._subgoal1_pos[:2]) < env._dist_threshold
         else:
             raise ValueError(f"loc should be either 'goal' or 'subgoal' not '{loc}'")
 
     def object_at(self, env, obj, loc):
         object_pos = np.zeros(2)
-        if (obj == "box"):
-            object_pos, _ = self.robot.pb_client.get_body_state(self._box_id)[:2]
+        if (obj == "box1"):
+            object_pos, _ = env.robot.pb_client.get_body_state(env._box_id)[:2]
         else:
-            raise ValueError(f"obj should be 'box1' nor '{obj}'")
+            raise ValueError(f"obj should be 'box1' not '{obj}'")
         if self.is_goal(env, loc):
             return np.linalg.norm(object_pos[:2] - env._goal_pos[:2]) < env._dist_threshold
         elif self.is_subgoal0(env, loc):
             return np.linalg.norm(object_pos[:2] - env._subgoal0_pos[:2]) < env._dist_threshold
         elif self.is_subgoal1(env, loc):
-            return np.linalg.norm(object_pos[:2] - env._subgoal1_pos[:2]) < env._dist_threshold:
+            return np.linalg.norm(object_pos[:2] - env._subgoal1_pos[:2]) < env._dist_threshold
         else:
             raise ValueError(f"loc should be either 'goal' or 'subgoal0' or 'subgoal1' not '{loc}'")
 
