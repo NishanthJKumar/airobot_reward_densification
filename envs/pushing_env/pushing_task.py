@@ -89,6 +89,26 @@ class URRobotPusherGym(gym.Env):
         self.observation_space = spaces.Box(state_low, state_high, dtype=np.float32)
         self.reset()
 
+        # add the dummy subgoal locations
+        self._subgoal_urdf_id = []
+        self._subgoal0_pos = self._ref_ee_pos
+        self._subgoal_urdf_id.append(
+            self.robot.pb_client.load_geom(
+                "sphere", size=0.04, mass=0, base_pos=self._subgoal0_pos, rgba=[0, 0.8, 0.8, 0.8]
+            )
+        )
+        self._subgoal1_pos = self._box_pos
+        self._subgoal_urdf_id.append(
+            self.robot.pb_client.load_geom(
+                "sphere", size=0.04, mass=0, base_pos=self._subgoal1_pos, rgba=[0, 0.8, 0.8, 0.8]
+            )
+        )
+        for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
+            for sg in self._subgoal_urdf_id:
+                self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id, sg, i, -1, enableCollision=0)
+        for sg in self._subgoal_urdf_id:
+            self.robot.pb.setCollisionFilterPair(self._box_id, sg, -1, -1, enableCollision=0)
+
     def reset(self):
         self.robot.arm.set_jpos(self._arm_reset_pos, ignore_physics=True)
         self.robot.pb_client.reset_body(self._box_id, base_pos=self._box_pos)
