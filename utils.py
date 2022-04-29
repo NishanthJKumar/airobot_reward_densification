@@ -131,7 +131,8 @@ class GroundingUtils:
 
     def get_shaped_reward(self, env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
         global max_plan_step_reached
-        dist_to_goal = np.linalg.norm(state[0][2:4] - env._goal_pos[:2])
+        # dist_to_goal = np.linalg.norm(state[0][2:4] - env._goal_pos[:2])
+        dist_to_goal = np.linalg.norm(state[0][:2] - env._goal_pos[:2])
         success = dist_to_goal < env._dist_threshold
         reward = 1 if success else 0
 
