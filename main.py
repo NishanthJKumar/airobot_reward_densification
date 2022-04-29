@@ -100,7 +100,7 @@ push_exp = True
 granularity = 3
 with_obstacle=False
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
-max_steps=150000
+max_steps=200000
 
 set_config("ppo")
 cfg.alg.seed = 0
