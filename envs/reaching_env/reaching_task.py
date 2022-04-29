@@ -36,7 +36,6 @@ def check_collision_rate(log_dir):
     collisions = [v["collision"] for k, v in info_data.items()]
     return np.mean(collisions)
 
-
 class URRobotGym(gym.Env):
     def __init__(
         self,
@@ -180,8 +179,7 @@ class URRobotGym(gym.Env):
 
     def _get_reward(self, state, action, collision):
         reward = None
-        dist_to_goal = np.linalg.norm(state - self._goal_pos[:2])
-        success = dist_to_goal < self._dist_threshold
+        success = self.get_success(self, state)
         info = {'success': success}
         return reward, info
 
@@ -241,6 +239,10 @@ class URRobotGym(gym.Env):
         )
         rgb, _ = self.robot.cam.get_images(get_rgb=True, get_depth=False)
         return rgb
+
+    def get_success(self, env, state):
+        dist_to_goal = np.linalg.norm(state - env._goal_pos[:2])
+        return dist_to_goal < env._dist_threshold
 
 
 module_name = __name__

@@ -17,8 +17,3 @@ class BaseClassifiers:
         """Return a tuple of strings containing the paths to the domain
         and problem files."""
         raise NotImplementedError("Override me!")
-
-    def get_success(self, env, state) -> bool:
-        """Given the environment and a state, return a boolean indicating
-        whether the state is at the goal."""
-        raise NotImplementedError("Override me!")
