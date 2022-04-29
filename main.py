@@ -19,6 +19,7 @@ from utils import play_video, GroundingUtils
 import gym
 from envs.pushing_env.single_subgoal.single_subgoal import PushingSingleSubgoalClassfiers
 from envs.pushing_env.multiple_subgoals.multiple_subgoals import PushingMultipleSubgoalClassfiers
+from envs.pushing_env.grid_based.grid_based import PushingGridBasedClassifiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
 from envs.reaching_env.single_subgoal.single_subgoal import SingleSubgoalClassfiers
 from envs.reaching_env.grid_based.grid_based import GridBasedClassifiers
@@ -90,7 +91,7 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-classifiers = PushingMultipleSubgoalClassfiers()
+classifiers = PushingGridBasedClassifiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
@@ -102,7 +103,7 @@ env_name="URPusher-v1" if push_exp else "URReacher-v1"
 max_steps=150000
 
 set_config("ppo")
-cfg.alg.seed = 923
+cfg.alg.seed = 0
 cfg.alg.num_envs = 1
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20

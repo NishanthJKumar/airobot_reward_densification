@@ -122,4 +122,4 @@ class PushingGridBasedClassifiers(BaseClassifiers):
         return {"0-arity": [], "1-arity": [(self.is_goal, "location")], "2-arity": [(self.robot_at, "gripper", "location"), (self.object_at, "box", "location"), (self.neighbors, "location", "location")]}
 
     def get_path_to_domain_and_problem_files(self):
-        return (os.path.abspath("envs/reaching_env/grid_based/pushing-grid-domain.pddl"), os.path.abspath("envs/reaching_env/grid_based/pushing-grid-problem3.pddl"))
+        return (os.path.abspath("envs/pushing_env/grid_based/pushing-grid-domain.pddl"), os.path.abspath("envs/pushing_env/grid_based/pushing-grid-problem3.pddl"))
