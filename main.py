@@ -116,7 +116,7 @@ if push_exp:
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
 cfg.alg.save_dir += str(cfg.alg.seed)
 cfg.alg.episode_steps = 100
-cfg.alg.eval_interval = 50
+cfg.alg.eval_interval = 20
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
