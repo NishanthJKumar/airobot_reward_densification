@@ -7,7 +7,7 @@ gym.logger.set_level(gym.logger.DEBUG)
 
 # Only one Subgoal.
 
-class SingleSubgoalClassfiers(BaseClassifiers):
+class PushingSingleSubgoalClassfiers(BaseClassifiers):
 
     def robot_at(self, env, gripper, loc):
         if self.is_goal(env, loc):

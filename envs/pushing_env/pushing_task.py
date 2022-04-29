@@ -97,10 +97,23 @@ class URRobotPusherGym(gym.Env):
                 "sphere", size=0.04, mass=0, base_pos=self._subgoal0_pos, rgba=[0, 0.8, 0.8, 0.8]
             )
         )
-        self._subgoal1_pos = self._box_pos
+        import ipdb; ipdb.set_trace()
+        self._subgoal1_pos = np.array([0.4, -0.21, 1.0])
         self._subgoal_urdf_id.append(
             self.robot.pb_client.load_geom(
                 "sphere", size=0.04, mass=0, base_pos=self._subgoal1_pos, rgba=[0, 0.8, 0.8, 0.8]
+            )
+        )
+        self._subgoal2_pos = self._box_pos
+        self._subgoal_urdf_id.append(
+            self.robot.pb_client.load_geom(
+                "sphere", size=0.04, mass=0, base_pos=self._subgoal2_pos, rgba=[0, 0.8, 0.8, 0.8]
+            )
+        )
+        self._subgoal3_pos = np.array([0.425, 0.05, 1.0])
+        self._subgoal_urdf_id.append(
+            self.robot.pb_client.load_geom(
+                "sphere", size=0.04, mass=0, base_pos=self._subgoal3_pos, rgba=[0, 0.8, 0.8, 0.8]
             )
         )
         for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
