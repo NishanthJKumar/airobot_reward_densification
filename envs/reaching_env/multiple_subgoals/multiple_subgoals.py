@@ -52,3 +52,7 @@ class MultipleSubgoalsClassfiers(BaseClassifiers):
 
     def get_path_to_domain_and_problem_files(self):
         return (os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-domain.pddl"), os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-problem.pddl"))
+
+    def get_success(self, env, state):
+        dist_to_goal = np.linalg.norm(state - env._goal_pos[:2])
+        return dist_to_goal < env._dist_threshold

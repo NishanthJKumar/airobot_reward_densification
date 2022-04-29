@@ -132,7 +132,7 @@ env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
 
-grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder)
+grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder, classifiers.get_success)
 save_dir = train_ppo(
     cfg=cfg,
     env_name="URPusher-v1" if push_exp else "URReacher-v1",
