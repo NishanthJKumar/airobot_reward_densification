@@ -139,7 +139,7 @@ class GroundingUtils:
         if max_plan_step_reached < prev_phi:
             max_plan_step_reached = prev_phi
 
-            if max_plan_step_reached >= 3:
+            if max_plan_step_reached >= 6:
                 import ipdb; ipdb.set_trace()
             
             # if max_plan_step_reached >= 9:

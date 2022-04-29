@@ -97,7 +97,7 @@ path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = True
-granularity = 3
+granularity = 4
 with_obstacle=False
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
 max_steps=200000
