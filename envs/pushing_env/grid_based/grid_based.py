@@ -12,6 +12,8 @@ class PushingGridBasedClassifiers(BaseClassifiers):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._goal_pos[:2]) < env._dist_threshold
         elif "loc" in loc:
             loc_index = int(loc[len("loc"):])
+            if (loc_index > 2 ** env._granularity - 1):
+                raise ValueError(f"loc ranges from 0 to {2 ** env._granularity - 1} but {loc} was passed!")
             if env._granularity % 2 == 0:
                 square = int(np.sqrt(2 ** env._granularity))
                 rows, cols = square, square
