@@ -175,7 +175,7 @@ class URRobotPusherGym(gym.Env):
         return rgb
 
     def get_success(self, env, state):
-        dist_to_goal = np.linalg.norm(state - env._goal_pos[2:4])
+        dist_to_goal = np.linalg.norm(state[2:4] - env._goal_pos[:2])
         return dist_to_goal < env._dist_threshold
 
 
