@@ -138,7 +138,7 @@ class GroundingUtils:
         prev_phi = self.phi(previous_state_grounded_atoms, plan)
         if max_plan_step_reached < prev_phi:
             max_plan_step_reached = prev_phi
-
+            
             # if max_plan_step_reached >= 9:
             #     print(env._t)
             #     print(dist_to_goal)

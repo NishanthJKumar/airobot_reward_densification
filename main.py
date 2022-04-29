@@ -13,9 +13,11 @@ import torch
 from pathlib import Path
 import pprint
 # NOTE: Needed for env.registery to go through
+import envs.pushing_env.pushing_task
 import envs.reaching_env.reaching_task
 from utils import play_video, GroundingUtils
 import gym
+from envs.pushing_env.single_subgoal.single_subgoal import SingleSubgoalClassfiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
 from envs.reaching_env.single_subgoal.single_subgoal import SingleSubgoalClassfiers
 from envs.reaching_env.grid_based.grid_based import GridBasedClassifiers
@@ -92,12 +94,13 @@ domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
-push_exp = False
-with_obstacle=True
+push_exp = True
+with_obstacle=False
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
-max_steps=2000#00
+max_steps=150000
 
 set_config("ppo")
+cfg.alg.seed = 923
 cfg.alg.num_envs = 1
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
@@ -111,8 +114,8 @@ if push_exp:
     cfg.alg.save_dir += "_push"
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
 cfg.alg.save_dir += str(cfg.alg.seed)
-cfg.alg.episode_steps = 250
-cfg.alg.eval_interval = 10
+cfg.alg.episode_steps = 25
+cfg.alg.eval_interval = 50
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
@@ -128,7 +131,7 @@ env_kwargs = (
     if not push_exp
     else dict()
 )
-env_kwargs.update(dict(max_episode_length = cfg.alg.episode_steps, granularity = 5))
+env_kwargs.update(dict(max_episode_length = cfg.alg.episode_steps))
 env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
