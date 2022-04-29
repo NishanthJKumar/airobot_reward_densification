@@ -126,11 +126,8 @@ class GroundingUtils:
         for i, grounded_atoms in enumerate(plan[max_plan_step_reached:]):
             # NOTE: using set() is very important here to remove potential duplicates
             # and make the comparison agnostic to order!
-            try:
-                if set(grounded_atoms) == set(state_grounded_atoms):
-                    return i + max_plan_step_reached
-            except TypeError:
-                import ipdb; ipdb.set_trace()
+            if set(grounded_atoms) == set(state_grounded_atoms):
+                return i + max_plan_step_reached
         return max_plan_step_reached
 
     def get_shaped_reward(self, env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
