@@ -8,6 +8,7 @@ from easyrl.utils.data import StepData
 from easyrl.utils.data import Trajectory
 from easyrl.utils.gym_util import get_render_images
 from easyrl.utils.torch_util import torch_to_np
+import cv2
 import os
 
 class ShapedRewardEpisodicRunner(BasicRunner):
@@ -39,7 +40,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             env = self.train_env
         if self.obs is None or reset_first or evaluation:
             self.reset(env=env, **reset_kwargs)
-        ob = self.obs  #['observation'] # NOTE: (njk) this is necessary for FetchBlockConstructionEnv
+        ob = self.obs
         # this is critical for some environments depending
         # on the returned ob data. use deepcopy() to avoid
         # adding the same ob to the traj
@@ -81,9 +82,12 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             reward = np.array([reward])
             info.update(env_info[0])
             info = [info]
-            
-            next_ob = next_ob#['observation']
 
+            print(f"dist to subgoal1 = {np.linalg.norm(next_ob[0][:2] - env.envs[0]._subgoal2_pos[:2])}")
+            print(f"action = {action}")
+            cv2.imshow("img", env.render())
+            cv2.waitKey(50)
+            
             if render_image:
                 for img, inf in zip(imgs, info):
                     inf['render_image'] = deepcopy(img)
