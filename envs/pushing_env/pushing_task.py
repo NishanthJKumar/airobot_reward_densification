@@ -174,6 +174,10 @@ class URRobotPusherGym(gym.Env):
         rgb, _ = self.robot.cam.get_images(get_rgb=True, get_depth=False)
         return rgb
 
+    def get_success(self, env, state):
+        dist_to_goal = np.linalg.norm(state - env._goal_pos[2:4])
+        return dist_to_goal < env._dist_threshold
+
 
 module_name = __name__
 
