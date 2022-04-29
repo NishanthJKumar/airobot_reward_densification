@@ -5,11 +5,6 @@ gym.logger.set_level(gym.logger.DEBUG)
 import numpy as np
 import os
 
-# Only one Subgoal.
-# domprob = pddlpy.DomainProblem('goal-subgoal-domain.pddl', 'goal-subgoal-problem.pddl')
-# Multiple Subgoals.
-NUM_BLOCKS = 2
-
 class MultipleSubgoalsClassfiers(BaseClassifiers):
 
     def at(self, env, gripper, loc):
@@ -52,3 +47,4 @@ class MultipleSubgoalsClassfiers(BaseClassifiers):
 
     def get_path_to_domain_and_problem_files(self):
         return (os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-domain.pddl"), os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-problem.pddl"))
+

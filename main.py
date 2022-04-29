@@ -19,6 +19,7 @@ from utils import play_video, GroundingUtils
 import gym
 from envs.pushing_env.single_subgoal.single_subgoal import SingleSubgoalClassfiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
+from envs.reaching_env.single_subgoal.single_subgoal import SingleSubgoalClassfiers
 from envs.reaching_env.grid_based.grid_based import GridBasedClassifiers
 
 def train_ppo(
@@ -88,7 +89,6 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-# classifiers = GridBasedClassifiers()
 classifiers = SingleSubgoalClassfiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
@@ -136,7 +136,7 @@ env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
 
-grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder) #TODO pass in grounding utils
+grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder, env.envs[0].get_success)
 save_dir = train_ppo(
     cfg=cfg,
     env_name="URPusher-v1" if push_exp else "URReacher-v1",

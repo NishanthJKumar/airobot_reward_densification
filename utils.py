@@ -50,7 +50,7 @@ def plot_curves(data_dict, title):
 
 class GroundingUtils:
 
-    def __init__(self, domain_file_path, problem_file_path, vec_env, classifiers, path_to_fd_folder):
+    def __init__(self, domain_file_path, problem_file_path, vec_env, classifiers, path_to_fd_folder, task_success_fn):
         self.domain_file_path = domain_file_path
         # TODO: make problem file automatically instead of taking in
         # right now. This can be done by just running the classifiers
@@ -58,6 +58,7 @@ class GroundingUtils:
         self.problem_file_path = problem_file_path
         self.vec_env = vec_env
         self.classifiers = classifiers
+        self.task_success_fn = task_success_fn
 
         # NOTE: In the future, we should be generaitng this problem_file_path
         # within this init method.
@@ -131,9 +132,7 @@ class GroundingUtils:
 
     def get_shaped_reward(self, env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
         global max_plan_step_reached
-        # dist_to_goal = np.linalg.norm(state[0][2:4] - env._goal_pos[:2])
-        dist_to_goal = np.linalg.norm(state[0][:2] - env._goal_pos[:2])
-        success = dist_to_goal < env._dist_threshold
+        success = self.task_success_fn(env, state)
         reward = 1 if success else 0
 
         prev_phi = self.phi(previous_state_grounded_atoms, plan)

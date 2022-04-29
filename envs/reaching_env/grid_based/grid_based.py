@@ -111,5 +111,3 @@ class GridBasedClassifiers(BaseClassifiers):
 
     def get_path_to_domain_and_problem_files(self):
         return (os.path.abspath("envs/reaching_env/grid_based/reaching-grid-domain.pddl"), os.path.abspath("envs/reaching_env/grid_based/reaching-grid-problem5.pddl"))
-
-
