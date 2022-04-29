@@ -17,6 +17,7 @@ import envs.reaching_env.reaching_task
 from utils import play_video, GroundingUtils
 import gym
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
+from envs.reaching_env.single_subgoal.single_subgoal import SingleSubgoalClassfiers
 from envs.reaching_env.grid_based.grid_based import GridBasedClassifiers
 
 def train_ppo(
@@ -86,7 +87,7 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-classifiers = GridBasedClassifiers()
+classifiers = SingleSubgoalClassfiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
@@ -94,7 +95,7 @@ path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 push_exp = False
 with_obstacle=True
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
-max_steps=200000
+max_steps=2000#00
 
 set_config("ppo")
 cfg.alg.num_envs = 1
