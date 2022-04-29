@@ -18,13 +18,16 @@
     )
 
     (:action move-to-subgoal1
-        :parameters (?g - gripper ?loc - location)
+        :parameters (?g - gripper ?loc1 ?loc2 - location)
         :precondition (and
-            (is_subgoal1 ?loc)
-            (not (robot_at ?g ?loc))
+            (is_subgoal1 ?loc2)
+            (not (robot_at ?g ?loc2))
+            (not (is_subgoal1 ?loc1))
+            (robot_at ?g ?loc1)
         )
         :effect (and
-            (robot_at ?g ?loc)
+            (robot_at ?g ?loc2)
+            (not (robot_at ?g ?loc1))
         )
     )
 

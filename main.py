@@ -101,7 +101,7 @@ env_name="URPusher-v1" if push_exp else "URReacher-v1"
 max_steps=150000
 
 set_config("ppo")
-cfg.alg.seed = 923
+cfg.alg.seed = 123
 cfg.alg.num_envs = 1
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 50

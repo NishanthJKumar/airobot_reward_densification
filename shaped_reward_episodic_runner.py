@@ -83,8 +83,8 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             info.update(env_info[0])
             info = [info]
 
-            print(f"dist to subgoal1 = {np.linalg.norm(next_ob[0][:2] - env.envs[0]._subgoal2_pos[:2])}")
-            print(f"action = {action}")
+            # print(f"dist to subgoal1 = {np.linalg.norm(next_ob[0][:2] - env.envs[0]._subgoal2_pos[:2])}")
+            # print(f"action = {action}")
             cv2.imshow("img", env.render())
             cv2.waitKey(50)
             
