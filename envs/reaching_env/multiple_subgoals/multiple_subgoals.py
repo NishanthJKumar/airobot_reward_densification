@@ -52,3 +52,4 @@ class MultipleSubgoalsClassfiers(BaseClassifiers):
 
     def get_path_to_domain_and_problem_files(self):
         return (os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-domain.pddl"), os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-problem.pddl"))
+
