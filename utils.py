@@ -145,11 +145,6 @@ class GroundingUtils:
             #     print(env._t)
             #     print(dist_to_goal)
             #     import ipdb; ipdb.set_trace()
-            if max_plan_step_reached >= 2:
-                import ipdb; ipdb.set_trace()
-
-        if success:
-            import ipdb; ipdb.set_trace()
 
         f = self.phi(next_state_grounded_atoms, plan) - self.phi(previous_state_grounded_atoms, plan)
         reward = reward + f
