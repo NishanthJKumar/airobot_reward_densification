@@ -97,9 +97,10 @@ path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 push_exp = True
 with_obstacle=False
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
-max_steps=200000
+max_steps=150000
 
 set_config("ppo")
+cfg.alg.seed = 923
 cfg.alg.num_envs = 1
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
@@ -114,7 +115,7 @@ if push_exp:
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
 cfg.alg.save_dir += str(cfg.alg.seed)
 cfg.alg.episode_steps = 25
-cfg.alg.eval_interval = 5
+cfg.alg.eval_interval = 50
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
