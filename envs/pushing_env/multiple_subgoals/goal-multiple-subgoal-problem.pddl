@@ -5,6 +5,9 @@
 		(is_goal goal)
         (robot_at claw subgoal0)
         (object_at box1 subgoal2)
+		(is_subgoal1 subgoal1)
+		(is_subgoal2 subgoal2)
+		(is_subgoal3 subgoal3)
     )
 	(:goal (and 
 		(object_at box1 goal))
