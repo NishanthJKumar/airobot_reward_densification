@@ -1,4 +1,4 @@
-(define (domain reaching-grid)
+(define (domain pushing-grid)
     
     (:requirements :typing :negative-preconditions :strips :equality)
     

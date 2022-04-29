@@ -6,6 +6,8 @@ from envs.base_classifiers_class import BaseClassifiers
 
 class PushingGridBasedClassifiers(BaseClassifiers):
     def robot_at(self, env, gripper, loc):
+        if (gripper != "claw"):
+            return False
         if self.is_goal(env, loc):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._goal_pos[:2]) < env._dist_threshold
         elif "loc" in loc:
@@ -32,7 +34,7 @@ class PushingGridBasedClassifiers(BaseClassifiers):
         if (obj == "box1"):
             object_pos, _ = env.robot.pb_client.get_body_state(env._box_id)[:2] 
         else:
-            raise ValueError(f"obj should be 'box1' not '{obj}'")
+            return False
         if self.is_goal(env, loc):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._goal_pos[:2]) < env._dist_threshold
         elif "loc" in loc:
