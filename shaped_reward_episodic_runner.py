@@ -84,8 +84,8 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             info = [info]
 
             # Rendering!
-            cv2.imshow("img", env.render())
-            cv2.waitKey(25)
+            # cv2.imshow("img", env.render())
+            # cv2.waitKey(25)
             
             if render_image:
                 for img, inf in zip(imgs, info):
