@@ -4,6 +4,7 @@ from copy import deepcopy
 import numpy as np
 import torch
 from easyrl.runner.base_runner import BasicRunner
+from easyrl.configs import cfg
 from easyrl.utils.data import StepData
 from easyrl.utils.data import Trajectory
 from easyrl.utils.gym_util import get_render_images
@@ -22,7 +23,10 @@ class ShapedRewardEpisodicRunner(BasicRunner):
         self.g_utils = g_utils
         self.plan = self.g_utils.plan
         self.plan_grounded_atoms = None
-
+        if cfg.alg.epsilon is not None:
+            np.random.seed(cfg.alg.seed)
+            self.epsilon = cfg.alg.epsilon
+            self.epsilon_reduction = self.epsilon / cfg.alg.max_steps
     @torch.no_grad()
     def __call__(self, time_steps, sample=True, evaluation=False,
                  return_on_done=False, render=False, render_image=False,
@@ -65,6 +69,11 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 action = env.random_actions()
                 action_info = dict()
             else:
+                if cfg.alg.epsilon is not None and not evaluation:
+                    if np.random.uniform() < self.epsilon:
+                        sample = True
+                    else:
+                        sample = False
                 action, action_info = self.agent.get_action(ob,
                                                             sample=sample,
                                                             **action_kwargs)
@@ -84,8 +93,9 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             info = [info]
 
             # Rendering!
-            # cv2.imshow("img", env.render())
-            # cv2.waitKey(25)
+            if evaluation:
+                cv2.imshow("img", env.render())
+                cv2.waitKey(25)
             
             if render_image:
                 for img, inf in zip(imgs, info):
@@ -116,4 +126,8 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             last_val = self.agent.get_val(traj[-1].next_ob)
             traj.add_extra('last_val', torch_to_np(last_val))
         self.obs = ob if not evaluation else None
+
+        if cfg.alg.epsilon is not None and not evaluation:
+            self.epsilon -= self.epsilon_reduction
+
         return traj

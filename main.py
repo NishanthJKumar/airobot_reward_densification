@@ -103,6 +103,7 @@ max_steps=200000
 set_config("ppo")
 cfg.alg.seed = 0
 cfg.alg.num_envs = 1
+cfg.alg.epsilon = 0.8
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -114,7 +115,7 @@ cfg.alg.save_dir += "/" + f"{env_name}"
 if push_exp:
     cfg.alg.save_dir += "_push"
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
-cfg.alg.episode_steps = 25
+cfg.alg.episode_steps = 100
 cfg.alg.eval_interval = 100
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
