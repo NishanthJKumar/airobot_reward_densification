@@ -77,7 +77,6 @@ class GroundingUtils:
         state_grounded_atoms = []
 
         predicates = self.classifiers.get_typed_predicates()
-        # TODO (wmcclinton) get objects with types from pddl
         objects = [(obj, obj_type) for obj, obj_type in self.domprob.problem.objects.items()]
         
         # TODO: make this cleaner so that we can automatically get things up to

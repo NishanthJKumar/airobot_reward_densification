@@ -90,19 +90,20 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-classifiers = PushingMultipleSubgoalClassfiers()
+classifiers = MultipleSubgoalsClassfiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
-push_exp = True
-with_obstacle=False
+push_exp = False #True
+with_obstacle= True #False
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
-max_steps=150000
+max_steps=200000
 
 set_config("ppo")
-cfg.alg.seed = 923
+cfg.alg.seed = 0
 cfg.alg.num_envs = 1
+cfg.alg.epsilon = 0.8
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -114,9 +115,8 @@ cfg.alg.save_dir += "/" + f"{env_name}"
 if push_exp:
     cfg.alg.save_dir += "_push"
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
-cfg.alg.save_dir += str(cfg.alg.seed)
-cfg.alg.episode_steps = 25
-cfg.alg.eval_interval = 50
+cfg.alg.episode_steps = 100
+cfg.alg.eval_interval = 100
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
