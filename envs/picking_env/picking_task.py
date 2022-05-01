@@ -6,6 +6,7 @@ import time
 
 import numpy as np
 from gym import spaces
+from gym.envs.registration import registry, register
 
 from airobot import Robot
 from airobot.utils.common import ang_in_mpi_ppi
@@ -16,8 +17,10 @@ from airobot.utils.common import rotvec2quat
 
 
 class URRobotGym:
-    def __init__(self, action_repeat=10, gui=True):
+    def __init__(self, action_repeat=10, gui=True, max_episode_length=25, dist_threshold = 0.05):
         self._action_repeat = action_repeat
+        self._max_episode_length = max_episode_length
+        self._dist_threshold = dist_threshold
         self.robot = Robot('ur5e_2f140',
                            pb_cfg={'gui': gui,
                                    'realtime': False})
@@ -25,6 +28,27 @@ class URRobotGym:
         self._action_bound = 1.0
         self._ee_pos_scale = 0.02
         self._ee_ori_scale = np.pi / 36.0
+        self._xy_bounds = np.array([[0.23, 0.78], # [xmin, xmax]
+                                   [-0.35, 0.3]]) # [ymin, ymax]
+        # create a ball at the goal location
+        self._goal_pos = np.array([0.65, 0.25, 1.1])
+        self._goal_urdf_id = self.robot.pb_client.load_geom(
+            "sphere", size=0.04, mass=0, base_pos=self._goal_pos, rgba=[1, 0, 0, 0.8]
+        )
+
+        # disable the collision checking between the robot and the ball at the goal location
+        for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
+            self.robot.pb_client.setCollisionFilterPair(
+                self.robot.arm.robot_id, self._goal_urdf_id, i, -1, enableCollision=0
+            )
+        self._box_pos = np.array([0.35, -0.1, 0.996])
+        self._box_id = self.robot.pb_client.load_geom('box', size=0.05, mass=1,
+                                                     base_pos=[0.5, 0.12, 1.0],
+                                                     rgba=[1, 0, 0, 1])
+
+        self.robot.pb_client.changeDynamics(self._box_id, -1, lateralFriction=0.9)
+        self.robot.pb_client.setCollisionFilterPair(self._box_id, self._goal_urdf_id, -1, -1, enableCollision=0)
+
         self._action_high = np.array([self._action_bound] * 5)
         self.action_space = spaces.Box(low=-self._action_high,
                                        high=self._action_high,
@@ -44,26 +68,34 @@ class URRobotGym:
                                                        [.5, 0, 0.4],
                                                        ori,
                                                        scaling=0.9)
-        self.box_id = self.robot.pb_client.load_geom('box', size=0.05, mass=1,
-                                                     base_pos=[0.5, 0.12, 1.0],
-                                                     rgba=[1, 0, 0, 1])
         self.ref_ee_ori = self.robot.arm.get_ee_pose()[1]
         self.gripper_ori = 0
+        self._t = 0
         return self._get_obs()
 
     def step(self, action):
         self.apply_action(action)
+        self._t += 1
         state = self._get_obs()
-        done = False
-        info = dict()
-        reward = -1
+        reward, info = self._get_reward(state)
+        done = done = self._t >= self._max_episode_length
         return state, reward, done, info
 
     def _get_obs(self):
-        jpos = self.robot.arm.get_jpos()
-        jvel = self.robot.arm.get_jvel()
-        state = jpos + jvel
+        # The observation is the robot's current 3D EE pos
+        # and the 3D pos of the block.
+        ee_pos = self.robot.arm.get_ee_pose()[0]
+        object_pos, object_quat = self.robot.pb_client.get_body_state(self._box_id)[:2]
+        state = ee_pos + object_pos
         return state
+
+    def _get_reward(self, state):
+        object_pos = state[2:4]
+        dist_to_goal = np.linalg.norm(object_pos - self._goal_pos[:2])
+        success = dist_to_goal < self._dist_threshold
+        reward = None
+        info = {'success': success}
+        return reward, info
 
     def apply_action(self, action):
         if not isinstance(action, np.ndarray):
@@ -120,19 +152,15 @@ class URRobotGym:
                                            get_depth=False)
         return rgb
 
+module_name = __name__
 
-def main():
-    env = URRobotGym(gui=True)
-    for i in range(10):
-        env.step([1, 0, 0, 0, -1])
-        time.sleep(0.1)
-    for i in range(10):
-        env.step([0, 1, 0, 0, -1])
-        time.sleep(0.1)
-
-
-if __name__ == '__main__':
-    main()
+env_name = "URPicker-v1"
+if env_name in registry.env_specs:
+    del registry.env_specs[env_name]
+register(
+    id=env_name,
+    entry_point=f"{module_name}:URRobotPusherGym",
+)
 
 
 # def main():
