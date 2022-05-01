@@ -98,12 +98,12 @@ path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 push_exp = False #True
 with_obstacle= True #False
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
-max_steps=200000
+max_steps=300000
 
 set_config("ppo")
 cfg.alg.seed = 0
 cfg.alg.num_envs = 1
-cfg.alg.epsilon = 0.8
+cfg.alg.epsilon = 0.4
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -143,12 +143,3 @@ save_dir = train_ppo(
     env_name="URPusher-v1" if push_exp else "URReacher-v1",
     grounding_utils=grounding_utils,
 )
-
-#### TODO: plot return and success rate curves
-# steps, returns, success_rate = read_tf_log(save_dir)
-# data_dict = {}
-# data_dict["return"] = [steps, returns]
-# plot_curves(data_dict, "Reaching Task without Obstacles - Sparse Reward")
-# data_dict = {}
-# data_dict["success_rate"] = [steps, success_rate]
-# plot_curves(data_dict, "Reaching Task without Obstacles - Sparse Reward")

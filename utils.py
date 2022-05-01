@@ -145,7 +145,6 @@ class GroundingUtils:
 
         f = self.phi(next_state_grounded_atoms, plan) - self.phi(previous_state_grounded_atoms, plan)
         reward = reward + f
-        # reward = -dist_to_goal
         info = dict(success=success)
 
         # if dist_to_goal <= 0.1:
