@@ -3,6 +3,7 @@ from easyrl.agents.sac_agent import SACAgent
 from easyrl.configs import cfg, set_config
 from easyrl.engine.ppo_engine import PPOEngine
 from easyrl.engine.sac_engine import SACEngine
+from easyrl.replays.circular_buffer import CyclicBuffer
 from easyrl.models.categorical_policy import CategoricalPolicy
 from easyrl.models.diag_gaussian_policy import DiagGaussianPolicy
 from easyrl.models.mlp import MLP
@@ -92,6 +93,13 @@ def train_sac(
 
     env.reset()
     ob_size = env.observation_space.shape[0]
+    actor_body = MLP(
+        input_size=ob_size,
+        hidden_sizes=[64],
+        output_size=64,
+        hidden_act=nn.Tanh,
+        output_act=nn.Tanh,
+    )
 
     if isinstance(env.action_space, gym.spaces.Discrete):
         act_size = env.action_space.n
@@ -102,19 +110,11 @@ def train_sac(
             actor_body,
             in_features=64,
             action_dim=act_size,
-            tanh_on_dist=cfg.alg.tanh_on_dist,
-            std_cond_in=cfg.alg.std_cond_in,
+            tanh_on_dist=True,
+            std_cond_in=True,
         )
     else:
         raise TypeError(f"Unknown action space type: {env.action_space}")
-
-    actor_body = MLP(
-        input_size=ob_size,
-        hidden_sizes=[64],
-        output_size=64,
-        hidden_act=nn.Tanh,
-        output_act=nn.Tanh,
-    )
 
     q1_body = MLP(
         input_size=ob_size + act_size,
@@ -164,7 +164,7 @@ def train_sac(
 
 classifiers = MultipleSubgoalsClassfiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
-path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
+path_to_fd_folder = '/home/wbm3/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False #True
@@ -172,10 +172,12 @@ with_obstacle= True #False
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
 max_steps=200000
 
-set_config("ppo")
+# set_config("ppo")
+set_config("sac")
 cfg.alg.seed = 0
 cfg.alg.num_envs = 1
-cfg.alg.epsilon = 0.8
+# cfg.alg.epsilon = 0.8
+cfg.alg.epsilon = None
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
