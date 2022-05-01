@@ -162,9 +162,10 @@ def train_sac(
 # 5. Run the appropriate function (training or evaling) in the
 # appropriate environment.
 
-classifiers = MultipleSubgoalsClassfiers()
+classifiers = GridBasedClassifiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
-path_to_fd_folder = '/home/wbm3/Documents/GitHub/downward'
+# path_to_fd_folder = '/home/wbm3/Documents/GitHub/downward'
+path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False #True
@@ -172,12 +173,12 @@ with_obstacle= True #False
 env_name="URPusher-v1" if push_exp else "URReacher-v1"
 max_steps=200000
 
-# set_config("ppo")
-set_config("sac")
+ALG_NAME = "ppo"
+set_config(ALG_NAME)
 cfg.alg.seed = 0
 cfg.alg.num_envs = 1
-# cfg.alg.epsilon = 0.8
-cfg.alg.epsilon = None
+cfg.alg.epsilon = 0.8
+# cfg.alg.epsilon = None
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -189,8 +190,9 @@ cfg.alg.save_dir += "/" + f"{env_name}"
 if push_exp:
     cfg.alg.save_dir += "_push"
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
-cfg.alg.episode_steps = 100
-cfg.alg.eval_interval = 100
+cfg.alg.save_dir += f"_{ALG_NAME}"
+cfg.alg.episode_steps = 150
+cfg.alg.eval_interval = 75
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
@@ -212,16 +214,16 @@ env = make_vec_env(
 )
 
 grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder, env.envs[0].get_success)
-# save_dir = train_ppo(
-#     cfg=cfg,
-#     env_name="URPusher-v1" if push_exp else "URReacher-v1",
-#     grounding_utils=grounding_utils,
-# )
-save_dir = train_sac(
+save_dir = train_ppo(
     cfg=cfg,
     env_name="URPusher-v1" if push_exp else "URReacher-v1",
     grounding_utils=grounding_utils,
 )
+# save_dir = train_sac(
+#     cfg=cfg,
+#     env_name="URPusher-v1" if push_exp else "URReacher-v1",
+#     grounding_utils=grounding_utils,
+# )
 
 #### TODO: plot return and success rate curves
 # steps, returns, success_rate = read_tf_log(save_dir)
