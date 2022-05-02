@@ -46,7 +46,7 @@ class PickingSingleSubgoalClassfiers(BaseClassifiers):
     def holding(self, env, gripper, obj):
         if obj == "box1":
             left_fingerpad_contacts = env.robot.pb_client.getContactPoints(env.robot.arm.robot_id, env._box_id, 15, -1)
-            right_fingerpad_contacts = env.robot.pb_client.getContactPoints(env.robot.arm.robot_id, env._box_id, 20, 1)
+            right_fingerpad_contacts = env.robot.pb_client.getContactPoints(env.robot.arm.robot_id, env._box_id, 20, -1)
             return len(left_fingerpad_contacts) > 0 and len(right_fingerpad_contacts) > 0
         else:
             raise ValueError(f"obj should be 'box1' not '{obj}'")
