@@ -106,7 +106,7 @@ elif pick_exp:
     env_name = "URPicker-v1"
 else:
     env_name = "URReacher-v1"
-max_steps=300000
+max_steps=30000
 
 set_config("ppo")
 cfg.alg.seed = 0
