@@ -70,6 +70,7 @@ def train_ppo(
     runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env)
     engine = PPOEngine(agent=agent, runner=runner)
     if cfg.alg.eval:
+        agent.load_model()
         stat_info, _ = engine.eval(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
@@ -77,6 +78,7 @@ def train_ppo(
         play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     else:
         engine.train()
+        agent.load_model()
         stat_info, _ = engine.eval(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
@@ -93,13 +95,13 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-classifiers = PickingMultipleSubgoalClassfiers()
+classifiers = GridBasedClassifiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False #True
-pick_exp = True
+pick_exp = False
 with_obstacle= True #False
 if push_exp:
     env_name = "URPusher-v1"
@@ -107,12 +109,12 @@ elif pick_exp:
     env_name = "URPicker-v1"
 else:
     env_name = "URReacher-v1"
-max_steps=30000
+max_steps=200000
 
 set_config("ppo")
 cfg.alg.seed = 0
 cfg.alg.num_envs = 1
-cfg.alg.epsilon = 0.4
+cfg.alg.epsilon = 0.8
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"

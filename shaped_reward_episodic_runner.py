@@ -83,9 +83,9 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 # This is the first time we're calling the function, so
                 # we can compute the plan_grounded_atoms.
                 self.plan_grounded_atoms = self.g_utils.apply_grounded_plan(previous_state_grounded_atoms, self.plan)
+            if evaluation:
+                print(env.envs[0].max_plan_step_reached)
             next_ob, _, done, env_info = env.step(action)
-            if done:
-                self.g_utils.reset_max_plan_step_reached()
             next_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
             reward, info = self.g_utils.get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms)
             reward = np.array([reward])
@@ -93,9 +93,9 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             info = [info]
 
             # Rendering!
-            if evaluation:
-                cv2.imshow("img", env.render())
-                cv2.waitKey(25)
+            # if evaluation:
+            #     cv2.imshow("img", env.render())
+            #     cv2.waitKey(25)
             
             if render_image:
                 for img, inf in zip(imgs, info):
@@ -119,6 +119,8 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                           info=info)
             ob = next_ob
             traj.add(sd)
+            if cfg.alg.epsilon is not None and not evaluation:
+                self.epsilon -= self.epsilon_reduction
             if return_on_done and np.all(all_dones):
                 break
 
@@ -126,8 +128,5 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             last_val = self.agent.get_val(traj[-1].next_ob)
             traj.add_extra('last_val', torch_to_np(last_val))
         self.obs = ob if not evaluation else None
-
-        if cfg.alg.epsilon is not None and not evaluation:
-            self.epsilon -= self.epsilon_reduction
 
         return traj

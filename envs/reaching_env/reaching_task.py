@@ -43,11 +43,12 @@ class URRobotGym(gym.Env):
         with_obstacle=False,
         # Set 'gui' to False if you are using Colab, otherwise the session will crash as Colab does not support X window
         # You can set it to True for debugging purpose if you are running the notebook on a local machine.
-        gui=False,
+        gui=True,
         max_episode_length=25,
         dist_threshold=0.05,
         granularity=5,
     ):
+        self.max_plan_step_reached = 0
         self._action_repeat = action_repeat
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
@@ -164,6 +165,7 @@ class URRobotGym(gym.Env):
         self._t = 0
         self._ref_ee_pos = self.robot.arm.get_ee_pose()[0]
         self._ref_ee_ori = self.robot.arm.get_ee_pose()[1]
+        self.max_plan_step_reached = 0
         return self._get_obs()
 
     def step(self, action):
