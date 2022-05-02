@@ -120,7 +120,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             ob = next_ob
             traj.add(sd)
             if cfg.alg.epsilon is not None and not evaluation:
-                self.epsilon -= self.epsilon_reduction
+                self.epsilon = max([0.2, self.epsilon - self.epsilon_reduction])
             if return_on_done and np.all(all_dones):
                 break
 
