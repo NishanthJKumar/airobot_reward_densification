@@ -88,6 +88,7 @@ class URRobotPusherGym(gym.Env):
         state_high = np.full(len(self._get_obs()), float("inf"))
         self.observation_space = spaces.Box(state_low, state_high, dtype=np.float32)
 
+        self.reset()
         # add the dummy subgoal locations
         self._subgoal_urdf_id = []
         self._subgoal0_pos = self._ref_ee_pos
@@ -116,7 +117,6 @@ class URRobotPusherGym(gym.Env):
                 self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id, sg, i, -1, enableCollision=0)
         for sg in self._subgoal_urdf_id:
             self.robot.pb_client.setCollisionFilterPair(self._box_id, sg, -1, -1, enableCollision=0)
-        self.reset()
 
     def reset(self):
         self.robot.arm.set_jpos(self._arm_reset_pos, ignore_physics=True)
@@ -124,6 +124,9 @@ class URRobotPusherGym(gym.Env):
         self._t = 0
         self._ref_ee_pos = self.robot.arm.get_ee_pose()[0]
         self._ref_ee_ori = self.robot.arm.get_ee_pose()[1]
+        self._box_id = self.robot.pb_client.load_geom('cylinder', size=[0.05, 0.05], mass=1.,
+                                                      base_pos=self._box_pos,
+                                                      rgba=[1., 0.6, 0.6, 1])
         return self._get_obs()
 
     def step(self, action):
