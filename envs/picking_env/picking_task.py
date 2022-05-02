@@ -84,9 +84,7 @@ class URRobotPickerGym(gym.Env):
         self.gripper_ori = 0
         self._t = 0
         self.robot.arm.eetool.set_jpos(0.0)
-        self._box_id = self.robot.pb_client.load_geom('box', size=0.05, mass=1,
-                                                     base_pos=[0.5, 0.12, 1.0],
-                                                     rgba=[1, 0, 0, 1])
+        self.robot.pb_client.reset_body(self._box_id, base_pos=self._box_pos)
         for step in range(self._action_repeat * 2):
             self.robot.pb_client.stepSimulation()
         return self._get_obs()
