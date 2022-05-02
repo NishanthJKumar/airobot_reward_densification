@@ -124,6 +124,9 @@ class URRobotPusherGym(gym.Env):
         self._t = 0
         self._ref_ee_pos = self.robot.arm.get_ee_pose()[0]
         self._ref_ee_ori = self.robot.arm.get_ee_pose()[1]
+        self._box_id = self.robot.pb_client.load_geom('cylinder', size=[0.05, 0.05], mass=1.,
+                                                      base_pos=self._box_pos,
+                                                      rgba=[1., 0.6, 0.6, 1])
         return self._get_obs()
 
     def step(self, action):
