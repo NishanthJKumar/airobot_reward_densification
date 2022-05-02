@@ -19,6 +19,7 @@ import envs.reaching_env.reaching_task
 from utils import play_video, GroundingUtils
 import gym
 from envs.picking_env.orig_blocksworld.single_subgoal import PickingSingleSubgoalClassfiers
+from envs.picking_env.multiple_subgoals.multiple_subgoals import PickingMultipleSubgoalClassfiers
 from envs.pushing_env.single_subgoal.single_subgoal import PushingSingleSubgoalClassfiers
 from envs.pushing_env.multiple_subgoals.multiple_subgoals import PushingMultipleSubgoalClassfiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
@@ -92,7 +93,7 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-classifiers = PickingSingleSubgoalClassfiers()
+classifiers = PickingMultipleSubgoalClassfiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 

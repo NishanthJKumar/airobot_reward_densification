@@ -80,4 +80,4 @@ class PickingMultipleSubgoalClassfiers(BaseClassifiers):
         return {"0-arity": [], "1-arity": [(self.is_goal, "location"), (self.is_subgoal1, "location"), (self.is_subgoal2, "location"), (self.is_subgoal3, "location"), (self.gripper_open, "gripper")], "2-arity": [(self.robot_at, "gripper", "location"), (self.object_at, "box", "location"), (self.holding, "gripper", "box")]}
 
     def get_path_to_domain_and_problem_files(self):
-        return (os.path.abspath("envs/picking_env/orig_blocksworld/blocksworld-multi-subgoal-domain.pddl"), os.path.abspath("envs/picking_env/orig_blocksworld/blocksworld-multi-subgoal-problem.pddl"))
+        return (os.path.abspath("envs/picking_env/multiple_subgoals/blocksworld-multi-subgoal-domain.pddl"), os.path.abspath("envs/picking_env/multiple_subgoals/blocksworld-multi-subgoal-problem.pddl"))

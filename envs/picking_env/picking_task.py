@@ -60,17 +60,17 @@ class URRobotPickerGym(gym.Env):
         self._subgoal1_pos = self._box_pos + np.array([0.0, 0.0, 0.25])
         self._subgoal2_pos = self._box_pos + np.array([0.0, 0.0, 0.13])
         self._subgoal3_pos = (self._box_pos + self._goal_pos) / 2
-        self._subgoal_urdf_id.append(
+        self._subgoal_urdf_ids.append(
             self.robot.pb_client.load_geom(
                 "sphere", size=0.04, mass=0, base_pos=self._subgoal1_pos, rgba=[0, 0.8, 0.8, 0.8]
             )
         )
-        self._subgoal_urdf_id.append(
+        self._subgoal_urdf_ids.append(
             self.robot.pb_client.load_geom(
                 "sphere", size=0.04, mass=0, base_pos=self._subgoal2_pos, rgba=[0, 0.8, 0.8, 0.8]
             )
         )
-        self._subgoal_urdf_id.append(
+        self._subgoal_urdf_ids.append(
             self.robot.pb_client.load_geom(
                 "sphere", size=0.04, mass=0, base_pos=self._subgoal3_pos, rgba=[0, 0.8, 0.8, 0.8]
             )
@@ -78,9 +78,9 @@ class URRobotPickerGym(gym.Env):
         # Remove collision checking between the robot and the subgoal balls, as well as
         # between the box and the subgoal balls.
         for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
-            for sg in self._subgoal_urdf_id:
+            for sg in self._subgoal_urdf_ids:
                 self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id, sg, i, -1, enableCollision=0)
-        for sg in self._subgoal_urdf_id:
+        for sg in self._subgoal_urdf_ids:
             self.robot.pb_client.setCollisionFilterPair(self._box_id, sg, -1, -1, enableCollision=0)
 
     def reset(self):
