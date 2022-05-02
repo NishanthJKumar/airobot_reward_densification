@@ -1,9 +1,4 @@
-"""
-An example of Gym Wrapper.
-
-"""
-import time
-
+import gym
 import numpy as np
 from gym import spaces
 from gym.envs.registration import registry, register
@@ -16,8 +11,8 @@ from airobot.utils.common import quat_multiply
 from airobot.utils.common import rotvec2quat
 
 
-class URRobotGym:
-    def __init__(self, action_repeat=10, gui=True, max_episode_length=25, dist_threshold = 0.05):
+class URRobotPickerGym(gym.Env):
+    def __init__(self, action_repeat=10, gui=False, max_episode_length=25, dist_threshold = 0.05):
         self._action_repeat = action_repeat
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
@@ -59,6 +54,22 @@ class URRobotGym:
                                             state_high,
                                             dtype=np.float32)
         self.reset()
+        # add the dummy subgoal locations
+        self._subgoal_urdf_id = []
+        self._subgoal0_pos = self._ref_ee_pos
+        self._subgoal1_pos = self._box_pos + np.array([0.0, 0.0, 0.25])
+        self._subgoal_urdf_id.append(
+            self.robot.pb_client.load_geom(
+                "sphere", size=0.04, mass=0, base_pos=self._subgoal1_pos, rgba=[0, 0.8, 0.8, 0.8]
+            )
+        )
+        # Remove collision checking between the robot and the subgoal balls, as well as
+        # between the box and the subgoal balls.
+        for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
+            for sg in self._subgoal_urdf_id:
+                self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id, sg, i, -1, enableCollision=0)
+        for sg in self._subgoal_urdf_id:
+            self.robot.pb_client.setCollisionFilterPair(self._box_id, sg, -1, -1, enableCollision=0)
 
     def reset(self):
         self.robot.arm.reset()
@@ -68,9 +79,13 @@ class URRobotGym:
                                                        [.5, 0, 0.4],
                                                        ori,
                                                        scaling=0.9)
+        self._ref_ee_pos = self.robot.arm.get_ee_pose()[0]
         self.ref_ee_ori = self.robot.arm.get_ee_pose()[1]
         self.gripper_ori = 0
         self._t = 0
+        self.robot.arm.eetool.set_jpos(0.0)
+        for step in range(self._action_repeat * 2):
+            self.robot.pb_client.stepSimulation()
         return self._get_obs()
 
     def step(self, action):
@@ -85,13 +100,14 @@ class URRobotGym:
         # The observation is the robot's current 3D EE pos
         # and the 3D pos of the block.
         ee_pos = self.robot.arm.get_ee_pose()[0]
+        gripper_open_pos = np.array([self.robot.arm.eetool.get_jpos()])
         object_pos, object_quat = self.robot.pb_client.get_body_state(self._box_id)[:2]
-        state = ee_pos + object_pos
+        state = np.concatenate([ee_pos, gripper_open_pos, object_pos])
         return state
 
     def _get_reward(self, state):
-        object_pos = state[2:4]
-        dist_to_goal = np.linalg.norm(object_pos - self._goal_pos[:2])
+        object_pos = state[4:]
+        dist_to_goal = np.linalg.norm(object_pos - self._goal_pos)
         success = dist_to_goal < self._dist_threshold
         reward = None
         info = {'success': success}
@@ -152,6 +168,12 @@ class URRobotGym:
                                            get_depth=False)
         return rgb
 
+    def get_success(self, env, state):
+        object_pos = state[0][4:]
+        dist_to_goal = np.linalg.norm(object_pos - self._goal_pos)
+        return dist_to_goal < env._dist_threshold
+
+
 module_name = __name__
 
 env_name = "URPicker-v1"
@@ -159,9 +181,8 @@ if env_name in registry.env_specs:
     del registry.env_specs[env_name]
 register(
     id=env_name,
-    entry_point=f"{module_name}:URRobotPusherGym",
+    entry_point=f"{module_name}:URRobotPickerGym",
 )
-
 
 # def main():
 #     """
@@ -170,8 +191,6 @@ register(
 #     np.set_printoptions(precision=4, suppress=True)
 #     robot = Robot('ur5e_2f140')
 #     success = robot.arm.go_home()
-#     if not success:
-#         log_warn('Robot go_home failed!!!')
 #     ori = euler2quat([0, 0, np.pi / 2])
 #     robot.pb_client.load_urdf('table/table.urdf',
 #                               [.5, 0, 0.4],
@@ -197,6 +216,7 @@ register(
 #     move_dir[2] = obj_pos[2] - robot.arm.get_ee_pose()[0][2]
 #     robot.arm.move_ee_xyz(move_dir, eef_step=eef_step)
 #     robot.arm.eetool.close(wait=False)
+#     import ipdb; ipdb.set_trace()
 #     robot.arm.move_ee_xyz([0, 0, 0.3], eef_step=eef_step)
 
 #     obj_pos = robot.pb_client.get_body_state(box_id2)[0]

@@ -4,12 +4,11 @@
         location gripper box - object
     )
     (:predicates 
-        (object_below ?o - box ?loc - location)
         (object_at ?o - box ?loc - location)
         (robot_at ?g - gripper ?loc - location)
         (gripper_open ?g - gripper)
         (holding ?g - gripper ?x - object)
-        (is_subgoal ?loc - location)
+        (is_subgoal1 ?loc - location)
         (is_goal ?loc - location)
     )
 
@@ -20,7 +19,7 @@
             (not (is_goal ?to))
             (robot_at ?g ?from)
             (not (robot_at ?g ?to))
-            (is_subgoal ?to)
+            (is_subgoal1 ?to)
         )
         :effect (and 
             (not (robot_at ?g ?from))
@@ -32,13 +31,12 @@
         :parameters (?claw - gripper ?obj - box ?loc - location)
         :precondition (and
             (robot_at ?claw ?loc)
-            (object_below ?obj ?loc)
+            (is_subgoal1 ?loc)
             (gripper_open ?claw)
         )
         :effect (and 
             (holding ?claw ?obj) 
             (not (gripper_open ?claw))
-            (not (object_below ?obj ?loc))
         )
     )
 

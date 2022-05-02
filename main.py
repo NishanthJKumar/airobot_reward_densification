@@ -13,10 +13,12 @@ import torch
 from pathlib import Path
 import pprint
 # NOTE: Needed for env.registery to go through
+import envs.picking_env.picking_task
 import envs.pushing_env.pushing_task
 import envs.reaching_env.reaching_task
 from utils import play_video, GroundingUtils
 import gym
+from envs.picking_env.orig_blocksworld.single_subgoal import PickingSingleSubgoalClassfiers
 from envs.pushing_env.single_subgoal.single_subgoal import PushingSingleSubgoalClassfiers
 from envs.pushing_env.multiple_subgoals.multiple_subgoals import PushingMultipleSubgoalClassfiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
@@ -90,14 +92,20 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-classifiers = MultipleSubgoalsClassfiers()
+classifiers = PickingSingleSubgoalClassfiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False #True
+pick_exp = True
 with_obstacle= True #False
-env_name="URPusher-v1" if push_exp else "URReacher-v1"
+if push_exp:
+    env_name = "URPusher-v1"
+elif pick_exp:
+    env_name = "URPicker-v1"
+else:
+    env_name = "URReacher-v1"
 max_steps=300000
 
 set_config("ppo")
@@ -114,6 +122,8 @@ cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
 cfg.alg.save_dir += "/" + f"{env_name}"
 if push_exp:
     cfg.alg.save_dir += "_push"
+elif pick_exp:
+    cfg.alg.save_dir += "_pick"
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
 cfg.alg.episode_steps = 100
 cfg.alg.eval_interval = 100
@@ -125,13 +135,10 @@ print(f"      Total number of steps:{cfg.alg.max_steps}")
 print(f"====================================")
 
 set_random_seed(cfg.alg.seed)
-env_kwargs = (
-    dict(
-        with_obstacle=with_obstacle,
-    )
-    if not push_exp
-    else dict()
-)
+if pick_exp or push_exp:
+    env_kwargs = dict()
+else:
+    env_kwargs = dict(with_obstacle=with_obstacle)
 env_kwargs.update(dict(max_episode_length = cfg.alg.episode_steps))
 env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
@@ -140,6 +147,6 @@ env = make_vec_env(
 grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder, env.envs[0].get_success)
 save_dir = train_ppo(
     cfg=cfg,
-    env_name="URPusher-v1" if push_exp else "URReacher-v1",
+    env_name=env_name,
     grounding_utils=grounding_utils,
 )
