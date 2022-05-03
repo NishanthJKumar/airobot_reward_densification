@@ -144,6 +144,7 @@ def train_sac(
     runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env)
     engine = SACEngine(agent=agent, runner=runner)
     if cfg.alg.eval:
+        agent.load_model()
         stat_info, _ = engine.eval(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
@@ -151,6 +152,7 @@ def train_sac(
         play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     else:
         engine.train()
+        agent.load_model()
         stat_info, _ = engine.eval(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
