@@ -46,5 +46,5 @@ class ReachingMultipleSubgoalsClassfiers(BaseClassifiers):
         return {"0-arity": [], "1-arity": [(self.is_goal, "location"), (self.is_subgoal1, "location"), (self.is_subgoal2, "location"), (self.is_subgoal3, "location")], "2-arity": [(self.at, "gripper", "location")]}
 
     def get_path_to_domain_and_problem_files(self):
-        return (os.path.abspath("envs/picking_env/multiple_subgoals/blocksworld-multi-subgoal-domain.pddl"), os.path.abspath("envs/picking_env/multiple_subgoals/blocksworld-multi-subgoal-problem.pddl"))
+        return (os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-domain.pddl"), os.path.abspath("envs/reaching_env/multiple_subgoals/goal-multiple-subgoal-problem.pddl"))
 

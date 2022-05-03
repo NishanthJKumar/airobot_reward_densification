@@ -92,12 +92,10 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 # This is the first time we're calling the function, so
                 # we can compute the plan_grounded_atoms.
                 self.plan_grounded_atoms = self.g_utils.apply_grounded_plan(previous_state_grounded_atoms, self.plan)
-            if evaluation:
-                print(env.envs[0].max_plan_step_reached)
             next_ob, reward, done, env_info = env.step(action)
             next_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
 
-            if env.envs[0].reward_type == None:
+            if env.envs[0].reward_type == "pddl":
                 reward, info = self.g_utils.get_shaped_reward(env.envs[0], ob, next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms, self.dynamic_reward_shaping)
                 reward = np.array([reward])
             else:
