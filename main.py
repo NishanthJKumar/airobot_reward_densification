@@ -12,6 +12,7 @@ from easyrl.utils.common import set_random_seed
 from easyrl.utils.gym_util import make_vec_env
 from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
 from torch import nn
+import argparse
 import torch
 from pathlib import Path
 import pprint
@@ -26,9 +27,9 @@ from envs.picking_env.multiple_subgoals.multiple_subgoals import PickingMultiple
 from envs.pushing_env.single_subgoal.single_subgoal import PushingSingleSubgoalClassfiers
 from envs.pushing_env.multiple_subgoals.multiple_subgoals import PushingMultipleSubgoalClassfiers
 from envs.pushing_env.grid_based.grid_based import PushingGridBasedClassifiers
-from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
-from envs.reaching_env.single_subgoal.single_subgoal import SingleSubgoalClassfiers
-from envs.reaching_env.grid_based.grid_based import GridBasedClassifiers
+from envs.reaching_env.multiple_subgoals.multiple_subgoals import ReachingMultipleSubgoalsClassfiers
+from envs.reaching_env.single_subgoal.single_subgoal import ReachingSingleSubgoalClassfiers
+from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
 
 def train_ppo(
     cfg=None,
@@ -162,43 +163,70 @@ def train_sac(
 
     return cfg.alg.save_dir
 
-# Structure of the remainder of this file:
-# 1. Take in input on whether we're training or evaling
-# 2. Take in input on environment
-# 3. Take in input on the kind of shaping that we want.
-# 4. Take in optional input on hyperparams for training/eval.
-# 5. Run the appropriate function (training or evaling) in the
-# appropriate environment.
 
-classifiers = GridBasedClassifiers()
-domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
-# path_to_fd_folder = '/home/wbm3/Documents/GitHub/downward'
-path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
+# Main code bgins here; takes in particular arguments and urns the relevant experiment with the specified configuration.
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick'], required=True, help='Name of env to run.')
+parser.add_argument('-rt', '--reward_type', choices=['sparse_handcrafted', "dense_handcrafted", 'pddl'], required=True, help='Type of reward to use.')
+parser.add_argument('-pt', '--pddl_type', choices=['single_subgoal', 'multi_subgoal', 'grid_based'], required=True, help='Type of classifier to use.')
+parser.add_argument('-al', '--algorithm', choices=['ppo', 'sac'], required=True, help='Choice of learning algorithm to use.')
+parser.add_argument('-ts', '--training_steps', int, default=200000, help='Number of steps to run training for.')
+parser.add_argument('-es', '--episode_steps', int, default=25, help='Max. number of steps in an episode.')
+parser.add_argument('-ei', '--eval_interval', int, default=100, help='Num. trajs after which to call eval.')
+parser.add_argument('-fdp', '--path_to_fd', str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
+parser.add_argument('-se', '--seed', int, default=0, help='Random seed to use during training.')
+parser.add_argument('-g', '--granularity', type=int, default=3, help='Number of divisions to segment the working space of the arm. Total divisions is equal to 2^{input}.')
+args = parser.parse_args()
 
-# call train_ppo, just set the argument flag properly
-push_exp = False #True
-pick_exp = False
-with_obstacle= True #False
-if push_exp:
-    env_name = "URPusher-v1"
-elif pick_exp:
-    env_name = "URPicker-v1"
-else:
+env_kwargs = dict(reward_type = args.reward_type)
+if args.domain == 'reach':
     env_name = "URReacher-v1"
-max_steps=300000
+    env_kwargs.update(dict(with_obstacle=True))
+    if args.pddl_type == "single_subgoal":
+        classifiers = ReachingSingleSubgoalClassfiers()
+    elif args.pddl_type == "multi_subgoal":
+        classifiers = ReachingMultipleSubgoalsClassfiers()
+    elif args.pddl_type == "grid_based":
+        env_kwargs.update(dict(granularity = args.granularity))
+        classifiers = ReachingGridBasedClassifiers()
+    else:
+        raise ValueError(f"Unknown pddl type: {args.pddl_type}")
+elif args.domain == 'push':
+    env_name = "URPusher-v1"
+    if args.pddl_type == "single_subgoal":
+        classifiers = PushingSingleSubgoalClassfiers()
+    elif args.pddl_type == "multi_subgoal":
+        classifiers = PushingMultipleSubgoalClassfiers()
+    elif args.pddl_type == "grid_based":
+        env_kwargs.update(dict(granularity = args.granularity))
+        classifiers = PushingGridBasedClassifiers()
+    else:
+        raise ValueError(f"Unknown pddl type: {args.pddl_type}")
+elif args.domain == 'pick':
+    env_name = "URPicker-v1"
+    if args.pddl_type == "single_subgoal":
+        classifiers = PickingSingleSubgoalClassfiers()
+    elif args.pddl_type == "multi_subgoal":
+        classifiers = PickingMultipleSubgoalClassfiers()
+    else:
+        raise ValueError(f"Unknown pddl type for picking env: {args.pddl_type}")
+else:
+    raise ValueError(f"Unknown domain: {args.domain}")
 
-ALG_NAME = "sac"
-set_config(ALG_NAME)
-cfg.alg.seed = 0
+
+domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
+
+set_config(args.algorithm)
+cfg.alg.seed = args.seed
 cfg.alg.num_envs = 1
 cfg.alg.epsilon = 0.8
 # cfg.alg.epsilon = None
-cfg.alg.max_steps = max_steps
+cfg.alg.max_steps = args.training_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
 cfg.alg.eval = False
 if cfg.alg.eval:
-    cfg.alg.resume_step = max_steps
+    cfg.alg.resume_step = args.training_steps
     cfg.alg.test = True
 else:
     cfg.alg.resume_step = None
@@ -209,15 +237,10 @@ cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = False
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
 cfg.alg.save_dir += "/" + f"{env_name}"
-if push_exp:
-    cfg.alg.save_dir += "_push"
-elif pick_exp:
-    cfg.alg.save_dir += "_pick"
-cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
-
-cfg.alg.save_dir += f"_{ALG_NAME}"
-cfg.alg.episode_steps = 250
-cfg.alg.eval_interval = 50
+cfg.alg.save_dir += "_" + args.domain + "_" + "args.reward_type"
+cfg.alg.save_dir += f"_{args.algorithm}"
+cfg.alg.episode_steps = args.episode_steps
+cfg.alg.eval_interval = args.eval_interval
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
@@ -226,24 +249,23 @@ print(f"      Total number of steps:{cfg.alg.max_steps}")
 print(f"====================================")
 
 set_random_seed(cfg.alg.seed)
-
-if pick_exp or push_exp:
-    env_kwargs = dict(reward_type=None)
-else:
-    env_kwargs = dict(with_obstacle=with_obstacle, granularity=6, reward_type="sparse")
 env_kwargs.update(dict(max_episode_length = cfg.alg.episode_steps))
 env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
 
-grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder, env.envs[0].get_success)
-# save_dir = train_ppo(
-#     cfg=cfg,
-#     env_name=env_name,
-#     grounding_utils=grounding_utils,
-# )
-save_dir = train_sac(
-    cfg=cfg,
-    env_name=env_name,
-    grounding_utils=grounding_utils,
-)
+grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, args.path_to_fd, env.envs[0].get_success)
+if args.algorithm == "ppo":
+    save_dir = train_ppo(
+        cfg=cfg,
+        env_name=env_name,
+        grounding_utils=grounding_utils,
+    )
+elif args.algorithm == "sac":
+    save_dir = train_sac(
+        cfg=cfg,
+        env_name=env_name,
+        grounding_utils=grounding_utils,
+    )
+else:
+    raise ValueError(f"Unknown algorithm: {args.algorithm}")
