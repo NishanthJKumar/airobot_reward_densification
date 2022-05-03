@@ -101,7 +101,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 reward, info = self.g_utils.get_shaped_reward(env.envs[0], ob, next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms, self.dynamic_reward_shaping)
                 reward = np.array([reward])
             else:
-                info = self.g_utils.get_info(env.envs[0], next_ob)
+                info = dict()
             
             info.update(env_info[0])
             info = [info]
