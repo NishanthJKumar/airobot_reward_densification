@@ -47,7 +47,9 @@ class URRobotGym(gym.Env):
         max_episode_length=25,
         dist_threshold=0.05,
         granularity=6,
+        reward_type=None,
     ):
+        self._reward_type = reward_type
         self.max_plan_step_reached = 0
         self._action_repeat = action_repeat
         self._max_episode_length = max_episode_length
@@ -119,6 +121,8 @@ class URRobotGym(gym.Env):
                 rgba=[0.5, 0.5, 0.5, 0.8],
             )
 
+        self.subgoal_reached = False
+
         # create balls at subgoal locations
         self._subgoal3_pos = np.array([[0.36, 0.2, 1.0], [0.64, 0.2, 1.0]])
         self._subgoal2_pos = np.array([[0.23, 0.15, 1.0], [0.76, 0.15, 1.0]])
@@ -166,6 +170,7 @@ class URRobotGym(gym.Env):
         self._ref_ee_pos = self.robot.arm.get_ee_pose()[0]
         self._ref_ee_ori = self.robot.arm.get_ee_pose()[1]
         self.max_plan_step_reached = 0
+        self.subgoal_reached = False
         return self._get_obs()
 
     def step(self, action):
@@ -179,9 +184,33 @@ class URRobotGym(gym.Env):
         info["collision"] = collision
         return state, reward, done, info
 
+    def _get_reward_with_subgoal(self, state):
+        #### TODO: Q5 design a reward based on the state, goal and subgoal positions
+        dist_to_goal = np.linalg.norm(state - self._goal_pos[:2])
+        if (not self.subgoal_reached):
+          dist_to_subgoal1 = np.linalg.norm(state - self._subgoal2_pos[0][:2])
+          dist_to_subgoal2 = np.linalg.norm(state - self._subgoal2_pos[1][:2])
+          success_subgoal1 = dist_to_subgoal1 < 1e-3
+          success_subgoal2 = dist_to_subgoal2 < 1e-3
+
+          if (success_subgoal1 or success_subgoal2):
+            self.subgoal_reached = True
+
+        if (not self.subgoal_reached):
+          reward = (-2.0 * min(dist_to_subgoal1, dist_to_subgoal2)) - dist_to_goal
+        else:
+          reward = -1.0 * dist_to_goal
+
+        return reward
+
     def _get_reward(self, state, action, collision):
-        reward = None
         success = self.get_success(self, state)
+        if self._reward_type == "sparse_handcrafted":
+            reward = success
+        elif self._reward_type == "dense_handcrafted":
+            reward = self._get_reward_with_subgoal(state)
+        else:
+            reward = None
         info = {'success': success}
         return reward, info
 
