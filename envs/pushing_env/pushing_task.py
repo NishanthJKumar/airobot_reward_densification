@@ -87,8 +87,8 @@ class URRobotPusherGym(gym.Env):
         state_low = np.full(len(self._get_obs()), -float("inf"))
         state_high = np.full(len(self._get_obs()), float("inf"))
         self.observation_space = spaces.Box(state_low, state_high, dtype=np.float32)
-        self.reset()
 
+        self.reset()
         # add the dummy subgoal locations
         self._subgoal_urdf_id = []
         self._subgoal0_pos = self._ref_ee_pos

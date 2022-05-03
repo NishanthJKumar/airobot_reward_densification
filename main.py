@@ -16,10 +16,13 @@ import torch
 from pathlib import Path
 import pprint
 # NOTE: Needed for env.registery to go through
+import envs.picking_env.picking_task
 import envs.pushing_env.pushing_task
 import envs.reaching_env.reaching_task
 from utils import play_video, GroundingUtils
 import gym
+from envs.picking_env.orig_blocksworld.single_subgoal import PickingSingleSubgoalClassfiers
+from envs.picking_env.multiple_subgoals.multiple_subgoals import PickingMultipleSubgoalClassfiers
 from envs.pushing_env.single_subgoal.single_subgoal import PushingSingleSubgoalClassfiers
 from envs.pushing_env.multiple_subgoals.multiple_subgoals import PushingMultipleSubgoalClassfiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
@@ -70,6 +73,7 @@ def train_ppo(
     runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env)
     engine = PPOEngine(agent=agent, runner=runner)
     if cfg.alg.eval:
+        agent.load_model()
         stat_info, _ = engine.eval(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
@@ -77,6 +81,7 @@ def train_ppo(
         play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     else:
         engine.train()
+        agent.load_model()
         stat_info, _ = engine.eval(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
@@ -169,9 +174,15 @@ path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False #True
+pick_exp = False
 with_obstacle= True #False
-env_name="URPusher-v1" if push_exp else "URReacher-v1"
-max_steps=200000
+if push_exp:
+    env_name = "URPusher-v1"
+elif pick_exp:
+    env_name = "URPicker-v1"
+else:
+    env_name = "URReacher-v1"
+max_steps=300000
 
 ALG_NAME = "ppo"
 set_config(ALG_NAME)
@@ -183,13 +194,24 @@ cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
 cfg.alg.eval = False
+if cfg.alg.eval:
+    cfg.alg.resume_step = max_steps
+    cfg.alg.test = True
+else:
+    cfg.alg.resume_step = None
+    cfg.alg.test = False
+cfg.alg.resume = False
+cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = False
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
 cfg.alg.save_dir += "/" + f"{env_name}"
 if push_exp:
     cfg.alg.save_dir += "_push"
+elif pick_exp:
+    cfg.alg.save_dir += "_pick"
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
+
 cfg.alg.save_dir += f"_{ALG_NAME}"
 cfg.alg.episode_steps = 150
 cfg.alg.eval_interval = 75
@@ -201,13 +223,10 @@ print(f"      Total number of steps:{cfg.alg.max_steps}")
 print(f"====================================")
 
 set_random_seed(cfg.alg.seed)
-env_kwargs = (
-    dict(
-        with_obstacle=with_obstacle,
-    )
-    if not push_exp
-    else dict()
-)
+if pick_exp or push_exp:
+    env_kwargs = dict()
+else:
+    env_kwargs = dict(with_obstacle=with_obstacle)
 env_kwargs.update(dict(max_episode_length = cfg.alg.episode_steps))
 env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
@@ -216,7 +235,7 @@ env = make_vec_env(
 grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder, env.envs[0].get_success)
 save_dir = train_ppo(
     cfg=cfg,
-    env_name="URPusher-v1" if push_exp else "URReacher-v1",
+    env_name=env_name,
     grounding_utils=grounding_utils,
 )
 # save_dir = train_sac(
@@ -224,12 +243,3 @@ save_dir = train_ppo(
 #     env_name="URPusher-v1" if push_exp else "URReacher-v1",
 #     grounding_utils=grounding_utils,
 # )
-
-#### TODO: plot return and success rate curves
-# steps, returns, success_rate = read_tf_log(save_dir)
-# data_dict = {}
-# data_dict["return"] = [steps, returns]
-# plot_curves(data_dict, "Reaching Task without Obstacles - Sparse Reward")
-# data_dict = {}
-# data_dict["success_rate"] = [steps, success_rate]
-# plot_curves(data_dict, "Reaching Task without Obstacles - Sparse Reward")
