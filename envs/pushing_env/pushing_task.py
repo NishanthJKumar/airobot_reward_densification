@@ -24,11 +24,13 @@ class URRobotPusherGym(gym.Env):
                  gui=False,
                  max_episode_length=25,
                  dist_threshold=0.05,
-                 granularity=4): # TODO: Seems like granularity parameter is not set correctly from make_vec_env. Need to check this!
+                 granularity=4, 
+                 reward_type=None): # TODO: Seems like granularity parameter is not set correctly from make_vec_env. Need to check this!
         self._action_repeat = action_repeat
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
         self._granularity = granularity
+        self_reward_type = reward_type
 
         self._xy_bounds = np.array([[0.23, 0.78], # [xmin, xmax]
                                    [-0.35, 0.3]]) # [ymin, ymax]
@@ -142,7 +144,17 @@ class URRobotPusherGym(gym.Env):
         object_pos = state[2:4]
         dist_to_goal = np.linalg.norm(object_pos - self._goal_pos[:2])
         success = dist_to_goal < self._dist_threshold
-        reward = None
+        if self._reward_type == "sparse":
+            reward = success
+        elif self._reward_type == "dense":
+            dist_to_obj = np.linalg.norm(state[:2] - object_pos)
+            previous_dist_to_goal = np.linalg.norm(previous_state[2:4] - self._goal_pos[:2])
+            if dist_to_obj < self._dist_threshold:
+                reward = -2.0 * dist_to_obj ** 2 +  (-1.0 * dist_to_goal ** 3)
+            else:
+                reward = -1.0 * dist_to_goal ** 2 + (previous_dist_to_goal - dist_to_goal)
+        else:
+            reward = None
         info = {'success': success}
         return reward, info
 
