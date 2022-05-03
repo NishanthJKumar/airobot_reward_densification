@@ -171,7 +171,7 @@ parser.add_argument('-rt', '--reward_type', choices=['sparse_handcrafted', "dens
 parser.add_argument('-pt', '--pddl_type', choices=['single_subgoal', 'multi_subgoal', 'grid_based'], required=True, help='Type of classifier to use.')
 parser.add_argument('-al', '--algorithm', choices=['ppo', 'sac'], required=True, help='Choice of learning algorithm to use.')
 parser.add_argument('-ts', '--training_steps', int, default=200000, help='Number of steps to run training for.')
-parser.add_argument('-es', '--episode_steps', int, default=25, help='Max. number of steps in an episode.')
+parser.add_argument('-es', '--episode_steps', int, default=50, help='Max. number of steps in an episode.')
 parser.add_argument('-ei', '--eval_interval', int, default=100, help='Num. trajs after which to call eval.')
 parser.add_argument('-fdp', '--path_to_fd', str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
 parser.add_argument('-se', '--seed', int, default=0, help='Random seed to use during training.')
