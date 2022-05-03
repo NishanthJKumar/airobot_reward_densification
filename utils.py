@@ -159,12 +159,12 @@ class GroundingUtils:
             if set(grounded_atoms) == set(state_grounded_atoms):
                 if dynamic_reward_shaping is None:
                     return i + env.max_plan_step_reached
-                elif dynamic_reward_shaping is "basic":
+                elif dynamic_reward_shaping == "basic":
                     if t == 0:
                         return [i + env.max_plan_step_reached, i + env.max_plan_step_reached]
                     # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
                     return [(i + env.max_plan_step_reached) * self.phi_t(t), i + env.max_plan_step_reached]
-                elif dynamic_reward_shaping is "dist":
+                elif dynamic_reward_shaping == "dist":
                     # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
                     return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached]), i + env.max_plan_step_reached] #* self.phi_t(t)
                 else:
@@ -172,13 +172,13 @@ class GroundingUtils:
 
         if dynamic_reward_shaping is None:
             return env.max_plan_step_reached
-        elif dynamic_reward_shaping is "basic":
+        elif dynamic_reward_shaping == "basic":
             # In basic reward shaping you cannot divide by 1/t when t=0 so just returns 0
             if t == 0:
                 return [env.max_plan_step_reached, env.max_plan_step_reached]
             # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
             return [(env.max_plan_step_reached) * self.phi_t(t), env.max_plan_step_reached]
-        elif dynamic_reward_shaping is "dist":
+        elif dynamic_reward_shaping == "dist":
             # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
             return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached]), env.max_plan_step_reached] #* self.phi_t(t)
         else:
@@ -188,7 +188,7 @@ class GroundingUtils:
         success = self.task_success_fn(env, state)
         reward = 1 if success else 0
 
-        if dynamic_reward_shaping is "dist":
+        if dynamic_reward_shaping == "dist":
             # Set prev_phi to phi(s) to update max_plan_step_reached
             prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping, state=state)[1]
         else:
