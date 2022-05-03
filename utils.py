@@ -5,6 +5,8 @@ import copy
 import os
 import glob
 
+ALPHA = 1
+
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
         video_files = list(glob.glob(video_dir + "/eval/**/render_video.mp4"))
@@ -115,34 +117,69 @@ class GroundingUtils:
             plan_grounded_atoms.append(self.apply_grounded_operator(plan_grounded_atoms[-1], op_name, params))
         return plan_grounded_atoms
 
-    def phi(self, env, state_grounded_atoms, plan):
+    def phi_t(self, t):
+        return (1/t)
+
+    def inv_phi_t(self, t):
+        return t
+
+    def dist_phi(self, state, max_plan_step_reached):
+        import ipdb; ipdb.set_trace()
+        return 0
+
+    def phi(self, env, state_grounded_atoms, plan, dynamic_reward_shaping, state=None):
+        t = env._t
         for i, grounded_atoms in enumerate(plan[env.max_plan_step_reached:]):
             # NOTE: using set() is very important here to remove potential duplicates
             # and make the comparison agnostic to order!
             if set(grounded_atoms) == set(state_grounded_atoms):
-                return i + env.max_plan_step_reached
-        return env.max_plan_step_reached
+                if dynamic_reward_shaping is None or t == 0:
+                    return i + env.max_plan_step_reached
+                elif dynamic_reward_shaping is "basic":
+                    return [(i + env.max_plan_step_reached) * self.phi_t(t), i + env.max_plan_step_reached]
+                elif dynamic_reward_shaping is "dist":
+                    return [ALPHA * self.dist_phi(state, env.max_plan_step_reached), i + env.max_plan_step_reached] #* self.phi_t(t)
+                else:
+                    raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
 
-    def get_shaped_reward(self, env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
+        if dynamic_reward_shaping is None or t == 0:
+            return env.max_plan_step_reached
+        elif dynamic_reward_shaping is "basic":
+            return [(env.max_plan_step_reached) * self.phi_t(t), env.max_plan_step_reached]
+        elif dynamic_reward_shaping is "dist":
+            return [ALPHA * self.dist_phi(state, env.max_plan_step_reached), env.max_plan_step_reached] #* self.phi_t(t)
+        else:
+            raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
+
+    def get_shaped_reward(self, env, prev_state, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan, dynamic_reward_shaping):
         success = self.task_success_fn(env, state)
         reward = 1 if success else 0
 
-        prev_phi = self.phi(env, previous_state_grounded_atoms, plan)
-        if env.max_plan_step_reached < prev_phi:
-            env.max_plan_step_reached = prev_phi
-            
+        if dynamic_reward_shaping is "dist":
+            prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping, state=state)
+        else:
+            prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
+        
+        if dynamic_reward_shaping is "basic":
+            if env.max_plan_step_reached < prev_phi[1]:
+                env.max_plan_step_reached = prev_phi[1]
+        elif dynamic_reward_shaping is "dist":
+            if env.max_plan_step_reached < prev_phi[1]:
+                env.max_plan_step_reached = prev_phi[1]
+        else:
+            if env.max_plan_step_reached < prev_phi:
+                env.max_plan_step_reached = prev_phi
             # if max_plan_step_reached >= 9:
             #     print(env._t)
             #     print(dist_to_goal)
             #     import ipdb; ipdb.set_trace()
 
-        f = self.phi(env, next_state_grounded_atoms, plan) - self.phi(env, previous_state_grounded_atoms, plan)
+        if dynamic_reward_shaping is not None:
+            f = self.phi(env, next_state_grounded_atoms, plan, dynamic_reward_shaping, state=state)[0] - self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping, state=prev_state)[0]
+        else:
+            f = self.phi(env, next_state_grounded_atoms, plan, dynamic_reward_shaping) - self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
         reward = reward + f
         info = dict(success=success)
-
-        # if dist_to_goal <= 0.1:
-        #     print(env._t)
-        #     import ipdb; ipdb.set_trace()
 
         return reward, info
 
