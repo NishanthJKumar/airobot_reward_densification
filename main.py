@@ -164,7 +164,7 @@ def train_sac(
     return cfg.alg.save_dir
 
 
-# Main code bgins here; takes in particular arguments and urns the relevant experiment with the specified configuration.
+# Main code begins here; takes in particular arguments and urns the relevant experiment with the specified configuration.
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick'], required=True, help='Name of env to run.')
 parser.add_argument('-rt', '--reward_type', choices=['sparse_handcrafted', "dense_handcrafted", 'pddl'], required=True, help='Type of reward to use.')
@@ -234,14 +234,18 @@ else:
 cfg.alg.resume = False
 cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
-cfg.alg.dynamic_reward_shaping = "dist"
-cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
-cfg.alg.save_dir += "/" + f"{env_name}"
-cfg.alg.save_dir += "_" + args.domain + "_" + args.reward_type
-cfg.alg.save_dir += f"_{args.algorithm}"
+cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
 cfg.alg.episode_steps = args.episode_steps
 cfg.alg.eval_interval = args.eval_interval
 cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
+# Include all relevant variables in the name so that there are no folder
+# collisions.
+cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
+cfg.alg.save_dir += "/" + f"{env_name}"
+cfg.alg.save_dir += "_" + args.reward_type + "_" + args.pddl_type + "_" + args.algorithm
+cfg.alg.save_dir += "_" + str(args.training_steps) + "_" + str(args.episode_steps) + "_" + str(args.eval_interval) + "_" + str(args.granularity)
+if args.dynamic_shaping is not None:
+    cfg.alg.save_dir += "_" + args.dynamic_shaping
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
