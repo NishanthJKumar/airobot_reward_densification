@@ -105,7 +105,6 @@ class GroundingUtils:
                 for effect in o.effect_neg:
                     next_state_grounded_atoms.remove(effect)
                 return next_state_grounded_atoms
-        import ipdb; ipdb.set_trace()
         raise ValueError("Couldn't compute next_state_grounded_atoms")
 
     def apply_grounded_plan(self, state_grounded_atoms, plan):
