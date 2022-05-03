@@ -72,7 +72,7 @@ def train_ppo(
 
     critic = ValueNet(critic_body, in_features=64)
     agent = PPOAgent(actor=actor, critic=critic, env=env)
-    runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env)
+    runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env, dynamic_reward_shaping=cfg.alg.dynamic_reward_shaping)
     engine = PPOEngine(agent=agent, runner=runner)
     if cfg.alg.eval:
         agent.load_model()
@@ -143,7 +143,7 @@ def train_sac(
     q2 = ValueNet(q2_body)
     memory = CyclicBuffer(capacity=cfg.alg.replay_size)
     agent = SACAgent(actor=actor, q1=q1, q2=q2, memory=memory, env=env)
-    runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env)
+    runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env, dynamic_reward_shaping=cfg.alg.dynamic_reward_shaping)
     engine = SACEngine(agent=agent, runner=runner)
     if cfg.alg.eval:
         agent.load_model()
@@ -192,6 +192,7 @@ if args.domain == 'reach':
     else:
         raise ValueError(f"Unknown pddl type: {args.pddl_type}")
 elif args.domain == 'push':
+
     env_name = "URPusher-v1"
     if args.pddl_type == "single_subgoal":
         classifiers = PushingSingleSubgoalClassfiers()
@@ -234,7 +235,7 @@ else:
 cfg.alg.resume = False
 cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
-cfg.alg.dynamic_reward_shaping = False
+cfg.alg.dynamic_reward_shaping = "dist"
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
 cfg.alg.save_dir += "/" + f"{env_name}"
 cfg.alg.save_dir += "_" + args.domain + "_" + "args.reward_type"
