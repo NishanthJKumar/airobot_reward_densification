@@ -80,7 +80,7 @@ def train_ppo(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
+        # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     else:
         engine.train()
         agent.load_model()
@@ -88,7 +88,7 @@ def train_ppo(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
+        # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
 
     return cfg.alg.save_dir
 
@@ -151,7 +151,7 @@ def train_sac(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
+        # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     else:
         engine.train()
         agent.load_model()
@@ -159,7 +159,7 @@ def train_sac(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
+        # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
 
     return cfg.alg.save_dir
 
