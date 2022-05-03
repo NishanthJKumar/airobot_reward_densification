@@ -123,6 +123,11 @@ class GroundingUtils:
                 return i + env.max_plan_step_reached
         return env.max_plan_step_reached
 
+    def get_info(self, env, state):
+        success = self.task_success_fn(env, state)
+        info = dict(success=success)
+        return info
+
     def get_shaped_reward(self, env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
         success = self.task_success_fn(env, state)
         reward = 1 if success else 0

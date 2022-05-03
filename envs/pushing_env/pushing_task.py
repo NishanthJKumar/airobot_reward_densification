@@ -21,16 +21,17 @@ def check_collision_rate(log_dir):
 class URRobotPusherGym(gym.Env):
     def __init__(self,
                  action_repeat=10,
-                 gui=False,
+                 gui=True,
                  max_episode_length=25,
                  dist_threshold=0.05,
                  granularity=4, 
                  reward_type=None): # TODO: Seems like granularity parameter is not set correctly from make_vec_env. Need to check this!
         self._action_repeat = action_repeat
+        self.max_plan_step_reached = 0
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
         self._granularity = granularity
-        self_reward_type = reward_type
+        selfreward_type = reward_type
 
         self._xy_bounds = np.array([[0.23, 0.78], # [xmin, xmax]
                                    [-0.35, 0.3]]) # [ymin, ymax]
@@ -126,6 +127,7 @@ class URRobotPusherGym(gym.Env):
         self.robot.arm.set_jpos(self._arm_reset_pos, ignore_physics=True)
         self.robot.pb_client.reset_body(self._box_id, base_pos=self._box_pos)
         self._t = 0
+        self.max_plan_step_reached = 0
         self._ref_ee_pos = self.robot.arm.get_ee_pose()[0]
         self._ref_ee_ori = self.robot.arm.get_ee_pose()[1]
         return self._get_obs()
@@ -144,9 +146,9 @@ class URRobotPusherGym(gym.Env):
         object_pos = state[2:4]
         dist_to_goal = np.linalg.norm(object_pos - self._goal_pos[:2])
         success = dist_to_goal < self._dist_threshold
-        if self._reward_type == "sparse_handcrafted":
+        if self.reward_type == "sparse_handcrafted":
             reward = success
-        elif self._reward_type == "dense_handcrafted":
+        elif self.reward_type == "dense_handcrafted":
             dist_to_obj = np.linalg.norm(state[:2] - object_pos)
             previous_dist_to_goal = np.linalg.norm(previous_state[2:4] - self._goal_pos[:2])
             if dist_to_obj < self._dist_threshold:

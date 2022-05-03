@@ -14,11 +14,12 @@ from airobot.utils.common import rotvec2quat
 class URRobotPickerGym(gym.Env):
     def __init__(self, 
                 action_repeat=10, 
-                gui=False, 
+                gui=True, 
                 max_episode_length=25, 
                 dist_threshold = 0.05,
                 reward_type=None):
-        self._reward_type = reward_type
+        self.reward_type = reward_type
+        self.max_plan_step_reached = 0
         
         # NOTE: below vars are necessary for the handcrafted
         # dense reward.
@@ -108,6 +109,7 @@ class URRobotPickerGym(gym.Env):
         self.ref_ee_ori = self.robot.arm.get_ee_pose()[1]
         self.gripper_ori = 0
         self._t = 0
+        self.max_plan_step_reached = 0
         self.robot.arm.eetool.set_jpos(0.0)
         self.robot.pb_client.reset_body(self._box_id, base_pos=self._box_pos)
         self._subgoal0_reached = False

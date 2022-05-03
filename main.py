@@ -170,15 +170,16 @@ def train_sac(
 # 5. Run the appropriate function (training or evaling) in the
 # appropriate environment.
 
-classifiers = GridBasedClassifiers()
+# classifiers = GridBasedClassifiers()
+classifiers = PickingMultipleSubgoalClassfiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 # path_to_fd_folder = '/home/wbm3/Documents/GitHub/downward'
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False #True
-pick_exp = False
-with_obstacle= True #False
+pick_exp = True
+with_obstacle = False #True
 if push_exp:
     env_name = "URPusher-v1"
 elif pick_exp:
@@ -187,7 +188,7 @@ else:
     env_name = "URReacher-v1"
 max_steps=300000
 
-ALG_NAME = "sac"
+ALG_NAME = "ppo"
 set_config(ALG_NAME)
 cfg.alg.seed = 0
 cfg.alg.num_envs = 1
@@ -227,8 +228,10 @@ print(f"====================================")
 
 set_random_seed(cfg.alg.seed)
 
-if pick_exp or push_exp:
+if push_exp:
     env_kwargs = dict(reward_type=None)
+elif pick_exp:
+    env_kwargs = dict(reward_type="dense_handcrafted")
 else:
     env_kwargs = dict(with_obstacle=with_obstacle, granularity=6, reward_type="sparse")
 env_kwargs.update(dict(max_episode_length = cfg.alg.episode_steps))
@@ -237,13 +240,13 @@ env = make_vec_env(
 )
 
 grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder, env.envs[0].get_success)
-# save_dir = train_ppo(
-#     cfg=cfg,
-#     env_name=env_name,
-#     grounding_utils=grounding_utils,
-# )
-save_dir = train_sac(
+save_dir = train_ppo(
     cfg=cfg,
     env_name=env_name,
     grounding_utils=grounding_utils,
 )
+# save_dir = train_sac(
+#     cfg=cfg,
+#     env_name=env_name,
+#     grounding_utils=grounding_utils,
+# )
