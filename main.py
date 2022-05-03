@@ -176,6 +176,7 @@ parser.add_argument('-ei', '--eval_interval', int, default=100, help='Num. trajs
 parser.add_argument('-fdp', '--path_to_fd', str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
 parser.add_argument('-se', '--seed', int, default=0, help='Random seed to use during training.')
 parser.add_argument('-g', '--granularity', type=int, default=3, help='Number of divisions to segment the working space of the arm. Total divisions is equal to 2^{input}.')
+parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
 
 env_kwargs = dict(reward_type = args.reward_type)
@@ -242,6 +243,7 @@ cfg.alg.save_dir += "_" + args.domain + "_" + "args.reward_type"
 cfg.alg.save_dir += f"_{args.algorithm}"
 cfg.alg.episode_steps = args.episode_steps
 cfg.alg.eval_interval = args.eval_interval
+cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
