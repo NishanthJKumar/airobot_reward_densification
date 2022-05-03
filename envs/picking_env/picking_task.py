@@ -23,8 +23,8 @@ class URRobotPickerGym(gym.Env):
         
         # NOTE: below vars are necessary for the handcrafted
         # dense reward.
-        self._subgoal0_reached = False
         self._subgoal1_reached = False
+        self._subgoal2_reached = False
         self._object1_picked = False
 
         self._action_repeat = action_repeat
@@ -143,20 +143,20 @@ class URRobotPickerGym(gym.Env):
         if self.reward_type == "sparse_handcrafted":
             reward = success
         elif self.reward_type == "dense_handcrafted":
-            if not self._subgoal0_reached:
-                dist_to_subgoal0 = np.linalg.norm(state[:3] - self._subgoal0_pos)
-                gripper_open_angle = self.robot.arm.eetool.get_jpos()
-                # NOTE gripper_open_angle == 0 implies the gripper is fully open
-                reward = -dist_to_subgoal0 - 0.1 * gripper_open_angle
-                if dist_to_subgoal0 < self._dist_threshold:
-                    self._subgoal0_reached = True
-            elif not self._subgoal1_reached:
+            if not self._subgoal1_reached:
                 dist_to_subgoal1 = np.linalg.norm(state[:3] - self._subgoal1_pos)
                 gripper_open_angle = self.robot.arm.eetool.get_jpos()
                 # NOTE gripper_open_angle == 0 implies the gripper is fully open
                 reward = -dist_to_subgoal1 - 0.1 * gripper_open_angle
                 if dist_to_subgoal1 < self._dist_threshold:
                     self._subgoal1_reached = True
+            elif not self._subgoal2_reached:
+                dist_to_subgoal2 = np.linalg.norm(state[:3] - self._subgoal2_pos)
+                gripper_open_angle = self.robot.arm.eetool.get_jpos()
+                # NOTE gripper_open_angle == 0 implies the gripper is fully open
+                reward = -dist_to_subgoal2 - 0.1 * gripper_open_angle
+                if dist_to_subgoal2 < self._dist_threshold:
+                    self._subgoal2_reached = True
             elif not self._object1_picked:
                 gripper_open_angle = self.robot.arm.eetool.get_jpos()
                 reward = gripper_open_angle

@@ -31,7 +31,7 @@ class URRobotPusherGym(gym.Env):
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
         self._granularity = granularity
-        selfreward_type = reward_type
+        self.reward_type = reward_type
 
         self._xy_bounds = np.array([[0.23, 0.78], # [xmin, xmax]
                                    [-0.35, 0.3]]) # [ymin, ymax]
