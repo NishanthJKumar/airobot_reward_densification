@@ -14,8 +14,8 @@ class PushingSingleSubgoalClassfiers(BaseClassifiers):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._goal_pos[:2]) < env._dist_threshold
         elif self.is_subgoal0(env, loc):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._subgoal0_pos[:2]) < env._dist_threshold
-        elif self.is_subgoal1(env, loc):
-            return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._subgoal1_pos[:2]) < env._dist_threshold
+        elif self.is_subgoal2(env, loc):
+            return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._subgoal2_pos[:2]) < env._dist_threshold
         else:
             raise ValueError(f"loc should be either 'goal' or 'subgoal' not '{loc}'")
 
@@ -29,8 +29,8 @@ class PushingSingleSubgoalClassfiers(BaseClassifiers):
             return np.linalg.norm(object_pos[:2] - env._goal_pos[:2]) < env._dist_threshold
         elif self.is_subgoal0(env, loc):
             return np.linalg.norm(object_pos[:2] - env._subgoal0_pos[:2]) < env._dist_threshold
-        elif self.is_subgoal1(env, loc):
-            return np.linalg.norm(object_pos[:2] - env._subgoal1_pos[:2]) < env._dist_threshold
+        elif self.is_subgoal2(env, loc):
+            return np.linalg.norm(object_pos[:2] - env._subgoal2_pos[:2]) < env._dist_threshold
         else:
             raise ValueError(f"loc should be either 'goal' or 'subgoal0' or 'subgoal1' not '{loc}'")
 
@@ -40,8 +40,8 @@ class PushingSingleSubgoalClassfiers(BaseClassifiers):
     def is_subgoal0(self, env, loc):
         return loc == "subgoal0"
 
-    def is_subgoal1(self, env, loc):
-        return loc == "subgoal1"
+    def is_subgoal2(self, env, loc):
+        return loc == "subgoal2"
 
     def get_typed_predicates(self):
         # TODO can this be read from domain file?
