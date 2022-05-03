@@ -1,0 +1,327 @@
+[32m[INFO][0m[2022-05-03 12:48:34]: [32mAlogrithm type:<class 'easyrl.configs.sac_config.SACConfig'>[0m
+[32m[INFO][0m[2022-05-03 12:48:34]: [32mCreating 1 environments.[0m
+pybullet build time: Mar 26 2022 03:00:15
+[32m[INFO][0m[2022-05-03 12:48:34]: [32mLoad in OpenGL![0m
+EGL device choice: -1 of 3.
+argv[0]=
+Loaded EGL 1.5 after reload.
+GL_VENDOR=NVIDIA Corporation
+GL_RENDERER=NVIDIA GeForce RTX 3080 Ti/PCIe/SSE2
+GL_VERSION=4.6.0 NVIDIA 470.103.01
+GL_SHADING_LANGUAGE_VERSION=4.60 NVIDIA
+Version = 4.6.0 NVIDIA 470.103.01
+Vendor = NVIDIA Corporation
+Renderer = NVIDIA GeForce RTX 3080 Ti/PCIe/SSE2
+b3Warning[examples/Importers/ImportURDFDemo/BulletUrdfImporter.cpp,126]:
+No inertial data for link, using mass=1, localinertiadiagonal = 1,1,1, identity local inertial frameb3Warning[examples/Importers/ImportURDFDemo/BulletUrdfImporter.cpp,126]:
+ee_linkb3Warning[examples/Importers/ImportURDFDemo/BulletUrdfImporter.cpp,126]:
+No inertial data for link, using mass=1, localinertiadiagonal = 1,1,1, identity local inertial frameb3Warning[examples/Importers/ImportURDFDemo/BulletUrdfImporter.cpp,126]:
+baseb3Warning[examples/Importers/ImportURDFDemo/BulletUrdfImporter.cpp,126]:
+No inertial data for link, using mass=1, localinertiadiagonal = 1,1,1, identity local inertial frameb3Warning[examples/Importers/ImportURDFDemo/BulletUrdfImporter.cpp,126]:
+tool0b3Warning[examples/Importers/ImportURDFDemo/BulletUrdfImporter.cpp,126]:
+No inertial data for link, using mass=1, localinertiadiagonal = 1,1,1, identity local inertial frameb3Warning[examples/Importers/ImportURDFDemo/BulletUrdfImporter.cpp,126]:
+ee_tipINFO     planner time limit: None
+INFO     planner memory limit: None
+
+INFO     Running translator.
+INFO     translator stdin: None
+INFO     translator time limit: None
+INFO     translator memory limit: None
+INFO     translator command line string: /home/wbm3/anaconda3/envs/6484_dqn/bin/python /home/wbm3/Documents/GitHub/downward/builds/release/bin/translate/translate.py /home/wbm3/Documents/GitHub/airobot_reward_densification/envs/pushing_env/single_subgoal/goal-subgoal-domain.pddl /home/wbm3/Documents/GitHub/airobot_reward_densification/envs/pushing_env/single_subgoal/goal-subgoal-problem.pddl --sas-file output.sas
+Parsing...
+Parsing: [0.000s CPU, 0.000s wall-clock]
+Normalizing task... [0.000s CPU, 0.000s wall-clock]
+Instantiating...
+Generating Datalog program... [0.000s CPU, 0.000s wall-clock]
+Normalizing Datalog program...
+Normalizing Datalog program: [0.000s CPU, 0.000s wall-clock]
+Preparing model... [0.000s CPU, 0.000s wall-clock]
+Generated 14 rules.
+Computing model... [0.000s CPU, 0.000s wall-clock]
+41 relevant atoms
+24 auxiliary atoms
+65 final queue length
+88 total queue pushes
+Completing instantiation... [0.000s CPU, 0.000s wall-clock]
+Instantiating: [0.000s CPU, 0.001s wall-clock]
+Computing fact groups...
+Finding invariants...
+6 initial candidates
+Finding invariants: [0.010s CPU, 0.001s wall-clock]
+Checking invariant weight... [0.000s CPU, 0.000s wall-clock]
+Instantiating groups... [0.000s CPU, 0.000s wall-clock]
+Collecting mutex groups... [0.000s CPU, 0.000s wall-clock]
+Choosing groups...
+0 uncovered facts
+Choosing groups: [0.000s CPU, 0.000s wall-clock]
+Building translation key... [0.000s CPU, 0.000s wall-clock]
+Computing fact groups: [0.010s CPU, 0.001s wall-clock]
+Building STRIPS to SAS dictionary... [0.000s CPU, 0.000s wall-clock]
+Building dictionary for full mutex groups... [0.000s CPU, 0.000s wall-clock]
+Building mutex information...
+Building mutex information: [0.000s CPU, 0.000s wall-clock]
+Translating task...
+Processing axioms...
+Simplifying axioms... [0.000s CPU, 0.000s wall-clock]
+Translator axioms removed by simplifying: 0
+Computing negative axioms... [0.000s CPU, 0.000s wall-clock]
+Processing axioms: [0.000s CPU, 0.000s wall-clock]
+Translating task: [0.000s CPU, 0.000s wall-clock]
+0 effect conditions simplified
+0 implied preconditions added
+Detecting unreachable propositions...
+0 operators removed
+0 axioms removed
+2 propositions removed
+Detecting unreachable propositions: [0.000s CPU, 0.000s wall-clock]
+Reordering and filtering variables...
+2 of 2 variables necessary.
+0 of 2 mutex groups necessary.
+8 of 8 operators necessary.
+0 of 0 axiom rules necessary.
+Reordering and filtering variables: [0.000s CPU, 0.000s wall-clock]
+Translator variables: 2
+Translator derived variables: 0
+Translator facts: 6
+Translator goal facts: 1
+Translator mutex groups: 0
+Translator total mutex groups size: 0
+Translator operators: 8
+Translator axioms: 0
+Translator task size: 45
+Translator peak memory: 29696 KB
+Writing output... [0.000s CPU, 0.000s wall-clock]
+Done! [0.010s CPU, 0.003s wall-clock]
+translate exit code: 0
+
+INFO     Running search (release).
+INFO     search stdin: output.sas
+INFO     search time limit: None
+INFO     search memory limit: None
+INFO     search command line string: /home/wbm3/Documents/GitHub/downward/builds/release/bin/downward --if-unit-cost --evaluator 'hlm=lmcount(lm_reasonable_orders_hps(lm_rhw()),pref=true)' --evaluator 'hff=ff()' --search 'iterated([lazy_greedy([hff,hlm],preferred=[hff,hlm]),lazy_wastar([hff,hlm],preferred=[hff,hlm],w=5),lazy_wastar([hff,hlm],preferred=[hff,hlm],w=3),lazy_wastar([hff,hlm],preferred=[hff,hlm],w=2),lazy_wastar([hff,hlm],preferred=[hff,hlm],w=1)],repeat_last=true,continue_on_fail=true)' --if-non-unit-cost --evaluator 'hlm1=lmcount(lm_reasonable_orders_hps(lm_rhw()),transform=adapt_costs(one),pref=true)' --evaluator 'hff1=ff(transform=adapt_costs(one))' --evaluator 'hlm2=lmcount(lm_reasonable_orders_hps(lm_rhw()),transform=adapt_costs(plusone),pref=true)' --evaluator 'hff2=ff(transform=adapt_costs(plusone))' --search 'iterated([lazy_greedy([hff1,hlm1],preferred=[hff1,hlm1],cost_type=one,reopen_closed=false),lazy_greedy([hff2,hlm2],preferred=[hff2,hlm2],reopen_closed=false),lazy_wastar([hff2,hlm2],preferred=[hff2,hlm2],w=5),lazy_wastar([hff2,hlm2],preferred=[hff2,hlm2],w=3),lazy_wastar([hff2,hlm2],preferred=[hff2,hlm2],w=2),lazy_wastar([hff2,hlm2],preferred=[hff2,hlm2],w=1)],repeat_last=true,continue_on_fail=true)' --always --internal-plan-file sas_plan < output.sas
+[t=1.311e-05s, 13696 KB] reading input...
+[t=8.356e-05s, 13696 KB] done reading input!
+[t=0.0007715s, 14084 KB] Initializing landmark count heuristic...
+[t=0.00079154s, 14084 KB] Generating landmark graph...
+[t=0.00080374s, 14084 KB] Building a landmark graph with reasonable orders.
+[t=0.00081242s, 14084 KB] Initializing Exploration...
+[t=0.00082326s, 14084 KB] Generating landmarks using the RPG/SAS+ approach
+[t=0.00084974s, 14084 KB] Removed 0 reasonable or obedient reasonable orders
+[t=0.00085915s, 14084 KB] Landmarks generation time: 5.44e-05s
+[t=0.00086719s, 14084 KB] Discovered 2 landmarks, of which 0 are disjunctive and 0 are conjunctive.
+[t=0.00087399s, 14084 KB] 1 edges
+[t=0.00088116s, 14084 KB] approx. reasonable orders
+[t=0.0008885s, 14084 KB] approx. obedient reasonable orders
+[t=0.00089559s, 14084 KB] Removed 0 reasonable or obedient reasonable orders
+[t=0.00090227s, 14084 KB] Landmarks generation time: 0.00010622s
+[t=0.00090916s, 14084 KB] Discovered 2 landmarks, of which 0 are disjunctive and 0 are conjunctive.
+[t=0.00091554s, 14084 KB] 1 edges
+[t=0.00092212s, 14084 KB] Landmark graph generation time: 0.00013644s
+[t=0.00092891s, 14084 KB] Landmark graph contains 2 landmarks, of which 0 are disjunctive and 0 are conjunctive.
+[t=0.00093534s, 14084 KB] Landmark graph contains 1 orderings.
+[t=0.00096103s, 14084 KB] Simplifying 14 unary operators... done! [12 unary operators]
+[t=0.00097634s, 14084 KB] time to simplify: 2.266e-05s
+[t=0.00098529s, 14084 KB] Initializing additive heuristic...
+[t=0.00099219s, 14084 KB] Initializing FF heuristic...
+[t=0.00103839s, 14084 KB] Building successor generator...done!
+[t=0.00106485s, 14084 KB] peak memory difference for successor generator creation: 0 KB
+[t=0.00107181s, 14084 KB] time for successor generation creation: 3.71e-06s
+[t=0.00107995s, 14084 KB] Variables: 2
+[t=0.00108669s, 14084 KB] FactPairs: 6
+[t=0.00109328s, 14084 KB] Bytes per state: 4
+[t=0.00124285s, 14348 KB] Building successor generator...done!
+[t=0.0012843s, 14348 KB] peak memory difference for successor generator creation: 0 KB
+[t=0.00129401s, 14348 KB] time for successor generation creation: 2.5e-07s
+[t=0.00130241s, 14348 KB] Variables: 2
+[t=0.00130939s, 14348 KB] FactPairs: 6
+[t=0.0013201s, 14348 KB] Bytes per state: 4
+[t=0.00133473s, 14348 KB] Starting search: lazy_greedy(list(hff, hlm), preferred = list(hff, hlm))
+[t=0.0013444s, 14348 KB] Conducting lazy best first search, (real) bound = 2147483647
+[t=0.00135559s, 14348 KB] 1 initial landmarks, 1 goal landmarks
+[t=0.0013739s, 14348 KB] New best heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.00138271s, 14348 KB] New best heuristic value for ff: 2
+[t=0.00138949s, 14348 KB] g=0, 1 evaluated, 0 expanded
+[t=0.00139819s, 14348 KB] Initial heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.00140521s, 14348 KB] Initial heuristic value for ff: 2
+[t=0.00141595s, 14348 KB] New best heuristic value for ff: 1
+[t=0.00142389s, 14348 KB] g=1, 2 evaluated, 1 expanded
+[t=0.00143388s, 14348 KB] Solution found!
+[t=0.00144167s, 14348 KB] Actual search time: 8.308e-05s
+move-to-location claw subgoal0 subgoal1 (1)
+push-box claw box1 subgoal1 goal (1)
+[t=0.00146757s, 14348 KB] Plan length: 2 step(s).
+[t=0.00147619s, 14348 KB] Plan cost: 2
+[t=0.0014834s, 14348 KB] Expanded 2 state(s).
+[t=0.00149035s, 14348 KB] Reopened 0 state(s).
+[t=0.00149689s, 14348 KB] Evaluated 3 state(s).
+[t=0.00150348s, 14348 KB] Evaluations: 6
+[t=0.00150991s, 14348 KB] Generated 4 state(s).
+[t=0.00151645s, 14348 KB] Dead ends: 0 state(s).
+[t=0.00152306s, 14348 KB] Number of registered states: 3
+[t=0.00152987s, 14348 KB] Int hash set load factor: 3/4 = 0.75
+[t=0.00153691s, 14348 KB] Int hash set resizes: 2
+[t=0.00154332s, 14348 KB] Best solution cost so far: 2
+[t=0.00154975s, 14348 KB] Solution found - keep searching
+[t=0.00158518s, 14348 KB] Building successor generator...done!
+[t=0.0016066s, 14348 KB] peak memory difference for successor generator creation: 0 KB
+[t=0.00161313s, 14348 KB] time for successor generation creation: 2.4e-07s
+[t=0.00162048s, 14348 KB] Variables: 2
+[t=0.00162699s, 14348 KB] FactPairs: 6
+[t=0.00163345s, 14348 KB] Bytes per state: 4
+[t=0.00164427s, 14348 KB] Starting search: lazy_wastar(list(hff, hlm), preferred = list(hff, hlm), w = 5)
+[t=0.00165275s, 14348 KB] Conducting lazy best first search, (real) bound = 2
+[t=0.00166157s, 14348 KB] 1 initial landmarks, 1 goal landmarks
+[t=0.00167313s, 14348 KB] New best heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.0016808s, 14348 KB] New best heuristic value for ff: 2
+[t=0.00168759s, 14348 KB] g=0, 1 evaluated, 0 expanded
+[t=0.00169641s, 14348 KB] Initial heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.00170329s, 14348 KB] Initial heuristic value for ff: 2
+[t=0.00171321s, 14348 KB] New best heuristic value for ff: 1
+[t=0.00172065s, 14348 KB] g=1, 2 evaluated, 1 expanded
+[t=0.00172941s, 14348 KB] Completely explored state space -- no solution!
+[t=0.00173635s, 14348 KB] Actual search time: 7.377e-05s
+[t=0.00174374s, 14348 KB] Expanded 2 state(s).
+[t=0.00175023s, 14348 KB] Reopened 0 state(s).
+[t=0.00175671s, 14348 KB] Evaluated 2 state(s).
+[t=0.00176314s, 14348 KB] Evaluations: 4
+[t=0.00176951s, 14348 KB] Generated 4 state(s).
+[t=0.00177588s, 14348 KB] Dead ends: 0 state(s).
+[t=0.00178226s, 14348 KB] Number of registered states: 2
+[t=0.00178907s, 14348 KB] Int hash set load factor: 2/2 = 1
+[t=0.00179603s, 14348 KB] Int hash set resizes: 1
+[t=0.00180254s, 14348 KB] Best solution cost so far: 2
+[t=0.00180916s, 14348 KB] No solution found - keep searching
+[t=0.00184005s, 14348 KB] Building successor generator...done!
+[t=0.00186174s, 14348 KB] peak memory difference for successor generator creation: 0 KB
+[t=0.00186824s, 14348 KB] time for successor generation creation: 2.3e-07s
+[t=0.00187562s, 14348 KB] Variables: 2
+[t=0.00188213s, 14348 KB] FactPairs: 6
+[t=0.00188857s, 14348 KB] Bytes per state: 4
+[t=0.00189856s, 14348 KB] Starting search: lazy_wastar(list(hff, hlm), preferred = list(hff, hlm), w = 3)
+[t=0.00190692s, 14348 KB] Conducting lazy best first search, (real) bound = 2
+[t=0.00191811s, 14348 KB] 1 initial landmarks, 1 goal landmarks
+[t=0.00192971s, 14348 KB] New best heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.00193744s, 14348 KB] New best heuristic value for ff: 2
+[t=0.00194423s, 14348 KB] g=0, 1 evaluated, 0 expanded
+[t=0.00195297s, 14348 KB] Initial heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.00195994s, 14348 KB] Initial heuristic value for ff: 2
+[t=0.00196986s, 14348 KB] New best heuristic value for ff: 1
+[t=0.00197755s, 14348 KB] g=1, 2 evaluated, 1 expanded
+[t=0.00198569s, 14348 KB] Completely explored state space -- no solution!
+[t=0.00199257s, 14348 KB] Actual search time: 7.305e-05s
+[t=0.00200001s, 14348 KB] Expanded 2 state(s).
+[t=0.00200652s, 14348 KB] Reopened 0 state(s).
+[t=0.002013s, 14348 KB] Evaluated 2 state(s).
+[t=0.00201936s, 14348 KB] Evaluations: 4
+[t=0.00202585s, 14348 KB] Generated 4 state(s).
+[t=0.00203225s, 14348 KB] Dead ends: 0 state(s).
+[t=0.0020387s, 14348 KB] Number of registered states: 2
+[t=0.00204514s, 14348 KB] Int hash set load factor: 2/2 = 1
+[t=0.00205191s, 14348 KB] Int hash set resizes: 1
+[t=0.00205835s, 14348 KB] Best solution cost so far: 2
+[t=0.00206488s, 14348 KB] No solution found - keep searching
+[t=0.00209483s, 14348 KB] Building successor generator...done!
+[t=0.00211611s, 14348 KB] peak memory difference for successor generator creation: 0 KB
+[t=0.00212258s, 14348 KB] time for successor generation creation: 2.3e-07s
+[t=0.00212988s, 14348 KB] Variables: 2
+[t=0.00213631s, 14348 KB] FactPairs: 6
+[t=0.00214284s, 14348 KB] Bytes per state: 4
+[t=0.00215302s, 14348 KB] Starting search: lazy_wastar(list(hff, hlm), preferred = list(hff, hlm), w = 2)
+[t=0.00216127s, 14348 KB] Conducting lazy best first search, (real) bound = 2
+[t=0.00216922s, 14348 KB] 1 initial landmarks, 1 goal landmarks
+[t=0.0021796s, 14348 KB] New best heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.00218706s, 14348 KB] New best heuristic value for ff: 2
+[t=0.00219372s, 14348 KB] g=0, 1 evaluated, 0 expanded
+[t=0.00220204s, 14348 KB] Initial heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.00220913s, 14348 KB] Initial heuristic value for ff: 2
+[t=0.002219s, 14348 KB] New best heuristic value for ff: 1
+[t=0.00222651s, 14348 KB] g=1, 2 evaluated, 1 expanded
+[t=0.00223453s, 14348 KB] Completely explored state space -- no solution!
+[t=0.00224138s, 14348 KB] Actual search time: 7.104e-05s
+[t=0.00224835s, 14348 KB] Expanded 2 state(s).
+[t=0.00225476s, 14348 KB] Reopened 0 state(s).
+[t=0.00226112s, 14348 KB] Evaluated 2 state(s).
+[t=0.00226769s, 14348 KB] Evaluations: 4
+[t=0.00227444s, 14348 KB] Generated 4 state(s).
+[t=0.00228087s, 14348 KB] Dead ends: 0 state(s).
+[t=0.00228753s, 14348 KB] Number of registered states: 2
+[t=0.00229418s, 14348 KB] Int hash set load factor: 2/2 = 1
+[t=0.00230086s, 14348 KB] Int hash set resizes: 1
+[t=0.00230721s, 14348 KB] Best solution cost so far: 2
+[t=0.00231373s, 14348 KB] No solution found - keep searching
+[t=0.00234209s, 14348 KB] Building successor generator...done!
+[t=0.00236273s, 14348 KB] peak memory difference for successor generator creation: 0 KB
+[t=0.00236974s, 14348 KB] time for successor generation creation: 2.3e-07s
+[t=0.00237729s, 14348 KB] Variables: 2
+[t=0.00238408s, 14348 KB] FactPairs: 6
+[t=0.00239044s, 14348 KB] Bytes per state: 4
+[t=0.00240075s, 14348 KB] Starting search: lazy_wastar(list(hff, hlm), preferred = list(hff, hlm), w = 1)
+[t=0.00240899s, 14348 KB] Conducting lazy best first search, (real) bound = 2
+[t=0.00241713s, 14348 KB] 1 initial landmarks, 1 goal landmarks
+[t=0.00242796s, 14348 KB] New best heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.00243521s, 14348 KB] New best heuristic value for ff: 2
+[t=0.00244177s, 14348 KB] g=0, 1 evaluated, 0 expanded
+[t=0.00244975s, 14348 KB] Initial heuristic value for lmcount(lm_reasonable_orders_hps(lm_rhw), pref = true): 1
+[t=0.00245644s, 14348 KB] Initial heuristic value for ff: 2
+[t=0.00246859s, 14348 KB] New best heuristic value for ff: 1
+[t=0.00247635s, 14348 KB] g=1, 2 evaluated, 1 expanded
+[t=0.00248439s, 14348 KB] Completely explored state space -- no solution!
+[t=0.00249111s, 14348 KB] Actual search time: 7.259e-05s
+[t=0.00249817s, 14348 KB] Expanded 2 state(s).
+[t=0.00250466s, 14348 KB] Reopened 0 state(s).
+[t=0.0025114s, 14348 KB] Evaluated 2 state(s).
+[t=0.00251784s, 14348 KB] Evaluations: 4
+[t=0.00252446s, 14348 KB] Generated 4 state(s).
+[t=0.00253085s, 14348 KB] Dead ends: 0 state(s).
+[t=0.00253723s, 14348 KB] Number of registered states: 2
+[t=0.00254434s, 14348 KB] Int hash set load factor: 2/2 = 1
+[t=0.00255116s, 14348 KB] Int hash set resizes: 1
+[t=0.00255757s, 14348 KB] Best solution cost so far: 2
+[t=0.00256435s, 14348 KB] No solution found - keep searching
+[t=0.00257237s, 14348 KB] Actual search time: 0.00135909s
+[t=0.00258037s, 14348 KB] Cumulative statistics:
+[t=0.00258037s, 14348 KB] Expanded 10 state(s).
+[t=0.00258037s, 14348 KB] Reopened 0 state(s).
+[t=0.00258037s, 14348 KB] Evaluated 11 state(s).
+[t=0.00258037s, 14348 KB] Evaluations: 22
+[t=0.00258037s, 14348 KB] Generated 20 state(s).
+[t=0.00258037s, 14348 KB] Dead ends: 0 state(s).
+[t=0.00258037s, 14348 KB] Search time: 0.00136069s
+[t=0.00258037s, 14348 KB] Total time: 0.00258037s
+Solution found.
+Peak memory: 14348 KB
+Remove intermediate file output.sas
+search exit code: 0
+
+INFO     Planner time: 0.05s
+/home/wbm3/anaconda3/envs/6484_dqn/lib/python3.7/site-packages/gym/logger.py:30: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  warnings.warn(colorize('%s: %s'%('WARN', msg % args), 'yellow'))
+====================================
+      Device:cuda
+      Total number of steps:200000
+====================================
+INFO: Making new env: URPusher-v1 ({'reward_type': 'dense_handcrafted', 'gui': False, 'max_episode_length': 50})
+Traceback (most recent call last):
+  File "main.py", line 273, in <module>
+    grounding_utils=grounding_utils,
+  File "main.py", line 145, in train_sac
+    agent = SACAgent(actor=actor, q1=q1, q2=q2, memory=memory, env=env)
+  File "<string>", line 8, in __init__
+  File "/home/wbm3/Documents/GitHub/easyrl/easyrl/agents/sac_agent.py", line 49, in __post_init__
+    device=cfg.alg.device)
+  File "/home/wbm3/Documents/GitHub/easyrl/easyrl/utils/torch_util.py", line 60, in move_to
+    model.to(device)
+  File "/home/wbm3/anaconda3/envs/6484_dqn/lib/python3.7/site-packages/torch/nn/modules/module.py", line 899, in to
+    return self._apply(convert)
+  File "/home/wbm3/anaconda3/envs/6484_dqn/lib/python3.7/site-packages/torch/nn/modules/module.py", line 570, in _apply
+    module._apply(fn)
+  File "/home/wbm3/anaconda3/envs/6484_dqn/lib/python3.7/site-packages/torch/nn/modules/module.py", line 570, in _apply
+    module._apply(fn)
+  File "/home/wbm3/anaconda3/envs/6484_dqn/lib/python3.7/site-packages/torch/nn/modules/module.py", line 570, in _apply
+    module._apply(fn)
+  File "/home/wbm3/anaconda3/envs/6484_dqn/lib/python3.7/site-packages/torch/nn/modules/module.py", line 593, in _apply
+    param_applied = fn(param)
+  File "/home/wbm3/anaconda3/envs/6484_dqn/lib/python3.7/site-packages/torch/nn/modules/module.py", line 897, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+KeyboardInterrupt
+Destroy EGL OpenGL window.

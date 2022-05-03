@@ -98,7 +98,7 @@ class GroundingUtils:
 
     def apply_grounded_operator(self, state_grounded_atoms, op_name, params):
         for o in self.domprob.ground_operator(op_name):
-            if params == list(o.variable_list.values()) and o.precondition_pos.issubset(state_grounded_atoms):
+            if set(params) == set(o.variable_list.values()) and o.precondition_pos.issubset(state_grounded_atoms):
                 next_state_grounded_atoms = copy.deepcopy(state_grounded_atoms)
                 for effect in o.effect_pos:
                     next_state_grounded_atoms.append(effect)
