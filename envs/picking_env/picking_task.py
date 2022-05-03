@@ -12,7 +12,21 @@ from airobot.utils.common import rotvec2quat
 
 
 class URRobotPickerGym(gym.Env):
-    def __init__(self, action_repeat=10, gui=False, max_episode_length=25, dist_threshold = 0.05):
+    def __init__(self, 
+                action_repeat=10, 
+                gui=True, 
+                max_episode_length=25, 
+                dist_threshold = 0.05,
+                reward_type=None):
+        self.reward_type = reward_type
+        self.max_plan_step_reached = 0
+        
+        # NOTE: below vars are necessary for the handcrafted
+        # dense reward.
+        self._subgoal1_reached = False
+        self._subgoal2_reached = False
+        self._object1_picked = False
+
         self._action_repeat = action_repeat
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
@@ -95,8 +109,12 @@ class URRobotPickerGym(gym.Env):
         self.ref_ee_ori = self.robot.arm.get_ee_pose()[1]
         self.gripper_ori = 0
         self._t = 0
+        self.max_plan_step_reached = 0
         self.robot.arm.eetool.set_jpos(0.0)
         self.robot.pb_client.reset_body(self._box_id, base_pos=self._box_pos)
+        self._subgoal0_reached = False
+        self._subgoal1_reached = False
+        self._object1_picked = False
         for step in range(self._action_repeat * 2):
             self.robot.pb_client.stepSimulation()
         return self._get_obs()
@@ -120,9 +138,34 @@ class URRobotPickerGym(gym.Env):
 
     def _get_reward(self, state):
         object_pos = state[4:]
-        dist_to_goal = np.linalg.norm(object_pos - self._goal_pos)
-        success = dist_to_goal < self._dist_threshold
-        reward = None
+        obj_dist_to_goal = np.linalg.norm(object_pos - self._goal_pos)
+        success = obj_dist_to_goal < self._dist_threshold
+        if self.reward_type == "sparse_handcrafted":
+            reward = success
+        elif self.reward_type == "dense_handcrafted":
+            if not self._subgoal1_reached:
+                dist_to_subgoal1 = np.linalg.norm(state[:3] - self._subgoal1_pos)
+                gripper_open_angle = self.robot.arm.eetool.get_jpos()
+                # NOTE gripper_open_angle == 0 implies the gripper is fully open
+                reward = -dist_to_subgoal1 - 0.1 * gripper_open_angle
+                if dist_to_subgoal1 < self._dist_threshold:
+                    self._subgoal1_reached = True
+            elif not self._subgoal2_reached:
+                dist_to_subgoal2 = np.linalg.norm(state[:3] - self._subgoal2_pos)
+                gripper_open_angle = self.robot.arm.eetool.get_jpos()
+                # NOTE gripper_open_angle == 0 implies the gripper is fully open
+                reward = -dist_to_subgoal2 - 0.1 * gripper_open_angle
+                if dist_to_subgoal2 < self._dist_threshold:
+                    self._subgoal2_reached = True
+            elif not self._object1_picked:
+                gripper_open_angle = self.robot.arm.eetool.get_jpos()
+                reward = gripper_open_angle
+                if gripper_open_angle > 0.1:
+                    self._object1_picked = True
+            else:
+                reward = -obj_dist_to_goal
+        else:
+            reward = None
         info = {'success': success}
         return reward, info
 

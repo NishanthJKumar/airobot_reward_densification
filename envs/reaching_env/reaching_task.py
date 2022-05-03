@@ -49,7 +49,7 @@ class URRobotGym(gym.Env):
         granularity=6,
         reward_type=None,
     ):
-        self._reward_type = reward_type
+        self.reward_type = reward_type
         self.max_plan_step_reached = 0
         self._action_repeat = action_repeat
         self._max_episode_length = max_episode_length
@@ -205,9 +205,9 @@ class URRobotGym(gym.Env):
 
     def _get_reward(self, state, action, collision):
         success = self.get_success(self, state)
-        if self._reward_type == "sparse_handcrafted":
+        if self.reward_type == "sparse_handcrafted":
             reward = success
-        elif self._reward_type == "dense_handcrafted":
+        elif self.reward_type == "dense_handcrafted":
             reward = self._get_reward_with_subgoal(state)
         else:
             reward = None

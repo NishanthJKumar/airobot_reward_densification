@@ -193,7 +193,6 @@ if args.domain == 'reach':
     else:
         raise ValueError(f"Unknown pddl type: {args.pddl_type}")
 elif args.domain == 'push':
-
     env_name = "URPusher-v1"
     if args.pddl_type == "single_subgoal":
         classifiers = PushingSingleSubgoalClassfiers()
@@ -214,7 +213,6 @@ elif args.domain == 'pick':
         raise ValueError(f"Unknown pddl type for picking env: {args.pddl_type}")
 else:
     raise ValueError(f"Unknown domain: {args.domain}")
-
 
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 
