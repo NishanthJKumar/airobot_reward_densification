@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from easyrl.runner.base_runner import BasicRunner
 from easyrl.configs import cfg
+from easyrl.configs.sac_config import SACConfig
 from easyrl.utils.data import StepData
 from easyrl.utils.data import Trajectory
 from easyrl.utils.gym_util import get_render_images
@@ -65,15 +66,22 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 # get render images at the same time step as ob
                 imgs = get_render_images(env)
 
+            if cfg.alg.epsilon is not None and not evaluation:
+                if np.random.uniform() < self.epsilon:
+                    if isinstance(cfg, SACConfig):
+                        random_action = True
+                    else:
+                        sample = True
+                else:
+                    if isinstance(cfg, SACConfig):
+                        random_action = False
+                    else:
+                        sample = False
+
             if random_action:
                 action = env.random_actions()
                 action_info = dict()
             else:
-                if cfg.alg.epsilon is not None and not evaluation:
-                    if np.random.uniform() < self.epsilon:
-                        sample = True
-                    else:
-                        sample = False
                 action, action_info = self.agent.get_action(ob,
                                                             sample=sample,
                                                             **action_kwargs)
