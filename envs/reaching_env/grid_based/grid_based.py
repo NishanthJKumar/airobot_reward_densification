@@ -4,7 +4,7 @@ from cachetools.keys import hashkey
 import numpy as np
 import os
 
-class GridBasedClassifiers(BaseClassifiers):
+class ReachingGridBasedClassifiers(BaseClassifiers):
     def at(self, env, gripper, loc):
         if self.is_goal(env, loc):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - env._goal_pos[:2]) < env._dist_threshold

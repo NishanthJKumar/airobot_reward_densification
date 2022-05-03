@@ -5,7 +5,7 @@ gym.logger.set_level(gym.logger.DEBUG)
 import numpy as np
 import os
 
-class MultipleSubgoalsClassfiers(BaseClassifiers):
+class ReachingMultipleSubgoalsClassfiers(BaseClassifiers):
 
     def at(self, env, gripper, loc):
         if self.is_goal(env, loc):
