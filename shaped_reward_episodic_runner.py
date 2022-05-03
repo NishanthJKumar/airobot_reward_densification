@@ -96,8 +96,11 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 print(env.envs[0].max_plan_step_reached)
             next_ob, _, done, env_info = env.step(action)
             next_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
-            reward, info = self.g_utils.get_shaped_reward(env.envs[0], ob, next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms, self.dynamic_reward_shaping)
-            reward = np.array([reward])
+
+            if env.envs[0].reward_type == None:
+                reward, info = self.g_utils.get_shaped_reward(env.envs[0], ob, next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms, self.dynamic_reward_shaping)
+                reward = np.array([reward])
+        
             info.update(env_info[0])
             info = [info]
 

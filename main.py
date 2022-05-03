@@ -187,7 +187,7 @@ else:
     env_name = "URReacher-v1"
 max_steps=300000
 
-ALG_NAME = "ppo"
+ALG_NAME = "sac"
 set_config(ALG_NAME)
 cfg.alg.seed = 0
 cfg.alg.num_envs = 1
@@ -216,8 +216,8 @@ elif pick_exp:
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
 
 cfg.alg.save_dir += f"_{ALG_NAME}"
-cfg.alg.episode_steps = 150
-cfg.alg.eval_interval = 75
+cfg.alg.episode_steps = 250
+cfg.alg.eval_interval = 50
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 
 print(f"====================================")
@@ -228,22 +228,22 @@ print(f"====================================")
 set_random_seed(cfg.alg.seed)
 
 if pick_exp or push_exp:
-    env_kwargs = dict()
+    env_kwargs = dict(reward_type=None)
 else:
-    env_kwargs = dict(with_obstacle=with_obstacle)
+    env_kwargs = dict(with_obstacle=with_obstacle, granularity=6, reward_type="sparse")
 env_kwargs.update(dict(max_episode_length = cfg.alg.episode_steps))
 env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
 
 grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, path_to_fd_folder, env.envs[0].get_success)
-save_dir = train_ppo(
+# save_dir = train_ppo(
+#     cfg=cfg,
+#     env_name=env_name,
+#     grounding_utils=grounding_utils,
+# )
+save_dir = train_sac(
     cfg=cfg,
     env_name=env_name,
     grounding_utils=grounding_utils,
 )
-# save_dir = train_sac(
-#     cfg=cfg,
-#     env_name="URPusher-v1" if push_exp else "URReacher-v1",
-#     grounding_utils=grounding_utils,
-# )
