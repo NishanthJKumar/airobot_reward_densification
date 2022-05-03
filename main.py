@@ -19,6 +19,7 @@ import envs.reaching_env.reaching_task
 from utils import play_video, GroundingUtils
 import gym
 from envs.picking_env.orig_blocksworld.single_subgoal import PickingSingleSubgoalClassfiers
+from envs.picking_env.multiple_subgoals.multiple_subgoals import PickingMultipleSubgoalClassfiers
 from envs.pushing_env.single_subgoal.single_subgoal import PushingSingleSubgoalClassfiers
 from envs.pushing_env.multiple_subgoals.multiple_subgoals import PushingMultipleSubgoalClassfiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
@@ -69,6 +70,7 @@ def train_ppo(
     runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env)
     engine = PPOEngine(agent=agent, runner=runner)
     if cfg.alg.eval:
+        agent.load_model()
         stat_info, _ = engine.eval(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
@@ -76,6 +78,7 @@ def train_ppo(
         play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     else:
         engine.train()
+        agent.load_model()
         stat_info, _ = engine.eval(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
@@ -92,13 +95,13 @@ def train_ppo(
 # 5. Run the appropriate function (training or evaling) in the 
 # appropriate environment.
 
-classifiers = PickingSingleSubgoalClassfiers()
+classifiers = GridBasedClassifiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False #True
-pick_exp = True
+pick_exp = False
 with_obstacle= True #False
 if push_exp:
     env_name = "URPusher-v1"
@@ -111,11 +114,19 @@ max_steps=300000
 set_config("ppo")
 cfg.alg.seed = 0
 cfg.alg.num_envs = 1
-cfg.alg.epsilon = 0.4
+cfg.alg.epsilon = 0.8
 cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
 cfg.alg.eval = False
+if cfg.alg.eval:
+    cfg.alg.resume_step = max_steps
+    cfg.alg.test = True
+else:
+    cfg.alg.resume_step = None
+    cfg.alg.test = False
+cfg.alg.resume = False
+cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = False
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
@@ -125,7 +136,7 @@ if push_exp:
 elif pick_exp:
     cfg.alg.save_dir += "_pick"
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
-cfg.alg.episode_steps = 100
+cfg.alg.episode_steps = 25
 cfg.alg.eval_interval = 100
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 

@@ -7,7 +7,7 @@ gym.logger.set_level(gym.logger.DEBUG)
 
 # Only one Subgoal.
 
-class PickingSingleSubgoalClassfiers(BaseClassifiers):
+class PickingMultipleSubgoalClassfiers(BaseClassifiers):
 
     def robot_at(self, env, gripper, loc):
         if self.is_goal(env, loc):
@@ -16,6 +16,10 @@ class PickingSingleSubgoalClassfiers(BaseClassifiers):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0] - env._subgoal0_pos) < env._dist_threshold
         elif self.is_subgoal1(env, loc):
             return np.linalg.norm(env.robot.arm.get_ee_pose()[0] - env._subgoal1_pos) < env._dist_threshold
+        elif self.is_subgoal2(env, loc):
+            return np.linalg.norm(env.robot.arm.get_ee_pose()[0] - env._subgoal2_pos) < env._dist_threshold
+        elif self.is_subgoal3(env, loc):
+            return np.linalg.norm(env.robot.arm.get_ee_pose()[0] - env._subgoal3_pos) < env._dist_threshold
         else:
             raise ValueError(f"loc should be either 'goal' or 'subgoal' not '{loc}'")
 
@@ -31,6 +35,10 @@ class PickingSingleSubgoalClassfiers(BaseClassifiers):
             return np.linalg.norm(object_pos - env._subgoal0_pos) < env._dist_threshold
         elif self.is_subgoal1(env, loc):
             return np.linalg.norm(object_pos - env._subgoal1_pos) < env._dist_threshold
+        elif self.is_subgoal2(env, loc):
+            return np.linalg.norm(object_pos - env._subgoal2_pos) < env._dist_threshold
+        elif self.is_subgoal3(env, loc):
+            return np.linalg.norm(object_pos - env._subgoal3_pos) < env._dist_threshold
         else:
             raise ValueError(f"loc should be either 'goal' or 'subgoal0' or 'subgoal1' not '{loc}'")
 
@@ -42,6 +50,12 @@ class PickingSingleSubgoalClassfiers(BaseClassifiers):
 
     def is_subgoal1(self, env, loc):
         return loc == "subgoal1"
+
+    def is_subgoal2(self, env, loc):
+        return loc == "subgoal2"
+
+    def is_subgoal3(self, env, loc):
+        return loc == "subgoal3"
 
     def holding(self, env, gripper, obj):
         if obj == "box1":
@@ -63,7 +77,7 @@ class PickingSingleSubgoalClassfiers(BaseClassifiers):
     def get_typed_predicates(self):
         # TODO can this be read from domain file?
         # This needs to specify typed predicates
-        return {"0-arity": [], "1-arity": [(self.is_goal, "location"), (self.is_subgoal1, "location"), (self.gripper_open, "gripper")], "2-arity": [(self.robot_at, "gripper", "location"), (self.object_at, "box", "location"), (self.holding, "gripper", "box")]}
+        return {"0-arity": [], "1-arity": [(self.is_goal, "location"), (self.is_subgoal1, "location"), (self.is_subgoal2, "location"), (self.is_subgoal3, "location"), (self.gripper_open, "gripper")], "2-arity": [(self.robot_at, "gripper", "location"), (self.object_at, "box", "location"), (self.holding, "gripper", "box")]}
 
     def get_path_to_domain_and_problem_files(self):
-        return (os.path.abspath("envs/picking_env/orig_blocksworld/blocksworld-domain.pddl"), os.path.abspath("envs/picking_env/orig_blocksworld/blocksworld-problem.pddl"))
+        return (os.path.abspath("envs/picking_env/multiple_subgoals/blocksworld-multi-subgoal-domain.pddl"), os.path.abspath("envs/picking_env/multiple_subgoals/blocksworld-multi-subgoal-problem.pddl"))

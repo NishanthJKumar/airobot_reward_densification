@@ -55,20 +55,32 @@ class URRobotPickerGym(gym.Env):
                                             dtype=np.float32)
         self.reset()
         # add the dummy subgoal locations
-        self._subgoal_urdf_id = []
+        self._subgoal_urdf_ids = []
         self._subgoal0_pos = self._ref_ee_pos
         self._subgoal1_pos = self._box_pos + np.array([0.0, 0.0, 0.25])
-        self._subgoal_urdf_id.append(
+        self._subgoal2_pos = self._box_pos + np.array([0.0, 0.0, 0.13])
+        self._subgoal3_pos = (self._box_pos + self._goal_pos) / 2
+        self._subgoal_urdf_ids.append(
             self.robot.pb_client.load_geom(
                 "sphere", size=0.04, mass=0, base_pos=self._subgoal1_pos, rgba=[0, 0.8, 0.8, 0.8]
+            )
+        )
+        self._subgoal_urdf_ids.append(
+            self.robot.pb_client.load_geom(
+                "sphere", size=0.04, mass=0, base_pos=self._subgoal2_pos, rgba=[0, 0.8, 0.8, 0.8]
+            )
+        )
+        self._subgoal_urdf_ids.append(
+            self.robot.pb_client.load_geom(
+                "sphere", size=0.04, mass=0, base_pos=self._subgoal3_pos, rgba=[0, 0.8, 0.8, 0.8]
             )
         )
         # Remove collision checking between the robot and the subgoal balls, as well as
         # between the box and the subgoal balls.
         for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
-            for sg in self._subgoal_urdf_id:
+            for sg in self._subgoal_urdf_ids:
                 self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id, sg, i, -1, enableCollision=0)
-        for sg in self._subgoal_urdf_id:
+        for sg in self._subgoal_urdf_ids:
             self.robot.pb_client.setCollisionFilterPair(self._box_id, sg, -1, -1, enableCollision=0)
 
     def reset(self):
@@ -184,52 +196,3 @@ register(
     id=env_name,
     entry_point=f"{module_name}:URRobotPickerGym",
 )
-
-# def main():
-#     """
-#     This function shows an example of block stacking.
-#     """
-#     np.set_printoptions(precision=4, suppress=True)
-#     robot = Robot('ur5e_2f140')
-#     success = robot.arm.go_home()
-#     ori = euler2quat([0, 0, np.pi / 2])
-#     robot.pb_client.load_urdf('table/table.urdf',
-#                               [.5, 0, 0.4],
-#                               ori,
-#                               scaling=0.9)
-#     box_size = 0.05
-#     box_id1 = robot.pb_client.load_geom('box', size=box_size,
-#                                         mass=.1,
-#                                         base_pos=[.5, 0.12, 1.0],
-#                                         rgba=[1, 0, 0, 1])
-#     box_id2 = robot.pb_client.load_geom('box',
-#                                         size=box_size,
-#                                         mass=.1,
-#                                         base_pos=[0.3, 0.12, 1.0],
-#                                         rgba=[0, 0, 1, 1])
-#     robot.arm.eetool.open()
-#     obj_pos = robot.pb_client.get_body_state(box_id1)[0]
-#     move_dir = obj_pos - robot.arm.get_ee_pose()[0]
-#     move_dir[2] = 0
-#     eef_step = 0.025
-#     robot.arm.move_ee_xyz(move_dir, eef_step=eef_step)
-#     move_dir = np.zeros(3)
-#     move_dir[2] = obj_pos[2] - robot.arm.get_ee_pose()[0][2]
-#     robot.arm.move_ee_xyz(move_dir, eef_step=eef_step)
-#     robot.arm.eetool.close(wait=False)
-#     import ipdb; ipdb.set_trace()
-#     robot.arm.move_ee_xyz([0, 0, 0.3], eef_step=eef_step)
-
-#     obj_pos = robot.pb_client.get_body_state(box_id2)[0]
-#     move_dir = obj_pos - robot.arm.get_ee_pose()[0]
-#     move_dir[2] = 0
-#     robot.arm.move_ee_xyz(move_dir, eef_step=eef_step)
-#     move_dir = obj_pos - robot.arm.get_ee_pose()[0]
-#     move_dir[2] += box_size * 2
-#     robot.arm.move_ee_xyz(move_dir, eef_step=eef_step)
-#     robot.arm.eetool.open()
-#     time.sleep(10)
-
-
-# if __name__ == '__main__':
-#     main()
