@@ -19,6 +19,10 @@
         :precondition (and
             (not (is_goal ?from))
             (not (is_goal ?to))
+            (not (is_subgoal2 ?from))
+            (not (is_subgoal2 ?to))
+            (not (is_subgoal3 ?from))
+            (not (is_subgoal3 ?to))
             (robot_at ?g ?from)
             (not (robot_at ?g ?to))
             (is_subgoal1 ?to)
@@ -34,6 +38,10 @@
         :precondition (and
             (not (is_goal ?from))
             (not (is_goal ?to))
+            (not (is_subgoal1 ?from))
+            (not (is_subgoal1 ?to))
+            (not (is_subgoal3 ?from))
+            (not (is_subgoal3 ?to))
             (robot_at ?g ?from)
             (not (robot_at ?g ?to))
             (is_subgoal2 ?to)
@@ -62,6 +70,10 @@
         :precondition (and
             (not (is_goal ?from))
             (not (is_goal ?to))
+            (not (is_subgoal2 ?from))
+            (not (is_subgoal2 ?to))
+            (not (is_subgoal1 ?from))
+            (not (is_subgoal1 ?to))
             (robot_at ?g ?from)
             (not (robot_at ?g ?to))
             (holding ?g ?obj)
