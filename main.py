@@ -71,7 +71,7 @@ def train_ppo(
 
     critic = ValueNet(critic_body, in_features=64)
     agent = PPOAgent(actor=actor, critic=critic, env=env)
-    runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env)
+    runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env, dynamic_reward_shaping=cfg.alg.dynamic_reward_shaping)
     engine = PPOEngine(agent=agent, runner=runner)
     if cfg.alg.eval:
         agent.load_model()
@@ -142,7 +142,7 @@ def train_sac(
     q2 = ValueNet(q2_body)
     memory = CyclicBuffer(capacity=cfg.alg.replay_size)
     agent = SACAgent(actor=actor, q1=q1, q2=q2, memory=memory, env=env)
-    runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env)
+    runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env, dynamic_reward_shaping=cfg.alg.dynamic_reward_shaping)
     engine = SACEngine(agent=agent, runner=runner)
     if cfg.alg.eval:
         agent.load_model()
@@ -172,8 +172,8 @@ def train_sac(
 
 classifiers = GridBasedClassifiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
-# path_to_fd_folder = '/home/wbm3/Documents/GitHub/downward'
-path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
+path_to_fd_folder = '/home/wbm3/Documents/GitHub/downward'
+# path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
 
 # call train_ppo, just set the argument flag properly
 push_exp = False #True
@@ -206,7 +206,7 @@ else:
 cfg.alg.resume = False
 cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
-cfg.alg.dynamic_reward_shaping = False
+cfg.alg.dynamic_reward_shaping = "dist"
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
 cfg.alg.save_dir += "/" + f"{env_name}"
 if push_exp:
