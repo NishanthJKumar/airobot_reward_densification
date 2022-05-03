@@ -80,7 +80,7 @@ def train_ppo(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
+        # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     else:
         engine.train()
         agent.load_model()
@@ -88,7 +88,7 @@ def train_ppo(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
+        # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
 
     return cfg.alg.save_dir
 
@@ -151,7 +151,7 @@ def train_sac(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
+        # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     else:
         engine.train()
         agent.load_model()
@@ -159,7 +159,7 @@ def train_sac(
             render=False, save_eval_traj=True, eval_num=1, sleep_time=0.0
         )
         pprint.pprint(stat_info)
-        play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
+        # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
 
     return cfg.alg.save_dir
 
@@ -170,12 +170,12 @@ parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick'], require
 parser.add_argument('-rt', '--reward_type', choices=['sparse_handcrafted', "dense_handcrafted", 'pddl'], required=True, help='Type of reward to use.')
 parser.add_argument('-pt', '--pddl_type', choices=['single_subgoal', 'multi_subgoal', 'grid_based'], required=True, help='Type of classifier to use.')
 parser.add_argument('-al', '--algorithm', choices=['ppo', 'sac'], required=True, help='Choice of learning algorithm to use.')
-parser.add_argument('-ts', '--training_steps', int, default=200000, help='Number of steps to run training for.')
-parser.add_argument('-es', '--episode_steps', int, default=50, help='Max. number of steps in an episode.')
-parser.add_argument('-ei', '--eval_interval', int, default=100, help='Num. trajs after which to call eval.')
-parser.add_argument('-fdp', '--path_to_fd', str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
-parser.add_argument('-se', '--seed', int, default=0, help='Random seed to use during training.')
-parser.add_argument('-g', '--granularity', type=int, default=3, help='Number of divisions to segment the working space of the arm. Total divisions is equal to 2^{input}.')
+parser.add_argument('-ts', '--training_steps', type=int, default=200000, help='Number of steps to run training for.')
+parser.add_argument('-es', '--episode_steps', type=int, default=50, help='Max. number of steps in an episode.')
+parser.add_argument('-ei', '--eval_interval', type=int, default=100, help='Num. trajs after which to call eval.')
+parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
+parser.add_argument('-se', '--seed', type=int, default=0, help='Random seed to use during training.')
+parser.add_argument('-g', '--granularity', type=int, default=6, help='Number of divisions to segment the working space of the arm. Total divisions is equal to 2^{input}.')
 parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
 
@@ -237,7 +237,7 @@ cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = "dist"
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
 cfg.alg.save_dir += "/" + f"{env_name}"
-cfg.alg.save_dir += "_" + args.domain + "_" + "args.reward_type"
+cfg.alg.save_dir += "_" + args.domain + "_" + args.reward_type
 cfg.alg.save_dir += f"_{args.algorithm}"
 cfg.alg.episode_steps = args.episode_steps
 cfg.alg.eval_interval = args.eval_interval
