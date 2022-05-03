@@ -123,9 +123,33 @@ class GroundingUtils:
     def inv_phi_t(self, t):
         return t
 
-    def dist_phi(self, state, max_plan_step_reached):
-        import ipdb; ipdb.set_trace()
-        return 0
+    def loc2xy(self, env, loc_index):
+        if env._granularity % 2 == 0:
+            square = int(np.sqrt(2 ** env._granularity))
+            rows, cols = square, square
+        else:
+            square = int(np.sqrt(2 ** (env._granularity - 1)))
+            rows, cols = square, int((2 ** env._granularity) / square)
+        loc_x, loc_y = loc_index // cols, loc_index % cols
+        xmin, ymin = env._xy_bounds[:, 0]
+        xmax, ymax = env._xy_bounds[:, 1]
+        x_lower_bound = xmin + (xmax - xmin) / rows * loc_x
+        x_upper_bound = xmin + (xmax - xmin) / rows * (loc_x + 1)
+        y_lower_bound = ymin + (ymax - ymin) / cols * loc_y
+        y_upper_bound = ymin + (ymax - ymin) / cols * (loc_y + 1)
+        return np.array([(x_upper_bound + x_lower_bound)/2, (y_upper_bound + y_lower_bound)/2])
+
+    def get_dist_to_next_subgoal(self, env, state, next_subgoal):
+        distance = None
+        for predicate in next_subgoal:
+            if predicate[0] == "at" and predicate[1] == "claw":
+                subgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
+                distance = np.linalg.norm(subgoal_xy - state[0])
+                return distance
+        raise NotImplementedError("get_dist_to_next_subgoal not implemented for this environment")
+
+    def dist_phi(self, env, state, next_subgoal):
+        return -1 * self.get_dist_to_next_subgoal(env, state, next_subgoal)
 
     def phi(self, env, state_grounded_atoms, plan, dynamic_reward_shaping, state=None):
         t = env._t
@@ -133,21 +157,25 @@ class GroundingUtils:
             # NOTE: using set() is very important here to remove potential duplicates
             # and make the comparison agnostic to order!
             if set(grounded_atoms) == set(state_grounded_atoms):
-                if dynamic_reward_shaping is None or t == 0:
+                if dynamic_reward_shaping is None:
                     return i + env.max_plan_step_reached
                 elif dynamic_reward_shaping is "basic":
+                    if t == 0:
+                        return [i + env.max_plan_step_reached, i + env.max_plan_step_reached]
                     return [(i + env.max_plan_step_reached) * self.phi_t(t), i + env.max_plan_step_reached]
                 elif dynamic_reward_shaping is "dist":
-                    return [ALPHA * self.dist_phi(state, env.max_plan_step_reached), i + env.max_plan_step_reached] #* self.phi_t(t)
+                    return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached]), i + env.max_plan_step_reached] #* self.phi_t(t)
                 else:
                     raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
 
-        if dynamic_reward_shaping is None or t == 0:
+        if dynamic_reward_shaping is None:
             return env.max_plan_step_reached
         elif dynamic_reward_shaping is "basic":
+            if t == 0:
+                return [env.max_plan_step_reached, env.max_plan_step_reached]
             return [(env.max_plan_step_reached) * self.phi_t(t), env.max_plan_step_reached]
         elif dynamic_reward_shaping is "dist":
-            return [ALPHA * self.dist_phi(state, env.max_plan_step_reached), env.max_plan_step_reached] #* self.phi_t(t)
+            return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached]), env.max_plan_step_reached] #* self.phi_t(t)
         else:
             raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
 
@@ -156,19 +184,12 @@ class GroundingUtils:
         reward = 1 if success else 0
 
         if dynamic_reward_shaping is "dist":
-            prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping, state=state)
+            prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping, state=state)[1]
         else:
-            prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
+            prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)[1]
         
-        if dynamic_reward_shaping is "basic":
-            if env.max_plan_step_reached < prev_phi[1]:
-                env.max_plan_step_reached = prev_phi[1]
-        elif dynamic_reward_shaping is "dist":
-            if env.max_plan_step_reached < prev_phi[1]:
-                env.max_plan_step_reached = prev_phi[1]
-        else:
-            if env.max_plan_step_reached < prev_phi:
-                env.max_plan_step_reached = prev_phi
+        if env.max_plan_step_reached < prev_phi:
+            env.max_plan_step_reached = prev_phi
             # if max_plan_step_reached >= 9:
             #     print(env._t)
             #     print(dist_to_goal)

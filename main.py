@@ -206,7 +206,7 @@ else:
 cfg.alg.resume = False
 cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
-cfg.alg.dynamic_reward_shaping = "basic"
+cfg.alg.dynamic_reward_shaping = "dist"
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
 cfg.alg.save_dir += "/" + f"{env_name}"
 if push_exp:
