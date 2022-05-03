@@ -1,6 +1,9 @@
 # Unnecessary trained weights + easyrl things
 /data
 
+# Unnecessary log files
+*.txt
+
 # Unnecessary FD things
 sas_plan.1
 output.sas
