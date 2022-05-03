@@ -205,9 +205,9 @@ class URRobotGym(gym.Env):
 
     def _get_reward(self, state, action, collision):
         success = self.get_success(self, state)
-        if self._reward_type == "sparse":
+        if self._reward_type == "sparse_handcrafted":
             reward = success
-        elif self._reward_type == "dense":
+        elif self._reward_type == "dense_handcrafted":
             reward = self._get_reward_with_subgoal(state)
         else:
             reward = None

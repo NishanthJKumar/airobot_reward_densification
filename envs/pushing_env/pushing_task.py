@@ -144,9 +144,9 @@ class URRobotPusherGym(gym.Env):
         object_pos = state[2:4]
         dist_to_goal = np.linalg.norm(object_pos - self._goal_pos[:2])
         success = dist_to_goal < self._dist_threshold
-        if self._reward_type == "sparse":
+        if self._reward_type == "sparse_handcrafted":
             reward = success
-        elif self._reward_type == "dense":
+        elif self._reward_type == "dense_handcrafted":
             dist_to_obj = np.linalg.norm(state[:2] - object_pos)
             previous_dist_to_goal = np.linalg.norm(previous_state[2:4] - self._goal_pos[:2])
             if dist_to_obj < self._dist_threshold:
