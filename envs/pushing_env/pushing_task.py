@@ -23,10 +23,12 @@ class URRobotPusherGym(gym.Env):
                  action_repeat=10,
                  gui=False,
                  max_episode_length=25,
-                 dist_threshold=0.05):
+                 dist_threshold=0.05,
+                 granularity=4): # TODO: Seems like granularity parameter is not set correctly from make_vec_env. Need to check this!
         self._action_repeat = action_repeat
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
+        self._granularity = granularity
 
         self._xy_bounds = np.array([[0.23, 0.78], # [xmin, xmax]
                                    [-0.35, 0.3]]) # [ymin, ymax]

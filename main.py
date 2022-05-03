@@ -25,6 +25,7 @@ from envs.picking_env.orig_blocksworld.single_subgoal import PickingSingleSubgoa
 from envs.picking_env.multiple_subgoals.multiple_subgoals import PickingMultipleSubgoalClassfiers
 from envs.pushing_env.single_subgoal.single_subgoal import PushingSingleSubgoalClassfiers
 from envs.pushing_env.multiple_subgoals.multiple_subgoals import PushingMultipleSubgoalClassfiers
+from envs.pushing_env.grid_based.grid_based import PushingGridBasedClassifiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import MultipleSubgoalsClassfiers
 from envs.reaching_env.single_subgoal.single_subgoal import SingleSubgoalClassfiers
 from envs.reaching_env.grid_based.grid_based import GridBasedClassifiers
@@ -169,7 +170,7 @@ def train_sac(
 # 5. Run the appropriate function (training or evaling) in the
 # appropriate environment.
 
-classifiers = GridBasedClassifiers()
+classifiers = PushingGridBasedClassifiers()
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 # path_to_fd_folder = '/home/wbm3/Documents/GitHub/downward'
 path_to_fd_folder = '/home/njk/Documents/GitHub/downward'
@@ -225,6 +226,7 @@ print(f"      Total number of steps:{cfg.alg.max_steps}")
 print(f"====================================")
 
 set_random_seed(cfg.alg.seed)
+
 if pick_exp or push_exp:
     env_kwargs = dict()
 else:
