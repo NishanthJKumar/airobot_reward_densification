@@ -119,6 +119,14 @@ cfg.alg.max_steps = max_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
 cfg.alg.eval = False
+if cfg.alg.eval:
+    cfg.alg.resume_step = max_steps
+    cfg.alg.test = True
+else:
+    cfg.alg.resume_step = None
+    cfg.alg.test = False
+cfg.alg.resume = False
+cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = False
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
@@ -128,7 +136,7 @@ if push_exp:
 elif pick_exp:
     cfg.alg.save_dir += "_pick"
 cfg.alg.save_dir += f"ob_{str(with_obstacle)}"
-cfg.alg.episode_steps = 100
+cfg.alg.episode_steps = 25
 cfg.alg.eval_interval = 100
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
 

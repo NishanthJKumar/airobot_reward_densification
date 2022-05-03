@@ -46,7 +46,7 @@ class URRobotGym(gym.Env):
         gui=True,
         max_episode_length=25,
         dist_threshold=0.05,
-        granularity=5,
+        granularity=6,
     ):
         self.max_plan_step_reached = 0
         self._action_repeat = action_repeat
