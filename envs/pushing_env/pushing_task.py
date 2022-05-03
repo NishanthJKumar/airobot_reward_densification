@@ -89,16 +89,11 @@ class URRobotPusherGym(gym.Env):
         state_low = np.full(len(self._get_obs()), -float("inf"))
         state_high = np.full(len(self._get_obs()), float("inf"))
         self.observation_space = spaces.Box(state_low, state_high, dtype=np.float32)
-        self.reset()
 
+        self.reset()
         # add the dummy subgoal locations
         self._subgoal_urdf_id = []
         self._subgoal0_pos = self._ref_ee_pos
-        self._subgoal_urdf_id.append(
-            self.robot.pb_client.load_geom(
-                "sphere", size=0.04, mass=0, base_pos=self._subgoal0_pos, rgba=[0, 0.8, 0.8, 0.8]
-            )
-        )
         self._subgoal1_pos = np.array([0.4, -0.21, 1.0])
         self._subgoal_urdf_id.append(
             self.robot.pb_client.load_geom(
@@ -117,6 +112,8 @@ class URRobotPusherGym(gym.Env):
                 "sphere", size=0.04, mass=0, base_pos=self._subgoal3_pos, rgba=[0, 0.8, 0.8, 0.8]
             )
         )
+        # Remove collision checking between the robot and the subgoal balls, as well as
+        # between the box and the subgoal balls.
         for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
             for sg in self._subgoal_urdf_id:
                 self.robot.pb_client.setCollisionFilterPair(self.robot.arm.robot_id, sg, i, -1, enableCollision=0)

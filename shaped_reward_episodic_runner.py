@@ -4,10 +4,13 @@ from copy import deepcopy
 import numpy as np
 import torch
 from easyrl.runner.base_runner import BasicRunner
+from easyrl.configs import cfg
+from easyrl.configs.sac_config import SACConfig
 from easyrl.utils.data import StepData
 from easyrl.utils.data import Trajectory
 from easyrl.utils.gym_util import get_render_images
 from easyrl.utils.torch_util import torch_to_np
+import cv2
 import os
 
 class ShapedRewardEpisodicRunner(BasicRunner):
@@ -21,7 +24,10 @@ class ShapedRewardEpisodicRunner(BasicRunner):
         self.g_utils = g_utils
         self.plan = self.g_utils.plan
         self.plan_grounded_atoms = None
-
+        if cfg.alg.epsilon is not None:
+            np.random.seed(cfg.alg.seed)
+            self.epsilon = cfg.alg.epsilon
+            self.epsilon_reduction = self.epsilon / cfg.alg.max_steps
     @torch.no_grad()
     def __call__(self, time_steps, sample=True, evaluation=False,
                  return_on_done=False, render=False, render_image=False,
@@ -39,7 +45,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             env = self.train_env
         if self.obs is None or reset_first or evaluation:
             self.reset(env=env, **reset_kwargs)
-        ob = self.obs  #['observation'] # NOTE: (njk) this is necessary for FetchBlockConstructionEnv
+        ob = self.obs
         # this is critical for some environments depending
         # on the returned ob data. use deepcopy() to avoid
         # adding the same ob to the traj
@@ -60,6 +66,18 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 # get render images at the same time step as ob
                 imgs = get_render_images(env)
 
+            if cfg.alg.epsilon is not None and not evaluation:
+                if np.random.uniform() < self.epsilon:
+                    if isinstance(cfg, SACConfig):
+                        random_action = True
+                    else:
+                        sample = True
+                else:
+                    if isinstance(cfg, SACConfig):
+                        random_action = False
+                    else:
+                        sample = False
+
             if random_action:
                 action = env.random_actions()
                 action_info = dict()
@@ -69,21 +87,24 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                                                             **action_kwargs)
 
             previous_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
-            next_ob, _, done, env_info = env.step(action)
-            if done:
-                self.g_utils.reset_max_plan_step_reached()
             if self.plan_grounded_atoms is None:
                 # This is the first time we're calling the function, so
                 # we can compute the plan_grounded_atoms.
                 self.plan_grounded_atoms = self.g_utils.apply_grounded_plan(previous_state_grounded_atoms, self.plan)
+            if evaluation:
+                print(env.envs[0].max_plan_step_reached)
+            next_ob, _, done, env_info = env.step(action)
             next_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
             reward, info = self.g_utils.get_shaped_reward(env.envs[0], next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms)
             reward = np.array([reward])
             info.update(env_info[0])
             info = [info]
-            
-            next_ob = next_ob#['observation']
 
+            # Rendering!
+            # if evaluation:
+            #     cv2.imshow("img", env.render())
+            #     cv2.waitKey(25)
+            
             if render_image:
                 for img, inf in zip(imgs, info):
                     inf['render_image'] = deepcopy(img)
@@ -106,6 +127,8 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                           info=info)
             ob = next_ob
             traj.add(sd)
+            if cfg.alg.epsilon is not None and not evaluation:
+                self.epsilon = max([0.2, self.epsilon - self.epsilon_reduction])
             if return_on_done and np.all(all_dones):
                 break
 
@@ -113,4 +136,5 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             last_val = self.agent.get_val(traj[-1].next_ob)
             traj.add_extra('last_val', torch_to_np(last_val))
         self.obs = ob if not evaluation else None
+
         return traj

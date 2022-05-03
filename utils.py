@@ -5,8 +5,6 @@ import copy
 import os
 import glob
 
-max_plan_step_reached = 0
-
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
         video_files = list(glob.glob(video_dir + "/eval/**/render_video.mp4"))
@@ -69,15 +67,10 @@ class GroundingUtils:
             # TODO (wmcclinton) automatically genetate plan_file from folder
             self.plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
         
-    def reset_max_plan_step_reached(self):
-        global max_plan_step_reached
-        max_plan_step_reached = 0
-
     def get_state_grounded_atoms(self, env):
         state_grounded_atoms = []
 
         predicates = self.classifiers.get_typed_predicates()
-        # TODO (wmcclinton) get objects with types from pddl
         objects = [(obj, obj_type) for obj, obj_type in self.domprob.problem.objects.items()]
         
         # TODO: make this cleaner so that we can automatically get things up to
@@ -110,6 +103,7 @@ class GroundingUtils:
                 for effect in o.effect_neg:
                     next_state_grounded_atoms.remove(effect)
                 return next_state_grounded_atoms
+        import ipdb; ipdb.set_trace()
         return None
 
     def apply_grounded_plan(self, state_grounded_atoms, plan):
@@ -121,35 +115,29 @@ class GroundingUtils:
             plan_grounded_atoms.append(self.apply_grounded_operator(plan_grounded_atoms[-1], op_name, params))
         return plan_grounded_atoms
 
-    def phi(self, state_grounded_atoms, plan):
-        global max_plan_step_reached
-        for i, grounded_atoms in enumerate(plan[max_plan_step_reached:]):
+    def phi(self, env, state_grounded_atoms, plan):
+        for i, grounded_atoms in enumerate(plan[env.max_plan_step_reached:]):
             # NOTE: using set() is very important here to remove potential duplicates
             # and make the comparison agnostic to order!
             if set(grounded_atoms) == set(state_grounded_atoms):
-                return i + max_plan_step_reached
-        return max_plan_step_reached
+                return i + env.max_plan_step_reached
+        return env.max_plan_step_reached
 
     def get_shaped_reward(self, env, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan):
-        global max_plan_step_reached
         success = self.task_success_fn(env, state)
         reward = 1 if success else 0
 
-        prev_phi = self.phi(previous_state_grounded_atoms, plan)
-        if max_plan_step_reached < prev_phi:
-            max_plan_step_reached = prev_phi
-
-            if max_plan_step_reached >= 6:
-                import ipdb; ipdb.set_trace()
+        prev_phi = self.phi(env, previous_state_grounded_atoms, plan)
+        if env.max_plan_step_reached < prev_phi:
+            env.max_plan_step_reached = prev_phi
             
             # if max_plan_step_reached >= 9:
             #     print(env._t)
             #     print(dist_to_goal)
             #     import ipdb; ipdb.set_trace()
 
-        f = self.phi(next_state_grounded_atoms, plan) - self.phi(previous_state_grounded_atoms, plan)
+        f = self.phi(env, next_state_grounded_atoms, plan) - self.phi(env, previous_state_grounded_atoms, plan)
         reward = reward + f
-        # reward = -dist_to_goal
         info = dict(success=success)
 
         # if dist_to_goal <= 0.1:
