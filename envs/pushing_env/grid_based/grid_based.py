@@ -27,7 +27,9 @@ class PushingGridBasedClassifiers(BaseClassifiers):
             x_upper_bound = xmin + (xmax - xmin) / rows * (loc_x + 1)
             y_lower_bound = ymin + (ymax - ymin) / cols * loc_y
             y_upper_bound = ymin + (ymax - ymin) / cols * (loc_y + 1)
-            return (x_lower_bound <= env.robot.arm.get_ee_pose()[0][0] <= x_upper_bound) and (y_lower_bound <= env.robot.arm.get_ee_pose()[0][1] <= y_upper_bound)
+            x_mid, y_mid = (x_lower_bound + x_upper_bound) / 2, (y_lower_bound + y_upper_bound) / 2
+            return np.linalg.norm(env.robot.arm.get_ee_pose()[0][:2] - np.array([x_mid, y_mid])) < env._dist_threshold
+            # return (x_lower_bound <= env.robot.arm.get_ee_pose()[0][0] <= x_upper_bound) and (y_lower_bound <= env.robot.arm.get_ee_pose()[0][1] <= y_upper_bound)
         else:
             raise ValueError(f"loc should be either 'goal' or must start with 'loc' not '{loc}'")
     
@@ -124,4 +126,4 @@ class PushingGridBasedClassifiers(BaseClassifiers):
         return {"0-arity": [], "1-arity": [(self.is_goal, "location")], "2-arity": [(self.robot_at, "gripper", "location"), (self.object_at, "box", "location"), (self.neighbors, "location", "location")]}
 
     def get_path_to_domain_and_problem_files(self):
-        return (os.path.abspath("envs/pushing_env/grid_based/pushing-grid-domain.pddl"), os.path.abspath("envs/pushing_env/grid_based/pushing-grid-problem6.pddl"))
+        return (os.path.abspath("envs/pushing_env/grid_based/pushing-grid-domain.pddl"), os.path.abspath("envs/pushing_env/grid_based/pushing-grid-problem5.pddl"))

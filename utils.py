@@ -55,10 +55,11 @@ class GroundingUtils:
         self.task_success_fn = task_success_fn
         self.pddl_type = pddl_type
         self.env_type = env_type
+
         # NOTE: In the future, we should be generaitng this problem_file_path
         # within this init method.
         self.domprob = pddlpy.DomainProblem(domain_file_path, problem_file_path)
-        os.system(f'python {path_to_fd_folder}/fast-downward.py --alias seq-sat-lama-2011 {domain_file_path} {problem_file_path}')
+        os.system(f'python {path_to_fd_folder}/fast-downward.py --alias seq-sat-lama-2011 {domain_file_path} {problem_file_path} >/dev/null 2>&1')
         plan_file_name = "sas_plan.1"
         with open(plan_file_name) as f:
             # TODO (wmcclinton) automatically genetate plan_file from folder
@@ -186,6 +187,7 @@ class GroundingUtils:
                     #print(nextgoal_xy)
                     distance = (env.max_plan_step_reached + 1) * np.linalg.norm(nextgoal_xy - obj_state)
                     return distance
+
         raise NotImplementedError("get_dist_to_next_subgoal not implemented for this environment")
     def dist_phi(self, env, state, next_subgoal):
         return -1 * self.get_dist_to_next_subgoal(env, state, next_subgoal)
@@ -248,7 +250,6 @@ class GroundingUtils:
         else:
             # Computes F using phi(s)
             f = self.phi(env, next_state_grounded_atoms, plan, dynamic_reward_shaping) - self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
-        #import ipdb; ipdb.set_trace()
         reward = SCALE * (reward + f)
         info = dict(success=success)
         return reward, info

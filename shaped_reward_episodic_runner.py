@@ -35,6 +35,9 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                  sleep_time=0, reset_first=False,
                  reset_kwargs=None, action_kwargs=None,
                  random_action=False, get_last_val=False):
+        # NOTE: Comment this back in when running the get eval distance metric
+        # file!
+        # import ipdb; ipdb.set_trace()
         traj = Trajectory()
         if reset_kwargs is None:
             reset_kwargs = {}
