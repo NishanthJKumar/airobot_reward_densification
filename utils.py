@@ -143,6 +143,7 @@ class GroundingUtils:
         distance = None
         for predicate in next_subgoal:
             if predicate[0] == "at" and predicate[1] == "claw":
+                # SINGLE SUBGOAL
                 # if predicate[2] == 'subgoal':
                 #     nextgoal_xy = env._subgoal2_pos[0][:2]
                 #     distance = np.linalg.norm(nextgoal_xy - state[0])
@@ -151,9 +152,31 @@ class GroundingUtils:
                 #     nextgoal_xy = env._goal_pos[:2]
                 #     distance = np.linalg.norm(nextgoal_xy - state[0])
                 #     return 2 * distance
-                nextgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
-                distance = np.linalg.norm(nextgoal_xy - state[0])
-                return distance
+                #
+                # MULTI SUBGOAL
+                if predicate[2] == 'subgoal1':
+                    nextgoal_xy = env._subgoal1_pos[0][:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return distance
+                elif predicate[2] == 'subgoal2':
+                    nextgoal_xy = env._subgoal2_pos[0][:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return distance
+                elif predicate[2] == 'subgoal3':
+                    nextgoal_xy = env._subgoal3_pos[0][:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return 10 * distance
+                else:
+                    nextgoal_xy = env._goal_pos[:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return 10 * distance
+                
+                # GRID-BASED
+                # nextgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
+                # #print(nextgoal_xy)
+                # distance = np.linalg.norm(nextgoal_xy - state[0])
+                # return distance
+                #
             
         raise NotImplementedError("get_dist_to_next_subgoal not implemented for this environment")
 
@@ -208,9 +231,10 @@ class GroundingUtils:
             prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping, state=state)[1]
         else:
             prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
-        
+    
         if env.max_plan_step_reached < prev_phi:
             env.max_plan_step_reached = prev_phi
+            
             # if max_plan_step_reached >= 9:
             #     print(env._t)
             #     print(dist_to_goal)

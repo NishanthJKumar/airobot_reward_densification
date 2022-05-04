@@ -175,7 +175,7 @@ parser.add_argument('-es', '--episode_steps', type=int, default=25, help='Max. n
 parser.add_argument('-ei', '--eval_interval', type=int, default=100, help='Num. trajs after which to call eval.')
 parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
 parser.add_argument('-se', '--seed', type=int, default=0, help='Random seed to use during training.')
-parser.add_argument('-g', '--granularity', type=int, default=6, help='Number of divisions to segment the working space of the arm. Total divisions is equal to 2^{input}.')
+parser.add_argument('-g', '--granularity', type=int, default=5, help='Number of divisions to segment the working space of the arm. Total divisions is equal to 2^{input}.')
 parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
 
@@ -224,7 +224,7 @@ cfg.alg.epsilon = None
 cfg.alg.max_steps = args.training_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
-cfg.alg.eval = True #False
+cfg.alg.eval = False #True #False
 if cfg.alg.eval:
     cfg.alg.resume_step = args.training_steps
     cfg.alg.test = True

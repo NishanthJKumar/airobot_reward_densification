@@ -96,8 +96,14 @@ class ShapedRewardEpisodicRunner(BasicRunner):
             next_state_grounded_atoms = self.g_utils.get_state_grounded_atoms(env.envs[0])
 
             if env.envs[0].reward_type == "pddl":
-                reward, info = self.g_utils.get_shaped_reward(env.envs[0], ob, next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms, self.dynamic_reward_shaping)
-                reward = np.array([reward])
+                if env.envs[0]._t != 0:
+                    reward, info = self.g_utils.get_shaped_reward(env.envs[0], ob, next_ob, previous_state_grounded_atoms, next_state_grounded_atoms, self.plan_grounded_atoms, self.dynamic_reward_shaping)
+                    reward = np.array([reward])
+                else:
+                    reward = np.array([0.0])
+                    info = dict(success=False)
+                if env.envs[0]._t == 0 and env.envs[0].max_plan_step_reached != 0:
+                    import ipdb; ipdb.set_trace()
             else:
                 info = dict()
 
