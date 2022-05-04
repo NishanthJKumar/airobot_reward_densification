@@ -5,7 +5,7 @@ import copy
 import os
 import glob
 
-ALPHA = 100
+ALPHA = 50
 
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
@@ -149,10 +149,10 @@ class GroundingUtils:
                 else:
                     nextgoal_xy = env._goal_pos[:2]
                     distance = np.linalg.norm(nextgoal_xy - state[0])
-                    return 10 * distance
+                    return 2 * distance
                 # nextgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
-                #distance = np.linalg.norm(nextgoal_xy - state[0])
-                #return distance
+                # distance = np.linalg.norm(nextgoal_xy - state[0])
+                # return distance
             
         raise NotImplementedError("get_dist_to_next_subgoal not implemented for this environment")
 
@@ -174,7 +174,10 @@ class GroundingUtils:
                     return [(i + env.max_plan_step_reached) * self.phi_t(t), i + env.max_plan_step_reached]
                 elif dynamic_reward_shaping == "dist":
                     # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
-                    return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached + 1]), i + env.max_plan_step_reached] #* self.phi_t(t)
+                    if env.max_plan_step_reached + 1 > len(plan) - 1:
+                        return [ALPHA * self.dist_phi(env, state, plan[-1]), i + env.max_plan_step_reached] #* self.phi_t(t)
+                    else:
+                        return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached + 1]), i + env.max_plan_step_reached] #* self.phi_t(t)
                 else:
                     raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
 
@@ -188,7 +191,10 @@ class GroundingUtils:
             return [(env.max_plan_step_reached) * self.phi_t(t), env.max_plan_step_reached]
         elif dynamic_reward_shaping == "dist":
             # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
-            return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached + 1]), env.max_plan_step_reached] #* self.phi_t(t)
+            if env.max_plan_step_reached + 1 > len(plan) - 1:
+                return [ALPHA * self.dist_phi(env, state, plan[-1]), i + env.max_plan_step_reached] #* self.phi_t(t)
+            else:
+                return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached + 1]), env.max_plan_step_reached] #* self.phi_t(t)
         else:
             raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
 
