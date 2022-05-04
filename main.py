@@ -235,9 +235,10 @@ cfg.alg.resume = False
 cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
-cfg.alg.episode_steps = 100 #args.episode_steps
+cfg.alg.episode_steps = 200 #100 #args.episode_steps
 cfg.alg.eval_interval = args.eval_interval
 cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
+cfg.alg.pddl_type = args.pddl_type
 # Include all relevant variables in the name so that there are no folder
 # collisions.
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
@@ -259,7 +260,7 @@ env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
 
-grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, args.path_to_fd, env.envs[0].get_success)
+grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, args.path_to_fd, env.envs[0].get_success, cfg.alg.pddl_type)
 if args.algorithm == "ppo":
     save_dir = train_ppo(
         cfg=cfg,

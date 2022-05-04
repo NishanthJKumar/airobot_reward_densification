@@ -124,7 +124,7 @@ class URRobotGym(gym.Env):
         self.subgoal_reached = False
 
         # create balls at subgoal locations
-        self._subgoal3_pos = np.array([[0.36, 0.2, 1.0], [0.64, 0.2, 1.0]])
+        self._subgoal3_pos = np.array([[0.36, 0.26, 1.0], [0.64, 0.26, 1.0]])
         self._subgoal2_pos = np.array([[0.23, 0.15, 1.0], [0.76, 0.15, 1.0]])
         self._subgoal1_pos = np.array([[0.36, 0.0, 1.0], [0.64, 0.0, 1.0]])
         self._subgoal_urdf_id = []

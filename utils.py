@@ -51,7 +51,7 @@ def plot_curves(data_dict, title):
 
 class GroundingUtils:
 
-    def __init__(self, domain_file_path, problem_file_path, vec_env, classifiers, path_to_fd_folder, task_success_fn):
+    def __init__(self, domain_file_path, problem_file_path, vec_env, classifiers, path_to_fd_folder, task_success_fn, pddl_type):
         self.domain_file_path = domain_file_path
         # TODO: make problem file automatically instead of taking in
         # right now. This can be done by just running the classifiers
@@ -60,6 +60,7 @@ class GroundingUtils:
         self.vec_env = vec_env
         self.classifiers = classifiers
         self.task_success_fn = task_success_fn
+        self.pddl_type = pddl_type
 
         # NOTE: In the future, we should be generaitng this problem_file_path
         # within this init method.
@@ -143,40 +144,46 @@ class GroundingUtils:
         distance = None
         for predicate in next_subgoal:
             if predicate[0] == "at" and predicate[1] == "claw":
-                # SINGLE SUBGOAL
-                # if predicate[2] == 'subgoal':
-                #     nextgoal_xy = env._subgoal2_pos[0][:2]
-                #     distance = np.linalg.norm(nextgoal_xy - state[0])
-                #     return distance
-                # else:
-                #     nextgoal_xy = env._goal_pos[:2]
-                #     distance = np.linalg.norm(nextgoal_xy - state[0])
-                #     return 2 * distance
-                #
-                # MULTI SUBGOAL
-                if predicate[2] == 'subgoal1':
-                    nextgoal_xy = env._subgoal1_pos[0][:2]
-                    distance = np.linalg.norm(nextgoal_xy - state[0])
-                    return distance
-                elif predicate[2] == 'subgoal2':
-                    nextgoal_xy = env._subgoal2_pos[0][:2]
-                    distance = np.linalg.norm(nextgoal_xy - state[0])
-                    return distance
-                elif predicate[2] == 'subgoal3':
-                    nextgoal_xy = env._subgoal3_pos[0][:2]
-                    distance = np.linalg.norm(nextgoal_xy - state[0])
-                    return 10 * distance
-                else:
-                    nextgoal_xy = env._goal_pos[:2]
-                    distance = np.linalg.norm(nextgoal_xy - state[0])
-                    return 10 * distance
+                if self.pddl_type == "single_subgoal":
+                    # SINGLE SUBGOAL
+                    if predicate[2] == 'subgoal':
+                        nextgoal_xy = env._subgoal2_pos[0][:2]
+                        distance = np.linalg.norm(nextgoal_xy - state[0])
+                        return distance
+                    else:
+                        nextgoal_xy = env._goal_pos[:2]
+                        distance = np.linalg.norm(nextgoal_xy - state[0])
+                        return 2 * distance
+                    
+                elif self.pddl_type == "multi_subgoal":
+                    # MULTI SUBGOAL
+                    if predicate[2] == 'subgoal1':
+                        nextgoal_xy = env._subgoal1_pos[0][:2]
+                        distance = np.linalg.norm(nextgoal_xy - state[0])
+                        return distance
+                    elif predicate[2] == 'subgoal2':
+                        nextgoal_xy = env._subgoal2_pos[0][:2]
+                        distance = np.linalg.norm(nextgoal_xy - state[0])
+                        return distance
+                    elif predicate[2] == 'subgoal3':
+                        #print("subgoal 3")
+                        nextgoal_xy = env._subgoal3_pos[0][:2]
+                        distance = np.linalg.norm(nextgoal_xy - state[0])
+                        #print(distance)
+                        return 10 * distance
+                    else:
+                        #print("goal")
+                        nextgoal_xy = env._goal_pos[:2]
+                        distance = np.linalg.norm(nextgoal_xy - state[0])
+                        return 10 * distance
                 
-                # GRID-BASED
-                # nextgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
-                # #print(nextgoal_xy)
-                # distance = np.linalg.norm(nextgoal_xy - state[0])
-                # return distance
-                #
+                elif self.pddl_type == "grid_based":
+                    # GRID-BASED
+                    nextgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
+                    #print(nextgoal_xy)
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return distance
+                    
             
         raise NotImplementedError("get_dist_to_next_subgoal not implemented for this environment")
 
