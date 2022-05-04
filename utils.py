@@ -253,7 +253,6 @@ class GroundingUtils:
         else:
             # Computes F using phi(s)
             f = self.phi(env, next_state_grounded_atoms, plan, dynamic_reward_shaping) - self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
-        #import ipdb; ipdb.set_trace()
         reward = SCALE * (reward + f)
         info = dict(success=success)
 

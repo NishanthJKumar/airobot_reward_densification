@@ -32,6 +32,7 @@ from envs.pushing_env.grid_based.grid_based import PushingGridBasedClassifiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import ReachingMultipleSubgoalsClassfiers
 from envs.reaching_env.single_subgoal.single_subgoal import ReachingSingleSubgoalClassfiers
 from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
+import matplotlib.pyplot as plt
 
 def eval_ppo(
     cfg=None,
@@ -162,6 +163,9 @@ parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documen
 # parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
 args.seed = 0
+
+reach_ppo_expr_names, reach_sac_expr_names, push_ppo_expr_names, push_sac_expr_names = [], [], [], []
+reach_ppo_final_dists, reach_sac_final_dists, push_ppo_final_dists, push_sac_final_dists = [], [], [], []
 
 all_data_folders = [f.path for f in os.scandir('data') if f.is_dir()]
 # Loop thru all folders and populate the above lists.
@@ -302,5 +306,28 @@ for data_folder in all_data_folders:
     else:
         raise ValueError(f"Domain not yet implemented for eval: {args.domain}")
 
-    print(f"{data_folder.split('/')[1]}, {cfg.alg.save_dir}: {final_dist}")
+    if args.domain == "reach" and args.algorithm == "ppo":
+        reach_ppo_expr_names.append(f"{args.reward_type}_{args.pddl_type}")
+        reach_ppo_final_dists.append(final_dist)
+    elif args.domain == "reach" and args.algorithm == "sac":
+        reach_sac_expr_names.append(f"{args.reward_type}_{args.pddl_type}")
+        reach_sac_final_dists.append(final_dist)
+    elif args.domain == "push" and args.algorithm == "ppo":
+        push_ppo_expr_names.append(f"{args.reward_type}_{args.pddl_type}")
+        push_ppo_final_dists.append(final_dist)
+    elif args.domain == "push" and args.algorithm == "sac":
+        push_sac_expr_names.append(f"{args.reward_type}_{args.pddl_type}")
+        push_sac_final_dists.append(final_dist)
+    else:
+        raise ValueError(f"Domain not yet implemented for eval: {args.domain}")
 
+fig, axs = plt.subplots(4)
+axs[0].bar(reach_ppo_expr_names, reach_ppo_final_dists)
+axs[0].set_title("Reaching PPO")
+axs[1].bar(push_ppo_expr_names, push_ppo_final_dists)
+axs[1].set_title("Pushing PPO")
+axs[2].bar(reach_sac_expr_names, reach_sac_final_dists)
+axs[2].set_title("Reaching SAC")
+axs[3].bar(push_sac_expr_names, push_sac_final_dists)
+axs[3].set_title("Pushing SAC")
+plt.show()
