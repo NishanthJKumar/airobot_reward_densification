@@ -102,8 +102,6 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 else:
                     reward = np.array([0.0])
                     info = dict(success=False)
-                if env.envs[0]._t == 0 and env.envs[0].max_plan_step_reached != 0:
-                    import ipdb; ipdb.set_trace()
             else:
                 info = dict()
 

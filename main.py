@@ -171,7 +171,7 @@ parser.add_argument('-rt', '--reward_type', choices=['sparse_handcrafted', "dens
 parser.add_argument('-pt', '--pddl_type', choices=['single_subgoal', 'multi_subgoal', 'grid_based'], required=True, help='Type of classifier to use.')
 parser.add_argument('-al', '--algorithm', choices=['ppo', 'sac'], required=True, help='Choice of learning algorithm to use.')
 parser.add_argument('-ts', '--training_steps', type=int, default=200000, help='Number of steps to run training for.')
-parser.add_argument('-es', '--episode_steps', type=int, default=25, help='Max. number of steps in an episode.')
+parser.add_argument('-es', '--episode_steps', type=int, default=200, help='Max. number of steps in an episode.')
 parser.add_argument('-ei', '--eval_interval', type=int, default=100, help='Num. trajs after which to call eval.')
 parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
 parser.add_argument('-se', '--seed', type=int, default=0, help='Random seed to use during training.')
@@ -235,7 +235,7 @@ cfg.alg.resume = False
 cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
-cfg.alg.episode_steps = 200 #100 #args.episode_steps
+cfg.alg.episode_steps = args.episode_steps
 cfg.alg.eval_interval = args.eval_interval
 cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
 cfg.alg.pddl_type = args.pddl_type
@@ -255,7 +255,7 @@ print(f"      Total number of steps:{cfg.alg.max_steps}")
 print(f"====================================")
 
 set_random_seed(cfg.alg.seed)
-env_kwargs.update(dict(max_episode_length = 25))#cfg.alg.episode_steps))
+env_kwargs.update(dict(max_episode_length = 25))
 env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
