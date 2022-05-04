@@ -171,7 +171,7 @@ parser.add_argument('-rt', '--reward_type', choices=['sparse_handcrafted', "dens
 parser.add_argument('-pt', '--pddl_type', choices=['single_subgoal', 'multi_subgoal', 'grid_based'], required=True, help='Type of classifier to use.')
 parser.add_argument('-al', '--algorithm', choices=['ppo', 'sac'], required=True, help='Choice of learning algorithm to use.')
 parser.add_argument('-ts', '--training_steps', type=int, default=200000, help='Number of steps to run training for.')
-parser.add_argument('-es', '--episode_steps', type=int, default=50, help='Max. number of steps in an episode.')
+parser.add_argument('-es', '--episode_steps', type=int, default=100, help='Max. number of steps in an episode.')
 parser.add_argument('-ei', '--eval_interval', type=int, default=100, help='Num. trajs after which to call eval.')
 parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
 parser.add_argument('-se', '--seed', type=int, default=0, help='Random seed to use during training.')
@@ -179,7 +179,7 @@ parser.add_argument('-g', '--granularity', type=int, default=6, help='Number of 
 parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
 
-env_kwargs = dict(reward_type = args.reward_type, gui = False)
+env_kwargs = dict(reward_type = args.reward_type, gui = True)
 if args.domain == 'reach':
     env_name = "URReacher-v1"
     env_kwargs.update(dict(with_obstacle=True))
@@ -219,12 +219,12 @@ domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem
 set_config(args.algorithm)
 cfg.alg.seed = args.seed
 cfg.alg.num_envs = 1
-cfg.alg.epsilon = 0.8
-# cfg.alg.epsilon = None
+# cfg.alg.epsilon = 0.8
+cfg.alg.epsilon = None
 cfg.alg.max_steps = args.training_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
-cfg.alg.eval = False
+cfg.alg.eval = False #True #False
 if cfg.alg.eval:
     cfg.alg.resume_step = args.training_steps
     cfg.alg.test = True
@@ -254,7 +254,7 @@ print(f"      Total number of steps:{cfg.alg.max_steps}")
 print(f"====================================")
 
 set_random_seed(cfg.alg.seed)
-env_kwargs.update(dict(max_episode_length = cfg.alg.episode_steps))
+env_kwargs.update(dict(max_episode_length = 25))
 env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
