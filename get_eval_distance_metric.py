@@ -164,8 +164,10 @@ parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documen
 args = parser.parse_args()
 args.seed = 0
 
-reach_ppo_expr_names, reach_sac_expr_names, push_ppo_expr_names, push_sac_expr_names = [], [], [], []
-reach_ppo_final_dists, reach_sac_final_dists, push_ppo_final_dists, push_sac_final_dists = [], [], [], []
+reach_ppo_results = {}
+reach_sac_results = {}
+push_ppo_results = {}
+push_sac_results = {}
 
 all_data_folders = [f.path for f in os.scandir('data') if f.is_dir()]
 # Loop thru all folders and populate the above lists.
@@ -307,27 +309,24 @@ for data_folder in all_data_folders:
         raise ValueError(f"Domain not yet implemented for eval: {args.domain}")
 
     if args.domain == "reach" and args.algorithm == "ppo":
-        reach_ppo_expr_names.append(f"{args.reward_type}_{args.pddl_type}")
-        reach_ppo_final_dists.append(final_dist)
+        reach_ppo_results[f"{args.reward_type}_{args.pddl_type}"] = final_dist
     elif args.domain == "reach" and args.algorithm == "sac":
-        reach_sac_expr_names.append(f"{args.reward_type}_{args.pddl_type}")
-        reach_sac_final_dists.append(final_dist)
+        reach_sac_results[f"{args.reward_type}_{args.pddl_type}"] = final_dist
     elif args.domain == "push" and args.algorithm == "ppo":
-        push_ppo_expr_names.append(f"{args.reward_type}_{args.pddl_type}")
-        push_ppo_final_dists.append(final_dist)
+        push_ppo_results[f"{args.reward_type}_{args.pddl_type}"] = final_dist
     elif args.domain == "push" and args.algorithm == "sac":
-        push_sac_expr_names.append(f"{args.reward_type}_{args.pddl_type}")
-        push_sac_final_dists.append(final_dist)
+        push_sac_results[f"{args.reward_type}_{args.pddl_type}"] = final_dist
     else:
         raise ValueError(f"Domain not yet implemented for eval: {args.domain}")
 
 fig, axs = plt.subplots(4)
-axs[0].bar(reach_ppo_expr_names, reach_ppo_final_dists)
+axs[0].bar(*zip(*sorted(reach_ppo_results.items())))
 axs[0].set_title("Reaching PPO")
-axs[1].bar(push_ppo_expr_names, push_ppo_final_dists)
+axs[1].bar(*zip(*sorted(push_ppo_results.items())))
 axs[1].set_title("Pushing PPO")
-axs[2].bar(reach_sac_expr_names, reach_sac_final_dists)
+axs[2].bar(*zip(*sorted(reach_sac_results.items())))
 axs[2].set_title("Reaching SAC")
-axs[3].bar(push_sac_expr_names, push_sac_final_dists)
+axs[3].bar(*zip(*sorted(push_sac_results.items())))
 axs[3].set_title("Pushing SAC")
+fig.tight_layout()
 plt.show()
