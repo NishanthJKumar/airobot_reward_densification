@@ -145,7 +145,11 @@ class GroundingUtils:
                         obj_state = state[0][2:]
                 if self.pddl_type == "single_subgoal":
                     # SINGLE SUBGOAL
-                    if predicate[2] == 'subgoal2':
+                    if self.env_type == "reach" and predicate[2] == 'subgoal':
+                        nextgoal_xy = env._subgoal2_pos[0][:2]
+                        distance = np.linalg.norm(nextgoal_xy - obj_state)
+                        return distance
+                    elif self.env_type == "push" and predicate[2] == 'subgoal2':
                         nextgoal_xy = env._subgoal2_pos[:2]
                         distance = np.linalg.norm(nextgoal_xy - obj_state)
                         return distance

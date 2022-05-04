@@ -163,7 +163,7 @@ parser.add_argument('-se', '--seed', type=int, default=0, help='Random seed to u
 parser.add_argument('-g', '--granularity', type=int, default=5, help='Number of divisions to segment the working space of the arm. Total divisions is equal to 2^{input}.')
 parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
-env_kwargs = dict(reward_type = args.reward_type, gui = False)
+env_kwargs = dict(reward_type = args.reward_type, gui = True)
 if args.domain == 'reach':
     env_name = "URReacher-v1"
     env_kwargs.update(dict(with_obstacle=True))
