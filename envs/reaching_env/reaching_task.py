@@ -186,22 +186,26 @@ class URRobotGym(gym.Env):
 
     def _get_reward_with_subgoal(self, state):
         #### TODO: Q5 design a reward based on the state, goal and subgoal positions
-        dist_to_goal = np.linalg.norm(state - self._goal_pos[:2])
-        if (not self.subgoal_reached):
-          dist_to_subgoal1 = np.linalg.norm(state - self._subgoal2_pos[0][:2])
-          dist_to_subgoal2 = np.linalg.norm(state - self._subgoal2_pos[1][:2])
-          success_subgoal1 = dist_to_subgoal1 < 1e-3
-          success_subgoal2 = dist_to_subgoal2 < 1e-3
-
-          if (success_subgoal1 or success_subgoal2):
-            self.subgoal_reached = True
-
-        if (not self.subgoal_reached):
-          reward = (-2.0 * min(dist_to_subgoal1, dist_to_subgoal2)) - dist_to_goal
+        if np.linalg.norm(state - self._subgoal2_pos[0][:2]) < \
+            np.linalg.norm(state - self._subgoal2_pos[1][:2]):
+            closet_subgoal = self._subgoal2_pos[0][:2]
         else:
-          reward = -1.0 * dist_to_goal
+            closet_subgoal = self._subgoal2_pos[1][:2]
 
+        dist_to_goal = np.linalg.norm(state - self._goal_pos[:2])
+        dist_to_subgoal = np.linalg.norm(state - closet_subgoal)
+        dist_goal_to_subgoal = np.linalg.norm(self._goal_pos[:2] - closet_subgoal)
+        
+        if dist_to_subgoal < (self._dist_threshold):
+            self.subgoal_reached = True
+          
+        if self.subgoal_reached:
+            reward = -dist_to_goal
+        else:
+            reward = -dist_to_subgoal + -dist_goal_to_subgoal
+        
         return reward
+        
 
     def _get_reward(self, state, action, collision):
         success = self.get_success(self, state)
