@@ -179,7 +179,7 @@ parser.add_argument('-g', '--granularity', type=int, default=5, help='Number of 
 parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
 
-env_kwargs = dict(reward_type = args.reward_type, gui = False)
+env_kwargs = dict(reward_type = args.reward_type, gui = True)
 if args.domain == 'reach':
     env_name = "URReacher-v1"
     env_kwargs.update(dict(with_obstacle=True))
@@ -224,7 +224,7 @@ cfg.alg.epsilon = None
 cfg.alg.max_steps = args.training_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
-cfg.alg.eval = False #True #False
+cfg.alg.eval = True #False
 if cfg.alg.eval:
     cfg.alg.resume_step = args.training_steps
     cfg.alg.test = True
