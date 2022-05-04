@@ -6,6 +6,7 @@ import os
 import glob
 
 ALPHA = 1
+SCALE = 100
 
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
@@ -98,7 +99,7 @@ class GroundingUtils:
 
     def apply_grounded_operator(self, state_grounded_atoms, op_name, params):
         for o in self.domprob.ground_operator(op_name):
-            if params == list(o.variable_list.values()) and o.precondition_pos.issubset(state_grounded_atoms):
+            if set(params) == set(o.variable_list.values()) and o.precondition_pos.issubset(state_grounded_atoms):
                 next_state_grounded_atoms = copy.deepcopy(state_grounded_atoms)
                 for effect in o.effect_pos:
                     next_state_grounded_atoms.append(effect)
@@ -142,9 +143,41 @@ class GroundingUtils:
         distance = None
         for predicate in next_subgoal:
             if predicate[0] == "at" and predicate[1] == "claw":
-                subgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
-                distance = np.linalg.norm(subgoal_xy - state[0])
-                return distance
+                # SINGLE SUBGOAL
+                # if predicate[2] == 'subgoal':
+                #     nextgoal_xy = env._subgoal2_pos[0][:2]
+                #     distance = np.linalg.norm(nextgoal_xy - state[0])
+                #     return distance
+                # else:
+                #     nextgoal_xy = env._goal_pos[:2]
+                #     distance = np.linalg.norm(nextgoal_xy - state[0])
+                #     return 2 * distance
+                #
+                # MULTI SUBGOAL
+                if predicate[2] == 'subgoal1':
+                    nextgoal_xy = env._subgoal1_pos[0][:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return distance
+                elif predicate[2] == 'subgoal2':
+                    nextgoal_xy = env._subgoal2_pos[0][:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return distance
+                elif predicate[2] == 'subgoal3':
+                    nextgoal_xy = env._subgoal3_pos[0][:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return 10 * distance
+                else:
+                    nextgoal_xy = env._goal_pos[:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return 10 * distance
+                
+                # GRID-BASED
+                # nextgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
+                # #print(nextgoal_xy)
+                # distance = np.linalg.norm(nextgoal_xy - state[0])
+                # return distance
+                #
+            
         raise NotImplementedError("get_dist_to_next_subgoal not implemented for this environment")
 
     def dist_phi(self, env, state, next_subgoal):
@@ -158,28 +191,34 @@ class GroundingUtils:
             if set(grounded_atoms) == set(state_grounded_atoms):
                 if dynamic_reward_shaping is None:
                     return i + env.max_plan_step_reached
-                elif dynamic_reward_shaping is "basic":
+                elif dynamic_reward_shaping == "basic":
                     if t == 0:
                         return [i + env.max_plan_step_reached, i + env.max_plan_step_reached]
                     # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
                     return [(i + env.max_plan_step_reached) * self.phi_t(t), i + env.max_plan_step_reached]
-                elif dynamic_reward_shaping is "dist":
+                elif dynamic_reward_shaping == "dist":
                     # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
-                    return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached]), i + env.max_plan_step_reached] #* self.phi_t(t)
+                    if env.max_plan_step_reached + 1 > len(plan) - 1:
+                        return [ALPHA * self.dist_phi(env, state, plan[-1]), i + env.max_plan_step_reached] #* self.phi_t(t)
+                    else:
+                        return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached + 1]), i + env.max_plan_step_reached] #* self.phi_t(t)
                 else:
                     raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
 
         if dynamic_reward_shaping is None:
             return env.max_plan_step_reached
-        elif dynamic_reward_shaping is "basic":
+        elif dynamic_reward_shaping == "basic":
             # In basic reward shaping you cannot divide by 1/t when t=0 so just returns 0
             if t == 0:
                 return [env.max_plan_step_reached, env.max_plan_step_reached]
             # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
             return [(env.max_plan_step_reached) * self.phi_t(t), env.max_plan_step_reached]
-        elif dynamic_reward_shaping is "dist":
+        elif dynamic_reward_shaping == "dist":
             # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
-            return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached]), env.max_plan_step_reached] #* self.phi_t(t)
+            if env.max_plan_step_reached + 1 > len(plan) - 1:
+                return [ALPHA * self.dist_phi(env, state, plan[-1]), i + env.max_plan_step_reached] #* self.phi_t(t)
+            else:
+                return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached + 1]), env.max_plan_step_reached] #* self.phi_t(t)
         else:
             raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
 
@@ -187,14 +226,15 @@ class GroundingUtils:
         success = self.task_success_fn(env, state)
         reward = 1 if success else 0
 
-        if dynamic_reward_shaping is "dist":
+        if dynamic_reward_shaping is not None:
             # Set prev_phi to phi(s) to update max_plan_step_reached
             prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping, state=state)[1]
         else:
             prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
-        
+    
         if env.max_plan_step_reached < prev_phi:
             env.max_plan_step_reached = prev_phi
+            
             # if max_plan_step_reached >= 9:
             #     print(env._t)
             #     print(dist_to_goal)
@@ -206,7 +246,8 @@ class GroundingUtils:
         else:
             # Computes F using phi(s)
             f = self.phi(env, next_state_grounded_atoms, plan, dynamic_reward_shaping) - self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
-        reward = reward + f
+        #import ipdb; ipdb.set_trace()
+        reward = SCALE * (reward + f)
         info = dict(success=success)
 
         return reward, info

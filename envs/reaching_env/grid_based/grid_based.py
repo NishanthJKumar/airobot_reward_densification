@@ -112,4 +112,4 @@ class ReachingGridBasedClassifiers(BaseClassifiers):
         return {"0-arity": [], "1-arity": [(self.is_goal, "location")], "2-arity": [(self.at, "gripper", "location"), (self.neighbors, "location", "location")]}
 
     def get_path_to_domain_and_problem_files(self):
-        return (os.path.abspath("envs/reaching_env/grid_based/reaching-grid-domain.pddl"), os.path.abspath("envs/reaching_env/grid_based/reaching-grid-problem6.pddl"))
+        return (os.path.abspath("envs/reaching_env/grid_based/reaching-grid-domain.pddl"), os.path.abspath("envs/reaching_env/grid_based/reaching-grid-problem5.pddl"))
