@@ -30,16 +30,13 @@ from envs.pushing_env.grid_based.grid_based import PushingGridBasedClassifiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import ReachingMultipleSubgoalsClassfiers
 from envs.reaching_env.single_subgoal.single_subgoal import ReachingSingleSubgoalClassfiers
 from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
-
 def train_ppo(
     cfg=None,
     env_name="URPusher-v1",
     grounding_utils=None,
 ):
-
     env.reset()
     ob_size = env.observation_space.shape[0]
-
     actor_body = MLP(
         input_size=ob_size,
         hidden_sizes=[64],
@@ -47,7 +44,6 @@ def train_ppo(
         hidden_act=nn.Tanh,
         output_act=nn.Tanh,
     )
-
     critic_body = MLP(
         input_size=ob_size,
         hidden_sizes=[64],
@@ -69,7 +65,6 @@ def train_ppo(
         )
     else:
         raise TypeError(f"Unknown action space type: {env.action_space}")
-
     critic = ValueNet(critic_body, in_features=64)
     agent = PPOAgent(actor=actor, critic=critic, env=env)
     runner = ShapedRewardEpisodicRunner(g_utils=grounding_utils, agent=agent, env=env, dynamic_reward_shaping=cfg.alg.dynamic_reward_shaping)
@@ -89,15 +84,12 @@ def train_ppo(
         )
         pprint.pprint(stat_info)
         # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
-
     return cfg.alg.save_dir
-
 def train_sac(
     cfg=None,
     env_name="URPusher-v1",
     grounding_utils=None,
 ):
-
     env.reset()
     ob_size = env.observation_space.shape[0]
     actor_body = MLP(
@@ -107,7 +99,6 @@ def train_sac(
         hidden_act=nn.Tanh,
         output_act=nn.Tanh,
     )
-
     if isinstance(env.action_space, gym.spaces.Discrete):
         act_size = env.action_space.n
         actor = CategoricalPolicy(actor_body, in_features=64, action_dim=act_size)
@@ -122,7 +113,6 @@ def train_sac(
         )
     else:
         raise TypeError(f"Unknown action space type: {env.action_space}")
-
     q1_body = MLP(
         input_size=ob_size + act_size,
         hidden_sizes=[64],
@@ -130,7 +120,6 @@ def train_sac(
         hidden_act=nn.Tanh,
         output_act=nn.Tanh,
     )
-
     q2_body = MLP(
         input_size=ob_size + act_size,
         hidden_sizes=[64],
@@ -138,7 +127,6 @@ def train_sac(
         hidden_act=nn.Tanh,
         output_act=nn.Tanh,
     )
-
     q1 = ValueNet(q1_body)
     q2 = ValueNet(q2_body)
     memory = CyclicBuffer(capacity=cfg.alg.replay_size)
@@ -160,10 +148,7 @@ def train_sac(
         )
         pprint.pprint(stat_info)
         # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
-
     return cfg.alg.save_dir
-
-
 # Main code begins here; takes in particular arguments and urns the relevant experiment with the specified configuration.
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick'], required=True, help='Name of env to run.')
@@ -213,9 +198,7 @@ elif args.domain == 'pick':
         raise ValueError(f"Unknown pddl type for picking env: {args.pddl_type}")
 else:
     raise ValueError(f"Unknown domain: {args.domain}")
-
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
-
 set_config(args.algorithm)
 cfg.alg.seed = args.seed
 cfg.alg.num_envs = 1
@@ -224,7 +207,7 @@ cfg.alg.epsilon = None
 cfg.alg.max_steps = args.training_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
-cfg.alg.eval = False #True #False
+cfg.alg.eval = False
 if cfg.alg.eval:
     cfg.alg.resume_step = args.training_steps
     cfg.alg.test = True
@@ -248,19 +231,17 @@ cfg.alg.save_dir += "_" + str(args.training_steps) + "_" + str(args.episode_step
 if args.dynamic_shaping is not None:
     cfg.alg.save_dir += "_" + args.dynamic_shaping
 setattr(cfg.alg, "diff_cfg", dict(save_dir=cfg.alg.save_dir))
-
 print(f"====================================")
 print(f"      Device:{cfg.alg.device}")
 print(f"      Total number of steps:{cfg.alg.max_steps}")
 print(f"====================================")
-
 set_random_seed(cfg.alg.seed)
 env_kwargs.update(dict(max_episode_length = 25))
 env = make_vec_env(
     cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
 )
 
-grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, args.path_to_fd, env.envs[0].get_success, cfg.alg.pddl_type)
+grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, args.path_to_fd, env.envs[0].get_success, cfg.alg.pddl_type, args.domain)
 if args.algorithm == "ppo":
     save_dir = train_ppo(
         cfg=cfg,
