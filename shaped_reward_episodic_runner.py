@@ -35,6 +35,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                  sleep_time=0, reset_first=False,
                  reset_kwargs=None, action_kwargs=None,
                  random_action=False, get_last_val=False):
+        import ipdb; ipdb.set_trace()
         traj = Trajectory()
         if reset_kwargs is None:
             reset_kwargs = {}

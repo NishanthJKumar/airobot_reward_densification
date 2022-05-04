@@ -65,7 +65,7 @@ class GroundingUtils:
         # NOTE: In the future, we should be generaitng this problem_file_path
         # within this init method.
         self.domprob = pddlpy.DomainProblem(domain_file_path, problem_file_path)
-        os.system(f'python {path_to_fd_folder}/fast-downward.py --alias seq-sat-lama-2011 {domain_file_path} {problem_file_path}')
+        os.system(f'python {path_to_fd_folder}/fast-downward.py --alias seq-sat-lama-2011 {domain_file_path} {problem_file_path} >/dev/null 2>&1')
         plan_file_name = "sas_plan.1"
         with open(plan_file_name) as f:
             # TODO (wmcclinton) automatically genetate plan_file from folder
