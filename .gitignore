@@ -1,5 +1,6 @@
 # Unnecessary trained weights + easyrl things
 /data
+/data_dupe
 
 # Unnecessary log files
 *.txt
