@@ -14,8 +14,8 @@ python main.py --domain push --algorithm sac --reward_type pddl --pddl_type grid
 echo "Running experiment... outputing here > push_ppo_dist.txt"
 python main.py --domain push --algorithm ppo --reward_type pddl --pddl_type grid_based --dynamic_shaping dist  --path_to_fd /home/wbm3/Documents/GitHub/downward &> push_ppo_dist.txt
 
-echo "Running experiment... outputing here > reach_sac_dns.txt"
-python main.py --domain reach --algorithm sac --reward_type pddl --pddl_type grid_based --path_to_fd /home/wbm3/Documents/GitHub/downward &> reach_sac_dns.txt
+#echo "Running experiment... outputing here > reach_sac_dns.txt"
+#python main.py --domain reach --algorithm sac --reward_type pddl --pddl_type grid_based --path_to_fd /home/wbm3/Documents/GitHub/downward &> reach_sac_dns.txt
 
-echo "Running experiment... outputing here > reach_ppo_dns.txt"
-python main.py --domain reach --algorithm ppo --reward_type pddl --pddl_type grid_based  --path_to_fd /home/wbm3/Documents/GitHub/downward &> reach_ppo_dns.txt
+#echo "Running experiment... outputing here > reach_ppo_dns.txt"
+#python main.py --domain reach --algorithm ppo --reward_type pddl --pddl_type grid_based  --path_to_fd /home/wbm3/Documents/GitHub/downward &> reach_ppo_dns.txt

@@ -100,7 +100,7 @@ class ShapedRewardEpisodicRunner(BasicRunner):
                 reward = np.array([reward])
             else:
                 info = dict()
-            
+
             info.update(env_info[0])
             info = [info]
 

@@ -187,7 +187,7 @@ class GroundingUtils:
         success = self.task_success_fn(env, state)
         reward = 1 if success else 0
 
-        if dynamic_reward_shaping == "dist":
+        if dynamic_reward_shaping is not None:
             # Set prev_phi to phi(s) to update max_plan_step_reached
             prev_phi = self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping, state=state)[1]
         else:
