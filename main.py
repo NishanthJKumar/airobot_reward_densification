@@ -235,7 +235,7 @@ cfg.alg.resume = False
 cfg.alg.resume_step = None
 cfg.alg.env_name = env_name
 cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
-cfg.alg.episode_steps = 100 #args.episode_steps
+cfg.alg.episode_steps = args.episode_steps
 cfg.alg.eval_interval = args.eval_interval
 cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
 # Include all relevant variables in the name so that there are no folder
