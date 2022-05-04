@@ -5,7 +5,8 @@ import copy
 import os
 import glob
 
-ALPHA = 50
+ALPHA = 1
+SCALE = 100
 
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
@@ -142,17 +143,17 @@ class GroundingUtils:
         distance = None
         for predicate in next_subgoal:
             if predicate[0] == "at" and predicate[1] == "claw":
-                if predicate[2] == 'subgoal':
-                    nextgoal_xy = env._subgoal2_pos[0][:2]
-                    distance = np.linalg.norm(nextgoal_xy - state[0])
-                    return distance
-                else:
-                    nextgoal_xy = env._goal_pos[:2]
-                    distance = np.linalg.norm(nextgoal_xy - state[0])
-                    return 2 * distance
-                # nextgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
-                # distance = np.linalg.norm(nextgoal_xy - state[0])
-                # return distance
+                # if predicate[2] == 'subgoal':
+                #     nextgoal_xy = env._subgoal2_pos[0][:2]
+                #     distance = np.linalg.norm(nextgoal_xy - state[0])
+                #     return distance
+                # else:
+                #     nextgoal_xy = env._goal_pos[:2]
+                #     distance = np.linalg.norm(nextgoal_xy - state[0])
+                #     return 2 * distance
+                nextgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
+                distance = np.linalg.norm(nextgoal_xy - state[0])
+                return distance
             
         raise NotImplementedError("get_dist_to_next_subgoal not implemented for this environment")
 
@@ -222,7 +223,7 @@ class GroundingUtils:
             # Computes F using phi(s)
             f = self.phi(env, next_state_grounded_atoms, plan, dynamic_reward_shaping) - self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
         #import ipdb; ipdb.set_trace()
-        reward = reward + f
+        reward = SCALE * (reward + f)
         info = dict(success=success)
 
         return reward, info
