@@ -5,7 +5,7 @@ import copy
 import os
 import glob
 
-ALPHA = 1
+ALPHA = 100
 
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
@@ -142,9 +142,18 @@ class GroundingUtils:
         distance = None
         for predicate in next_subgoal:
             if predicate[0] == "at" and predicate[1] == "claw":
-                subgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
-                distance = np.linalg.norm(subgoal_xy - state[0])
-                return distance
+                if predicate[2] == 'subgoal':
+                    nextgoal_xy = env._subgoal2_pos[0][:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return distance
+                else:
+                    nextgoal_xy = env._goal_pos[:2]
+                    distance = np.linalg.norm(nextgoal_xy - state[0])
+                    return 10 * distance
+                # nextgoal_xy = self.loc2xy(env, int(predicate[2].replace("loc","")))
+                #distance = np.linalg.norm(nextgoal_xy - state[0])
+                #return distance
+            
         raise NotImplementedError("get_dist_to_next_subgoal not implemented for this environment")
 
     def dist_phi(self, env, state, next_subgoal):
@@ -165,7 +174,7 @@ class GroundingUtils:
                     return [(i + env.max_plan_step_reached) * self.phi_t(t), i + env.max_plan_step_reached]
                 elif dynamic_reward_shaping == "dist":
                     # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
-                    return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached]), i + env.max_plan_step_reached] #* self.phi_t(t)
+                    return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached + 1]), i + env.max_plan_step_reached] #* self.phi_t(t)
                 else:
                     raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
 
@@ -179,7 +188,7 @@ class GroundingUtils:
             return [(env.max_plan_step_reached) * self.phi_t(t), env.max_plan_step_reached]
         elif dynamic_reward_shaping == "dist":
             # Returns phi(s, t) and phi(s) which is used to update max_plan_step_reached
-            return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached]), env.max_plan_step_reached] #* self.phi_t(t)
+            return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached + 1]), env.max_plan_step_reached] #* self.phi_t(t)
         else:
             raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
 
@@ -206,6 +215,7 @@ class GroundingUtils:
         else:
             # Computes F using phi(s)
             f = self.phi(env, next_state_grounded_atoms, plan, dynamic_reward_shaping) - self.phi(env, previous_state_grounded_atoms, plan, dynamic_reward_shaping)
+        #import ipdb; ipdb.set_trace()
         reward = reward + f
         info = dict(success=success)
 
