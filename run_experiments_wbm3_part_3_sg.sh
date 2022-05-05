@@ -8,14 +8,16 @@
 #echo "Running experiment... outputing here > push_ppo_dns.txt"
 #python main.py --domain push --algorithm ppo --reward_type pddl --pddl_type single_subgoal --path_to_fd /home/wbm3/Documents/GitHub/downward &> push_ppo_dns.txt
 
-echo "Running experiment... outputing here > reach_sac_basic.txt"
-python main.py --domain reach --algorithm sac --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic --path_to_fd /home/wbm3/Documents/GitHub/downward &> reach_sac_basic_sg.txt
+# echo "Running experiment... outputing here > reach_sac_basic.txt"
+# python main.py --domain reach --algorithm sac --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic --path_to_fd /home/wbm3/Documents/GitHub/downward &> reach_sac_basic_sg.txt
 
-echo "Running experiment... outputing here > reach_ppo_basic.txt"
-python main.py --domain reach --algorithm ppo --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic --path_to_fd /home/wbm3/Documents/GitHub/downward &> reach_ppo_basic_sg.txt
+# echo "Running experiment... outputing here > reach_ppo_basic.txt"
+# python main.py --domain reach --algorithm ppo --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic --path_to_fd /home/wbm3/Documents/GitHub/downward &> reach_ppo_basic_sg.txt
 
 echo "Running experiment... outputing here > push_sac_basic.txt"
-python main.py --domain push --algorithm sac --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic --path_to_fd /home/wbm3/Documents/GitHub/downward &> push_sac_basic_sg.txt
+# python main.py --domain push --algorithm sac --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic --path_to_fd /home/wbm3/Documents/GitHub/downward &> push_sac_basic_sg.txt
+python main.py --domain push --algorithm sac --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic &> push_sac_basic_sg.txt
 
 echo "Running experiment... outputing here > push_ppo_basic.txt"
-python main.py --domain push --algorithm ppo --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic --path_to_fd /home/wbm3/Documents/GitHub/downward &> push_ppo_basic_sg.txt
+# python main.py --domain push --algorithm ppo --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic --path_to_fd /home/wbm3/Documents/GitHub/downward &> push_ppo_basic_sg.txt
+python main.py --domain push --algorithm ppo --reward_type pddl --pddl_type single_subgoal --dynamic_shaping basic &> push_ppo_basic_sg.txt

@@ -207,7 +207,7 @@ cfg.alg.epsilon = None
 cfg.alg.max_steps = args.training_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
-cfg.alg.eval = False
+cfg.alg.eval = False #True #False
 if cfg.alg.eval:
     cfg.alg.resume_step = args.training_steps
     cfg.alg.test = True

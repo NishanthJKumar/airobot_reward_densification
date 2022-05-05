@@ -1,6 +1,9 @@
 import os
+
+from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
 import torch
 import gym
+import pddlpy
 import pprint
 import numpy as np
 import matplotlib.pyplot as plt
@@ -151,6 +154,43 @@ class URRobotGym(gym.Env):
                         "sphere", size=0.04, mass=0, base_pos=pos, rgba=[0, 0.8, 0.8, 0.8]
                     )
                 )
+
+        if self._pddl_type == "grid_based":
+            domain_file_path, problem_file_path = ReachingGridBasedClassifiers().get_path_to_domain_and_problem_files()
+            domprob = pddlpy.DomainProblem(domain_file_path, problem_file_path)
+            path_to_fd_folder = "/home/njk/Documents/GitHub/downward"
+            os.system(f'python {path_to_fd_folder}/fast-downward.py --alias seq-sat-lama-2011 {domain_file_path} {problem_file_path} >/dev/null 2>&1')
+            plan_file_name = "sas_plan.1"
+            with open(plan_file_name) as f:
+                plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
+            locations = set()
+            for plan_tup in plan:
+                for lexicon in plan_tup[1:]:
+                    if "loc" in lexicon:
+                        locations.add(lexicon)
+            for loc in locations:
+                loc_index = int(loc[len("loc"):])
+                if self._granularity % 2 == 0:
+                    square = int(np.sqrt(2 ** self._granularity))
+                    rows, cols = square, square
+                else:
+                    square = int(np.sqrt(2 ** (self._granularity - 1)))
+                    rows, cols = square, int((2 ** self._granularity) / square)
+                loc_x, loc_y = loc_index // cols, loc_index % cols
+                xmin, ymin = self._xy_bounds[:, 0]
+                xmax, ymax = self._xy_bounds[:, 1]
+                x_lower_bound = xmin + (xmax - xmin) / rows * loc_x
+                x_upper_bound = xmin + (xmax - xmin) / rows * (loc_x + 1)
+                y_lower_bound = ymin + (ymax - ymin) / cols * loc_y
+                y_upper_bound = ymin + (ymax - ymin) / cols * (loc_y + 1)
+                x_mid, y_mid = (x_lower_bound + x_upper_bound) / 2, (y_lower_bound + y_upper_bound) / 2
+                pos = np.array([x_mid, y_mid, 1.0])
+                self._subgoal_urdf_id.append(
+                    self.robot.pb_client.load_geom(
+                        "sphere", size=0.04, mass=0, base_pos=pos, rgba=[0, 0.8, 0.8, 0.8]
+                    )
+                )
+
         # disable the collision checking between the robot and the subgoal balls
         for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
             for sg in self._subgoal_urdf_id:
