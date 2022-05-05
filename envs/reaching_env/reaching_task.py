@@ -1,7 +1,5 @@
 import os
-from tracemalloc import DomainFilter
 
-from pygments import lex
 from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
 import torch
 import gym
