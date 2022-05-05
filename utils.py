@@ -172,22 +172,31 @@ class GroundingUtils:
                     
                 elif self.pddl_type == "multi_subgoal":
                     # MULTI SUBGOAL
-                    if predicate[2] == 'subgoal1':
+                    if predicate[2] == 'subgoal1' and self.env_type == "reach":
+                        nextgoal_xy = env._subgoal1_pos[0][:2]
+                        distance = np.linalg.norm(nextgoal_xy - obj_state)
+                        return distance
+                    elif predicate[2] == 'subgoal1' and self.env_type == "push":
                         nextgoal_xy = env._subgoal1_pos[:2]
                         distance = np.linalg.norm(nextgoal_xy - obj_state)
                         return distance
-                    elif predicate[2] == 'subgoal2':
+                    elif predicate[2] == 'subgoal2' and self.env_type == "reach":
+                        nextgoal_xy = env._subgoal2_pos[0][:2]
+                        distance = np.linalg.norm(nextgoal_xy - obj_state)
+                        return 2 * distance
+                    elif predicate[2] == 'subgoal2' and self.env_type == "push":
                         nextgoal_xy = env._subgoal2_pos[:2]
                         distance = np.linalg.norm(nextgoal_xy - obj_state)
                         return 2 * distance
-                    elif predicate[2] == 'subgoal3':
-                        #print("subgoal 3")
+                    elif predicate[2] == 'subgoal3' and self.env_type == "reach":
+                        nextgoal_xy = env._subgoal3_pos[0][:2]
+                        distance = np.linalg.norm(nextgoal_xy - obj_state)
+                        return 10 * distance
+                    elif predicate[2] == 'subgoal3' and self.env_type == "push":
                         nextgoal_xy = env._subgoal3_pos[:2]
                         distance = np.linalg.norm(nextgoal_xy - obj_state)
-                        #print(distance)
                         return 10 * distance
                     else:
-                        #print("goal")
                         nextgoal_xy = env._goal_pos[:2]
                         distance = np.linalg.norm(nextgoal_xy - obj_state)
                         return 10 * distance

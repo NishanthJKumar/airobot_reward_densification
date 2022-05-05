@@ -24,6 +24,7 @@ import envs.reaching_env.reaching_task
 from utils import play_video, GroundingUtils
 import gym
 import numpy as np
+import pickle
 from envs.picking_env.orig_blocksworld.single_subgoal import PickingSingleSubgoalClassfiers
 from envs.picking_env.multiple_subgoals.multiple_subgoals import PickingMultipleSubgoalClassfiers
 from envs.pushing_env.single_subgoal.single_subgoal import PushingSingleSubgoalClassfiers
@@ -150,17 +151,7 @@ def eval_sac(
 
 # Main code begins here; takes in particular arguments and urns the relevant experiment with the specified configuration.
 parser = argparse.ArgumentParser()
-# parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick'], required=True, help='Name of env to run.')
-# parser.add_argument('-rt', '--reward_type', choices=['sparse_handcrafted', "dense_handcrafted", 'pddl'], required=True, help='Type of reward to use.')
-# parser.add_argument('-pt', '--pddl_type', choices=['single_subgoal', 'multi_subgoal', 'grid_based'], required=True, help='Type of classifier to use.')
-# parser.add_argument('-al', '--algorithm', choices=['ppo', 'sac'], required=True, help='Choice of learning algorithm to use.')
-# parser.add_argument('-ts', '--training_steps', type=int, default=200000, help='Number of steps to run training for.')
-# parser.add_argument('-es', '--episode_steps', type=int, default=200, help='Max. number of steps in an episode.')
-# parser.add_argument('-ei', '--eval_interval', type=int, default=100, help='Num. trajs after which to call eval.')
 parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
-# parser.add_argument('-se', '--seed', type=int, default=0, help='Random seed to use during training.')
-# parser.add_argument('-g', '--granularity', type=int, default=5, help='Number of divisions to segment the working space of the arm. Total divisions is equal to 2^{input}.')
-# parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
 args.seed = 0
 
@@ -278,12 +269,12 @@ for data_folder in all_data_folders:
     print(f"====================================")
 
     set_random_seed(cfg.alg.seed)
-    env_kwargs.update(dict(max_episode_length = 25))
+    env_kwargs.update(dict(max_episode_length = 25, pddl_type=args.pddl_type))
     env = make_vec_env(
         cfg.alg.env_name, cfg.alg.num_envs, seed=cfg.alg.seed, env_kwargs=env_kwargs
     )
 
-    grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, args.path_to_fd, env.envs[0].get_success, cfg.alg.pddl_type)
+    grounding_utils = GroundingUtils(domain_file_path, problem_file_path, env, classifiers, args.path_to_fd, env.envs[0].get_success, cfg.alg.pddl_type, args.domain)
     if args.algorithm == "ppo":
         traj_info = eval_ppo(
             cfg=cfg,
@@ -308,25 +299,35 @@ for data_folder in all_data_folders:
     else:
         raise ValueError(f"Domain not yet implemented for eval: {args.domain}")
 
+    if args.dynamic_shaping is None:
+        dynamic_shaping = ""
+    else:
+        dynamic_shaping = args.dynamic_shaping + "drs"
+
     if args.domain == "reach" and args.algorithm == "ppo":
-        reach_ppo_results[f"{args.reward_type}_{args.pddl_type}"] = final_dist
+        reach_ppo_results[f"{args.reward_type}_{args.pddl_type}_{dynamic_shaping}"] = final_dist
     elif args.domain == "reach" and args.algorithm == "sac":
-        reach_sac_results[f"{args.reward_type}_{args.pddl_type}"] = final_dist
+        reach_sac_results[f"{args.reward_type}_{args.pddl_type}_{dynamic_shaping}"] = final_dist
     elif args.domain == "push" and args.algorithm == "ppo":
-        push_ppo_results[f"{args.reward_type}_{args.pddl_type}"] = final_dist
+        push_ppo_results[f"{args.reward_type}_{args.pddl_type}_{dynamic_shaping}"] = final_dist
     elif args.domain == "push" and args.algorithm == "sac":
-        push_sac_results[f"{args.reward_type}_{args.pddl_type}"] = final_dist
+        push_sac_results[f"{args.reward_type}_{args.pddl_type}_{dynamic_shaping}"] = final_dist
     else:
         raise ValueError(f"Domain not yet implemented for eval: {args.domain}")
 
+import ipdb; ipdb.set_trace()
+pickle_list = [reach_ppo_results, reach_sac_results, push_ppo_results, push_sac_results]
+with open('results.pickle', 'wb') as handle:
+    pickle.dump(pickle_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 fig, axs = plt.subplots(4)
-axs[0].bar(*zip(*sorted(reach_ppo_results.items())))
+axs[0].bar(*zip(*sorted(reach_ppo_results.items())), color=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan', 'lime'])
 axs[0].set_title("Reaching PPO")
-axs[1].bar(*zip(*sorted(push_ppo_results.items())))
+axs[1].bar(*zip(*sorted(push_ppo_results.items())), color=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan', 'lime'])
 axs[1].set_title("Pushing PPO")
-axs[2].bar(*zip(*sorted(reach_sac_results.items())))
+axs[2].bar(*zip(*sorted(reach_sac_results.items())), color=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan', 'lime'])
 axs[2].set_title("Reaching SAC")
-axs[3].bar(*zip(*sorted(push_sac_results.items())))
+axs[3].bar(*zip(*sorted(push_sac_results.items())), color=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan', 'lime'])
 axs[3].set_title("Pushing SAC")
 fig.tight_layout()
 plt.show()
