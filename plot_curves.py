@@ -36,10 +36,50 @@ def plot_curves(data_dict, title):
 #### 
 # 
 # TODO: plot return and success rate curves
-steps, returns, success_rate = read_tf_log('data/URReacher-v1_pddl_single_subgoal_ppo_200000_25_100_6_dist')
-plot_rewards_dict = {'returns': [steps, returns]}
-plot_curves(plot_rewards_dict, 'Sparse Reward Returns')
+steps_dense_reach, returns_dense_reach, success_rate_dense_reach = read_tf_log('data/URReacher-v1_dense_handcrafted_grid_based_ppo_200000_100_100_5')
+steps_sparse_reach, returns_sparse_reach, success_rate_sparse_reach = read_tf_log('data/URReacher-v1_sparse_handcrafted_grid_based_ppo_200000_200_100_5')
+plot_success_rate_dict = {'Dense': [steps_dense_reach, success_rate_dense_reach], 'Sparse': [steps_sparse_reach, success_rate_sparse_reach]}
+plot_curves(plot_success_rate_dict, 'Reaching Success Rate')
 plt.show()
-plot_success_rate_dict = {'success_rate': [steps, success_rate]}
-plot_curves(plot_success_rate_dict, 'Sparse Reward Success Rate')
+
+steps_dense_push, returns_dense_push, success_rate_dense_push = read_tf_log('data/URPusher-v1_dense_handcrafted_grid_based_ppo_200000_100_100_5')
+steps_sparse_push, returns_sparse_push, success_rate_sparse_push = read_tf_log('data/URPusher-v1_sparse_handcrafted_single_subgoal_ppo_200000_200_100_5')
+plot_success_rate_dict = {'Dense': [steps_dense_push, success_rate_dense_push], 'Sparse': [steps_sparse_push, success_rate_sparse_push]}
+plot_curves(plot_success_rate_dict, 'Pushing Success Rate')
 plt.show()
+
+steps_dist_single_reach, returns_dist_single_reach, success_rate_dist_single_reach = read_tf_log('data/URReacher-v1_pddl_single_subgoal_ppo_200000_200_100_5_dist')
+steps_dist_multi_reach, returns_dist_multi_reach, success_rate_dist_multi_reach = read_tf_log('data/URReacher-v1_pddl_multi_subgoal_ppo_200000_200_100_5_dist')
+steps_dist_grid_reach, returns_dist_grid_reach, success_rate_dist_grid_reach = read_tf_log('data/URReacher-v1_pddl_grid_based_ppo_200000_200_100_5_dist')
+plot_success_rate_dict = {'Single': [steps_dist_single_reach, success_rate_dist_single_reach], 'Multi': [steps_dist_multi_reach, success_rate_dist_multi_reach], 'Grid': [steps_dist_grid_reach, success_rate_dist_grid_reach]}
+plot_curves(plot_success_rate_dict, 'Reaching Success Rate')
+plt.show()
+
+steps_dist_single_push, returns_dist_single_push, success_rate_dist_single_push = read_tf_log('data/URPusher-v1_pddl_single_subgoal_ppo_200000_200_100_5_dist')
+steps_dist_multi_push, returns_dist_multi_push, success_rate_dist_multi_push = read_tf_log('data/URPusher-v1_pddl_multi_subgoal_ppo_200000_200_100_5_dist')
+steps_dist_grid_push, returns_dist_grid_push, success_rate_dist_grid_push = read_tf_log('data/URPusher-v1_pddl_grid_based_ppo_200000_200_100_5_dist')
+plot_success_rate_dict = {'Single': [steps_dist_single_push, success_rate_dist_single_push], 'Multi': [steps_dist_multi_push, success_rate_dist_multi_push], 'Grid': [steps_dist_grid_push, success_rate_dist_grid_push]}
+plot_curves(plot_success_rate_dict, 'Pushing Success Rate')
+plt.show()
+
+steps_pddl_single_reach, returns_pddl_single_reach, success_rate_pddl_single_reach = read_tf_log('data/URReacher-v1_pddl_single_subgoal_ppo_200000_200_100_5')
+steps_pddl_multi_reach, returns_pddl_multi_reach, success_rate_pddl_multi_reach = read_tf_log('data/URReacher-v1_pddl_multi_subgoal_ppo_200000_200_100_5')
+steps_pddl_grid_reach, returns_pddl_grid_reach, success_rate_pddl_grid_reach = read_tf_log('data/URReacher-v1_pddl_grid_based_ppo_200000_200_100_5')
+plot_success_rate_dict = {'Single': [steps_pddl_single_reach, success_rate_pddl_single_reach], 'Multi': [steps_pddl_multi_reach, success_rate_pddl_multi_reach], 'Grid': [steps_pddl_grid_reach, success_rate_pddl_grid_reach]}
+plot_curves(plot_success_rate_dict, 'Reaching Success Rate')
+plt.show()
+
+steps_pddl_single_push, returns_pddl_single_push, success_rate_pddl_single_push = read_tf_log('data/URPusher-v1_pddl_single_subgoal_ppo_200000_200_100_5')
+steps_pddl_multi_push, returns_pddl_multi_push, success_rate_pddl_multi_push = read_tf_log('data/URPusher-v1_pddl_multi_subgoal_ppo_200000_200_100_5')
+steps_pddl_grid_push, returns_pddl_grid_push, success_rate_pddl_grid_push = read_tf_log('data/URPusher-v1_pddl_grid_based_ppo_200000_200_100_5')
+plot_success_rate_dict = {'Single': [steps_pddl_single_push, success_rate_pddl_single_push], 'Multi': [steps_pddl_multi_push, success_rate_pddl_multi_push], 'Grid': [steps_pddl_grid_push, success_rate_pddl_grid_push]}
+plot_curves(plot_success_rate_dict, 'Pushing Success Rate')
+plt.show()
+
+# steps, returns, success_rate = read_tf_log('data/URReacher-v1_dense_handcrafted_grid_based_ppo_200000_100_100_5')
+# plot_rewards_dict = {'returns': [steps, returns]}
+# plot_curves(plot_rewards_dict, 'Sparse Reward Returns')
+# plt.show()
+# plot_success_rate_dict = {'success_rate': [steps, success_rate]}
+# plot_curves(plot_success_rate_dict, 'Sparse Reward Success Rate')
+# plt.show()

@@ -155,7 +155,7 @@ class URRobotGym(gym.Env):
                     )
                 )
 
-        if self._pddl_type == "grid_based":
+        if self._pddl_type == "grid_based" and not "handcrafted" in self.reward_type:
             domain_file_path, problem_file_path = ReachingGridBasedClassifiers().get_path_to_domain_and_problem_files()
             domprob = pddlpy.DomainProblem(domain_file_path, problem_file_path)
             path_to_fd_folder = "/home/njk/Documents/GitHub/downward"
