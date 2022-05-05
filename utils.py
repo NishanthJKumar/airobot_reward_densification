@@ -6,6 +6,7 @@ import os
 import glob
 ALPHA = 1
 SCALE = 100
+
 def play_video(video_dir, video_file=None, play_rate=0.2):
     if video_file is None:
         video_files = list(glob.glob(video_dir + "/eval/**/render_video.mp4"))
@@ -14,6 +15,7 @@ def play_video(video_dir, video_file=None, play_rate=0.2):
     else:
         video_file = os.Path(video_file)
     os.system(f"vlc --rate {str(play_rate + 0.01)} {video_file}")
+
 # read tf log file
 def read_tf_log(log_dir):
     log_dir = Path(log_dir)
@@ -33,6 +35,7 @@ def read_tf_log(log_dir):
     except:
         return None
     return steps, returns, success_rate
+
 def plot_curves(data_dict, title):
     # {label: [x, y]}
     fig, ax = plt.subplots(figsize=(4, 3))
@@ -43,6 +46,7 @@ def plot_curves(data_dict, title):
         ax.plot(x, y, label=label)
     ax.set_title(title)
     ax.legend()
+
 class GroundingUtils:
     def __init__(self, domain_file_path, problem_file_path, vec_env, classifiers, path_to_fd_folder, task_success_fn, pddl_type, env_type):
         self.domain_file_path = domain_file_path
@@ -64,6 +68,7 @@ class GroundingUtils:
         with open(plan_file_name) as f:
             # TODO (wmcclinton) automatically genetate plan_file from folder
             self.plan = [eval(line.replace('\n','').replace(' ','\', \'').replace('(','(\'').replace(')','\')')) for line in f.readlines() if 'unit cost' not in line]
+
     def get_state_grounded_atoms(self, env):
         state_grounded_atoms = []
         predicates = self.classifiers.get_typed_predicates()
@@ -87,6 +92,7 @@ class GroundingUtils:
                     if obj1[1] == predicate[1] and obj2[1] == predicate[2]:
                         state_grounded_atoms.append([(predicate[0].__name__, obj1[0], obj2[0]), predicate[0](env, obj1[0], obj2[0])]) 
         return [atom[0] for atom in state_grounded_atoms if atom[1]]
+    
     def apply_grounded_operator(self, state_grounded_atoms, op_name, params):
         for o in self.domprob.ground_operator(op_name):
             if set(params) == set(o.variable_list.values()) and o.precondition_pos.issubset(state_grounded_atoms):
@@ -97,6 +103,7 @@ class GroundingUtils:
                     next_state_grounded_atoms.remove(effect)
                 return next_state_grounded_atoms
         raise ValueError("Couldn't compute next_state_grounded_atoms")
+    
     def apply_grounded_plan(self, state_grounded_atoms, plan):
         plan_grounded_atoms = []
         plan_grounded_atoms.append(state_grounded_atoms)
@@ -105,10 +112,13 @@ class GroundingUtils:
             params = list([ground_operator[1]] if len(ground_operator[1]) == 2 else ground_operator[1:])
             plan_grounded_atoms.append(self.apply_grounded_operator(plan_grounded_atoms[-1], op_name, params))
         return plan_grounded_atoms
+    
     def phi_t(self, t):
         return (1/t)
+    
     def inv_phi_t(self, t):
         return t
+    
     def loc2xy(self, env, loc_index):
         if env._granularity % 2 == 0:
             square = int(np.sqrt(2 ** env._granularity))
@@ -124,6 +134,7 @@ class GroundingUtils:
         y_lower_bound = ymin + (ymax - ymin) / cols * loc_y
         y_upper_bound = ymin + (ymax - ymin) / cols * (loc_y + 1)
         return np.array([(x_upper_bound + x_lower_bound)/2, (y_upper_bound + y_lower_bound)/2])
+    
     def get_dist_to_next_subgoal(self, env, state, next_subgoal):
         distance = 0
         for predicate in next_subgoal:
@@ -189,8 +200,10 @@ class GroundingUtils:
                     return distance
 
         raise NotImplementedError("get_dist_to_next_subgoal not implemented for this environment")
+    
     def dist_phi(self, env, state, next_subgoal):
         return -1 * self.get_dist_to_next_subgoal(env, state, next_subgoal)
+    
     def phi(self, env, state_grounded_atoms, plan, dynamic_reward_shaping, state=None):
         t = env._t
         for i, grounded_atoms in enumerate(plan[env.max_plan_step_reached:]):
@@ -228,6 +241,7 @@ class GroundingUtils:
                 return [ALPHA * self.dist_phi(env, state, plan[env.max_plan_step_reached + 1]), env.max_plan_step_reached] #* self.phi_t(t)
         else:
             raise NotImplementedError(f"{dynamic_reward_shaping} is not a valid dynamic reward shaping function")
+    
     def get_shaped_reward(self, env, prev_state, state, previous_state_grounded_atoms, next_state_grounded_atoms, plan, dynamic_reward_shaping):
         success = self.task_success_fn(env, state)
         reward = 1 if success else 0
