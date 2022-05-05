@@ -25,13 +25,15 @@ class URRobotPusherGym(gym.Env):
                  max_episode_length=25,
                  dist_threshold=0.05,
                  granularity=4, 
-                 reward_type=None): # TODO: Seems like granularity parameter is not set correctly from make_vec_env. Need to check this!
+                 reward_type=None,
+                 pddl_type="single_subgoal"): # TODO: Seems like granularity parameter is not set correctly from make_vec_env. Need to check this!
         self._action_repeat = action_repeat
         self.max_plan_step_reached = 0
         self._max_episode_length = max_episode_length
         self._dist_threshold = dist_threshold
         self._granularity = granularity
         self.reward_type = reward_type
+        self._pddl_type = pddl_type
 
         self._xy_bounds = np.array([[0.23, 0.78], # [xmin, xmax]
                                    [-0.35, 0.3]]) # [ymin, ymax]
@@ -98,23 +100,25 @@ class URRobotPusherGym(gym.Env):
         self._subgoal_urdf_id = []
         self._subgoal0_pos = self._ref_ee_pos
         self._subgoal1_pos = np.array([0.4, -0.21, 1.0])
-        self._subgoal_urdf_id.append(
-            self.robot.pb_client.load_geom(
-                "sphere", size=0.04, mass=0, base_pos=self._subgoal1_pos, rgba=[0, 0.8, 0.8, 0.8]
-            )
-        )
         self._subgoal2_pos = self._box_pos
-        self._subgoal_urdf_id.append(
-            self.robot.pb_client.load_geom(
-                "sphere", size=0.04, mass=0, base_pos=self._subgoal2_pos, rgba=[0, 0.8, 0.8, 0.8]
-            )
-        )
         self._subgoal3_pos = np.array([0.425, 0.05, 1.0])
-        self._subgoal_urdf_id.append(
-            self.robot.pb_client.load_geom(
-                "sphere", size=0.04, mass=0, base_pos=self._subgoal3_pos, rgba=[0, 0.8, 0.8, 0.8]
+        if self._pddl_type in ["single_subgoal", "multi_subgoal"]:
+            self._subgoal_urdf_id.append(
+                self.robot.pb_client.load_geom(
+                    "sphere", size=0.04, mass=0, base_pos=self._subgoal2_pos, rgba=[0, 0.8, 0.8, 0.8]
+                )
             )
-        )
+        if self._pddl_type == "multi_subgoal":
+            self._subgoal_urdf_id.append(
+                self.robot.pb_client.load_geom(
+                    "sphere", size=0.04, mass=0, base_pos=self._subgoal1_pos, rgba=[0, 0.8, 0.8, 0.8]
+                )
+            )
+            self._subgoal_urdf_id.append(
+                self.robot.pb_client.load_geom(
+                    "sphere", size=0.04, mass=0, base_pos=self._subgoal3_pos, rgba=[0, 0.8, 0.8, 0.8]
+                )
+            )
         # Remove collision checking between the robot and the subgoal balls, as well as
         # between the box and the subgoal balls.
         for i in range(self.robot.pb_client.getNumJoints(self.robot.arm.robot_id)):
