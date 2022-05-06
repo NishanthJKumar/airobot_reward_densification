@@ -30,6 +30,7 @@ from envs.pushing_env.grid_based.grid_based import PushingGridBasedClassifiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import ReachingMultipleSubgoalsClassfiers
 from envs.reaching_env.single_subgoal.single_subgoal import ReachingSingleSubgoalClassfiers
 from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
+from envs.reaching_env.grid_based.grid_based_complex import ReachingGridBasedComplexClassifiers
 def train_ppo(
     cfg=None,
     env_name="URPusher-v1",
@@ -166,7 +167,7 @@ args = parser.parse_args()
 
 env_kwargs = dict(reward_type = args.reward_type, gui = True)
 if args.domain == 'reach':
-    env_name = "URReacher-v1"
+    env_name = "URReacher-v2"
     env_kwargs.update(dict(with_obstacle=True))
     if args.pddl_type == "single_subgoal":
         classifiers = ReachingSingleSubgoalClassfiers()
@@ -174,7 +175,8 @@ if args.domain == 'reach':
         classifiers = ReachingMultipleSubgoalsClassfiers()
     elif args.pddl_type == "grid_based":
         env_kwargs.update(dict(granularity = args.granularity))
-        classifiers = ReachingGridBasedClassifiers()
+        classifiers = ReachingGridBasedComplexClassifiers()
+        # classifiers = ReachingGridBasedClassifiers()
     else:
         raise ValueError(f"Unknown pddl type: {args.pddl_type}")
 elif args.domain == 'push':
@@ -207,7 +209,7 @@ cfg.alg.epsilon = None
 cfg.alg.max_steps = args.training_steps
 cfg.alg.deque_size = 20
 cfg.alg.device = "cuda" if torch.cuda.is_available() else "cpu"
-cfg.alg.eval = True #False
+cfg.alg.eval = False #True #False
 if cfg.alg.eval:
     cfg.alg.resume_step = args.training_steps
     cfg.alg.test = True

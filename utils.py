@@ -102,6 +102,7 @@ class GroundingUtils:
                 for effect in o.effect_neg:
                     next_state_grounded_atoms.remove(effect)
                 return next_state_grounded_atoms
+        import ipdb; ipdb.set_trace()
         raise ValueError("Couldn't compute next_state_grounded_atoms")
     
     def apply_grounded_plan(self, state_grounded_atoms, plan):
@@ -110,6 +111,7 @@ class GroundingUtils:
         for ground_operator in plan:
             op_name = ground_operator[0]
             params = list([ground_operator[1]] if len(ground_operator[1]) == 2 else ground_operator[1:])
+            # import ipdb; ipdb.set_trace()
             plan_grounded_atoms.append(self.apply_grounded_operator(plan_grounded_atoms[-1], op_name, params))
         return plan_grounded_atoms
     
