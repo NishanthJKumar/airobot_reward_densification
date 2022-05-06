@@ -181,7 +181,7 @@ if args.domain == 'reach':
         classifiers = ReachingGridBasedClassifiers()
     else:
         raise ValueError(f"Unknown pddl type: {args.pddl_type}")
-if args.domain == 'mazereach':
+elif args.domain == 'mazereach':
     env_name = "URReacher-v2"
     env_kwargs.update(dict(with_obstacle=True))
     if args.pddl_type == "single_subgoal":
