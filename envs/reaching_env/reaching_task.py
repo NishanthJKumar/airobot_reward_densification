@@ -324,6 +324,7 @@ class URRobotGym(gym.Env):
         dist_to_goal = np.linalg.norm(state - env._goal_pos[:2])
         return dist_to_goal < env._dist_threshold
 
+
 module_name = __name__
 
 env_name = "URReacher-v1"
