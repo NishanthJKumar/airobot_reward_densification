@@ -30,17 +30,7 @@ from shaped_reward_episodic_runner import ShapedRewardEpisodicRunner
 from IPython import display
 from IPython.display import HTML
 
-
-def check_collision_rate(log_dir):
-    log_dir = Path(log_dir)
-    log_files = list(log_dir.glob(f"**/info.json"))
-    log_files.sort()
-    log_file = log_files[-1]
-    info_data = load_from_json(log_file)
-    collisions = [v["collision"] for k, v in info_data.items()]
-    return np.mean(collisions)
-
-class URRobotGym(gym.Env):
+class URRobotComplexGym(gym.Env):
     def __init__(
         self,
         action_repeat=10,
@@ -101,7 +91,7 @@ class URRobotGym(gym.Env):
         )
 
         # create a ball at the goal location
-        self._goal_pos = np.array([0.5, 0.26, 1.0])
+        self._goal_pos = np.array([0.5, 0.0, 1.0])
         self._goal_urdf_id = self.robot.pb_client.load_geom(
             "sphere", size=0.04, mass=0, base_pos=self._goal_pos, rgba=[1, 0, 0, 0.8]
         )
@@ -119,11 +109,25 @@ class URRobotGym(gym.Env):
 
         # create an obstacle
         if self._with_obstacle:
-            self._wall_id = self.robot.pb_client.load_geom(
+            self._wall_id_1 = self.robot.pb_client.load_geom(
                 "box",
-                size=[0.18, 0.01, 0.1],
+                size=[0.1, 0.01, 0.1],
                 mass=0,
-                base_pos=[0.5, 0.15, 1.0],
+                base_pos=[0.5, -0.2, 1.0],
+                rgba=[0.5, 0.5, 0.5, 0.8],
+            )
+            self._wall_id_2 = self.robot.pb_client.load_geom(
+                "box",
+                size=[0.01, 0.18, 0.1],
+                mass=0,
+                base_pos=[0.4, -0.03, 1.0],
+                rgba=[0.5, 0.5, 0.5, 0.8],
+            )
+            self._wall_id_3 = self.robot.pb_client.load_geom(
+                "box",
+                size=[0.01, 0.18, 0.1],
+                mass=0,
+                base_pos=[0.6, -0.03, 1.0],
                 rgba=[0.5, 0.5, 0.5, 0.8],
             )
 
@@ -157,7 +161,7 @@ class URRobotGym(gym.Env):
                 )
 
         if self._pddl_type == "grid_based" and not "handcrafted" in self.reward_type:
-            domain_file_path, problem_file_path = ReachingGridBasedClassifiers().get_path_to_domain_and_problem_files()
+            domain_file_path, problem_file_path = ReachingGridBasedComplexClassifiers().get_path_to_domain_and_problem_files()
             domprob = pddlpy.DomainProblem(domain_file_path, problem_file_path)
             path_to_fd_folder = "/home/njk/Documents/GitHub/downward"
             os.system(f'python {path_to_fd_folder}/fast-downward.py --alias seq-sat-lama-2011 {domain_file_path} {problem_file_path} >/dev/null 2>&1')
@@ -327,10 +331,10 @@ class URRobotGym(gym.Env):
 
 module_name = __name__
 
-env_name = "URReacher-v1"
+env_name = "URReacher-v2"
 if env_name in registry.env_specs:
     del registry.env_specs[env_name]
 register(
     id=env_name,
-    entry_point=f"{module_name}:URRobotGym",
+    entry_point=f"{module_name}:URRobotComplexGym",
 )

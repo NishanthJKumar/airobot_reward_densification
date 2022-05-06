@@ -20,6 +20,7 @@ import pprint
 import envs.picking_env.picking_task
 import envs.pushing_env.pushing_task
 import envs.reaching_env.reaching_task
+import envs.complex_reaching_env.complex_reaching_task
 from utils import play_video, GroundingUtils
 import gym
 from envs.picking_env.orig_blocksworld.single_subgoal import PickingSingleSubgoalClassfiers
@@ -29,8 +30,10 @@ from envs.pushing_env.multiple_subgoals.multiple_subgoals import PushingMultiple
 from envs.pushing_env.grid_based.grid_based import PushingGridBasedClassifiers
 from envs.reaching_env.multiple_subgoals.multiple_subgoals import ReachingMultipleSubgoalsClassfiers
 from envs.reaching_env.single_subgoal.single_subgoal import ReachingSingleSubgoalClassfiers
+from envs.complex_reaching_env.multiple_subgoals.multiple_subgoals import ReachingMultipleSubgoalsComplexClassfiers
+from envs.complex_reaching_env.single_subgoal.single_subgoal import ReachingSingleSubgoalComplexClassfiers
 from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
-from envs.reaching_env.grid_based.grid_based_complex import ReachingGridBasedComplexClassifiers
+from envs.complex_reaching_env.grid_based.grid_based_complex import ReachingGridBasedComplexClassifiers
 def train_ppo(
     cfg=None,
     env_name="URPusher-v1",
@@ -152,7 +155,7 @@ def train_sac(
     return cfg.alg.save_dir
 # Main code begins here; takes in particular arguments and urns the relevant experiment with the specified configuration.
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick'], required=True, help='Name of env to run.')
+parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick', 'reach_complex'], required=True, help='Name of env to run.')
 parser.add_argument('-rt', '--reward_type', choices=['sparse_handcrafted', "dense_handcrafted", 'pddl'], required=True, help='Type of reward to use.')
 parser.add_argument('-pt', '--pddl_type', choices=['single_subgoal', 'multi_subgoal', 'grid_based'], required=True, help='Type of classifier to use.')
 parser.add_argument('-al', '--algorithm', choices=['ppo', 'sac'], required=True, help='Choice of learning algorithm to use.')
@@ -167,7 +170,7 @@ args = parser.parse_args()
 
 env_kwargs = dict(reward_type = args.reward_type, gui = True)
 if args.domain == 'reach':
-    env_name = "URReacher-v2"
+    env_name = "URReacher-v1"
     env_kwargs.update(dict(with_obstacle=True))
     if args.pddl_type == "single_subgoal":
         classifiers = ReachingSingleSubgoalClassfiers()
@@ -175,8 +178,19 @@ if args.domain == 'reach':
         classifiers = ReachingMultipleSubgoalsClassfiers()
     elif args.pddl_type == "grid_based":
         env_kwargs.update(dict(granularity = args.granularity))
+        classifiers = ReachingGridBasedClassifiers()
+    else:
+        raise ValueError(f"Unknown pddl type: {args.pddl_type}")
+if args.domain == 'reach_complex':
+    env_name = "URReacher-v2"
+    env_kwargs.update(dict(with_obstacle=True))
+    if args.pddl_type == "single_subgoal":
+        classifiers = ReachingSingleSubgoalComplexClassfiers()
+    elif args.pddl_type == "multi_subgoal":
+        classifiers = ReachingMultipleSubgoalsComplexClassfiers()
+    elif args.pddl_type == "grid_based":
+        env_kwargs.update(dict(granularity = args.granularity))
         classifiers = ReachingGridBasedComplexClassifiers()
-        # classifiers = ReachingGridBasedClassifiers()
     else:
         raise ValueError(f"Unknown pddl type: {args.pddl_type}")
 elif args.domain == 'push':
