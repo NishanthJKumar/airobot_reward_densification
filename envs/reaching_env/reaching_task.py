@@ -1,7 +1,6 @@
 import os
 
 from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
-from envs.complex_reaching_env.grid_based.grid_based_complex import ReachingGridBasedComplexClassifiers
 import torch
 import gym
 import pddlpy
