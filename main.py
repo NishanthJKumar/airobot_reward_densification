@@ -155,7 +155,7 @@ def train_sac(
     return cfg.alg.save_dir
 # Main code begins here; takes in particular arguments and urns the relevant experiment with the specified configuration.
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick', 'reach_complex'], required=True, help='Name of env to run.')
+parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick', 'mazereach'], required=True, help='Name of env to run.')
 parser.add_argument('-rt', '--reward_type', choices=['sparse_handcrafted', "dense_handcrafted", 'pddl'], required=True, help='Type of reward to use.')
 parser.add_argument('-pt', '--pddl_type', choices=['single_subgoal', 'multi_subgoal', 'grid_based'], required=True, help='Type of classifier to use.')
 parser.add_argument('-al', '--algorithm', choices=['ppo', 'sac'], required=True, help='Choice of learning algorithm to use.')
@@ -181,7 +181,7 @@ if args.domain == 'reach':
         classifiers = ReachingGridBasedClassifiers()
     else:
         raise ValueError(f"Unknown pddl type: {args.pddl_type}")
-if args.domain == 'reach_complex':
+if args.domain == 'mazereach':
     env_name = "URReacher-v2"
     env_kwargs.update(dict(with_obstacle=True))
     if args.pddl_type == "single_subgoal":
