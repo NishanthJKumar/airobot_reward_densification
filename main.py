@@ -163,12 +163,12 @@ parser.add_argument('-ts', '--training_steps', type=int, default=200000, help='N
 parser.add_argument('-es', '--episode_steps', type=int, default=200, help='Max. number of steps in an episode.')
 parser.add_argument('-ei', '--eval_interval', type=int, default=100, help='Num. trajs after which to call eval.')
 parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
-parser.add_argument('-se', '--seed', type=int, default=0, help='Random seed to use during training.')
+parser.add_argument('-se', '--seed', type=int, default=1, help='Random seed to use during training.')
 parser.add_argument('-g', '--granularity', type=int, default=5, help='Number of divisions to segment the working space of the arm. Total divisions is equal to 2^{input}.')
 parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
 
-env_kwargs = dict(reward_type = args.reward_type, gui = True)
+env_kwargs = dict(reward_type = args.reward_type, gui = False)
 if args.domain == 'reach':
     env_name = "URReacher-v1"
     env_kwargs.update(dict(with_obstacle=True))
