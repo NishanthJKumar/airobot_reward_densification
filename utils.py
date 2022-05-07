@@ -138,9 +138,9 @@ class GroundingUtils:
     def get_dist_to_next_subgoal(self, env, state, next_subgoal):
         distance = 0
         for predicate in next_subgoal:
-            if (predicate[0] == "at" and predicate[1] == "claw" and self.env_type == "reach") or \
+            if (predicate[0] == "at" and predicate[1] == "claw" and self.env_type in ["reach", "mazereach"]) or \
             ("at" in predicate[0] and predicate[1] == "box1" and self.env_type == "push"):
-                if self.env_type == "reach":
+                if self.env_type in ["reach", "mazereach"]:
                     obj_state = state[0][:2]
                 elif self.env_type == "push":
                     state_grounded_atoms = self.get_state_grounded_atoms(env)

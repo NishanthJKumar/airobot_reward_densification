@@ -2,6 +2,7 @@
 /data
 /data_dupe
 /data_first_exprs
+/data_seed1
 
 # Unnecessary log files
 *.txt
