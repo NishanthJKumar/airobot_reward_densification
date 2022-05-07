@@ -153,7 +153,7 @@ def eval_sac(
 parser = argparse.ArgumentParser()
 parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
 args = parser.parse_args()
-args.seed = 1
+args.seed = 3
 
 reach_ppo_results = {}
 reach_sac_results = {}
@@ -317,7 +317,7 @@ for data_folder in all_data_folders:
 
 import ipdb; ipdb.set_trace()
 pickle_list = [reach_ppo_results, reach_sac_results, push_ppo_results, push_sac_results]
-with open('results_seed1.pickle', 'wb') as handle:
+with open('results_seed3.pickle', 'wb') as handle:
     pickle.dump(pickle_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 fig, axs = plt.subplots(4)
