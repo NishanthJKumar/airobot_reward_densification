@@ -34,6 +34,7 @@ from envs.complex_reaching_env.multiple_subgoals.multiple_subgoals import Reachi
 from envs.complex_reaching_env.single_subgoal.single_subgoal import ReachingSingleSubgoalComplexClassfiers
 from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
 from envs.complex_reaching_env.grid_based.grid_based_complex import ReachingGridBasedComplexClassifiers
+
 def train_ppo(
     cfg=None,
     env_name="URPusher-v1",
@@ -89,6 +90,7 @@ def train_ppo(
         pprint.pprint(stat_info)
         # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     return cfg.alg.save_dir
+
 def train_sac(
     cfg=None,
     env_name="URPusher-v1",
@@ -153,6 +155,7 @@ def train_sac(
         pprint.pprint(stat_info)
         # play_video(cfg.alg.save_dir+"/seed_"+str(cfg.alg.seed))
     return cfg.alg.save_dir
+
 # Main code begins here; takes in particular arguments and urns the relevant experiment with the specified configuration.
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--domain', choices=['reach', 'push', 'pick', 'mazereach'], required=True, help='Name of env to run.')
@@ -168,7 +171,7 @@ parser.add_argument('-g', '--granularity', type=int, default=5, help='Number of 
 parser.add_argument('-drs', '--dynamic_shaping', choices=['basic', 'dist'], nargs='?', help='DRS type to use.')
 args = parser.parse_args()
 
-env_kwargs = dict(reward_type = args.reward_type, gui = False)
+env_kwargs = dict(reward_type = args.reward_type, gui = True)
 if args.domain == 'reach':
     env_name = "URReacher-v1"
     env_kwargs.update(dict(with_obstacle=True))
@@ -214,6 +217,7 @@ elif args.domain == 'pick':
         raise ValueError(f"Unknown pddl type for picking env: {args.pddl_type}")
 else:
     raise ValueError(f"Unknown domain: {args.domain}")
+
 domain_file_path, problem_file_path = classifiers.get_path_to_domain_and_problem_files()
 set_config(args.algorithm)
 cfg.alg.seed = args.seed
@@ -238,6 +242,7 @@ cfg.alg.episode_steps = args.episode_steps
 cfg.alg.eval_interval = args.eval_interval
 cfg.alg.dynamic_reward_shaping = args.dynamic_shaping
 cfg.alg.pddl_type = args.pddl_type
+
 # Include all relevant variables in the name so that there are no folder
 # collisions.
 cfg.alg.save_dir = Path.cwd().absolute().joinpath("data").as_posix()
