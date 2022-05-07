@@ -1,9 +1,10 @@
 import pickle
 import matplotlib.pyplot as plt
+import numpy as np
 
 def create_renamed_dict(input_dict):
-    renaming = {'sparse_handcrafted_grid_based_': 'sparse_hc',
-                'dense_handcrafted_grid_based_': 'dense_hc',
+    renaming = {'sparse_handcrafted': 'sparse_hc',
+                'dense_handcrafted': 'dense_hc',
                 'pddl_grid_based_basicdrs': 'pddl\ngrid_based\nbasic_drs',
                 'pddl_multi_subgoal_': 'pddl\nmulti\nsubgoal',
                 'pddl_grid_based_distdrs': 'pddl\ngrid_based\ndist_drs',
@@ -22,19 +23,58 @@ def create_renamed_dict(input_dict):
 
     return renamed_dict
 
+def combine_dicts(dict0, dict1, dict2):
+    combined_dict = {}
+    for key0 in dict0.keys():
+        if 'sparse_handcrafted' in key0:
+            k = 'sparse_handcrafted'
+        elif 'dense_handcrafted' in key0:
+            k = 'dense_handcrafted'
+        else:
+            k = key0
 
+        k1 = None
+        k2 = None
+        for key1 in dict1.keys():
+            if k in key1:
+                k1 = key1
+                break
+        for key2 in dict2.keys():
+            if k in key2:
+                k2 = key2
+                break
 
-with open('results.pickle', 'rb') as handle:
-    results_list = pickle.load(handle)
+        if k1 is not None and k2 is not None:
+            combined_dict[k] = [dict0[key0], dict1[k1], dict2[k2]]
+        else:
+            raise ValueError(f"Could not find key {k} in dicts")
+    return combined_dict
 
-reach_ppo_results, reach_sac_results, push_ppo_results, push_sac_results = results_list
+with open('results_seed0.pickle', 'rb') as handle:
+    results_list0 = pickle.load(handle)
+
+with open('results_seed1.pickle', 'rb') as handle:
+    results_list1= pickle.load(handle)
+
+with open('results_seed3.pickle', 'rb') as handle:
+    results_list3 = pickle.load(handle)
+
+reach_ppo_results0, reach_sac_results0, push_ppo_results0, push_sac_results0 = results_list0
+reach_ppo_results1, reach_sac_results1, push_ppo_results1, push_sac_results1 = results_list1
+reach_ppo_results3, reach_sac_results3, push_ppo_results3, push_sac_results3 = results_list3
+
+# Combine all the dictionaries into one composite dictionary.
+reach_ppo_combined = combine_dicts(reach_ppo_results0, reach_ppo_results1, reach_ppo_results3)
+reach_sac_combined = combine_dicts(reach_sac_results0, reach_sac_results1, reach_sac_results3)
+push_ppo_combined = combine_dicts(push_ppo_results0, push_ppo_results1, push_ppo_results3)
+push_sac_combined = combine_dicts(push_sac_results0, push_sac_results1, push_sac_results3)
 
 colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan', 'lime']
 
-reach_ppo_renamed = create_renamed_dict(reach_ppo_results)
-reach_sac_renamed = create_renamed_dict(reach_sac_results)
-push_ppo_renamed = create_renamed_dict(push_ppo_results)
-push_sac_renamed = create_renamed_dict(push_sac_results)
+reach_ppo_renamed = create_renamed_dict(reach_ppo_combined)
+reach_sac_renamed = create_renamed_dict(reach_sac_combined)
+push_ppo_renamed = create_renamed_dict(push_ppo_combined)
+push_sac_renamed = create_renamed_dict(push_sac_combined)
 
 key_ordering = ['sparse_hc', 'dense_hc', 
 "pddl\nsingle\nsubgoal", 'pddl\nmulti\nsubgoal', 'pddl\ngrid_based', 
@@ -43,25 +83,25 @@ key_ordering = ['sparse_hc', 'dense_hc',
 "pddl\nmulti\nsubgoal\ndist_drs", 'pddl\ngrid_based\ndist_drs']
 
 plt.figure(0)
-plt.bar(key_ordering, [reach_ppo_renamed[k] for k in key_ordering], color=colors)
+plt.bar(key_ordering, [np.array(reach_ppo_renamed[k]).mean() for k in key_ordering], yerr=[np.array(reach_ppo_renamed[k]).std() for k in key_ordering], color=colors)
 plt.title('PPO Performance on Reaching Task')
 plt.xlabel('Approach')
 plt.ylabel('Distance to Goal')
 
 plt.figure(1)
-plt.bar(key_ordering, [reach_sac_renamed[k] for k in key_ordering], color=colors)
+plt.bar(key_ordering, [np.array(reach_sac_renamed[k]).mean() for k in key_ordering], yerr=[np.array(reach_sac_renamed[k]).std() for k in key_ordering], color=colors)
 plt.title('SAC Performance on Reaching Task')
 plt.xlabel('Approach')
 plt.ylabel('Distance to Goal')
 
 plt.figure(2)
-plt.bar(key_ordering, [push_ppo_renamed[k] for k in key_ordering], color=colors)
+plt.bar(key_ordering, [np.array(push_ppo_renamed[k]).mean() for k in key_ordering], yerr=[np.array(push_ppo_renamed[k]).std() for k in key_ordering], color=colors)
 plt.title('PPO Performance on Pushing Task')
 plt.xlabel('Approach')
 plt.ylabel('Distance to Goal')
 
 plt.figure(3)
-plt.bar(key_ordering, [push_sac_renamed[k] for k in key_ordering], color=colors)
+plt.bar(key_ordering, [np.array(push_sac_renamed[k]).mean() for k in key_ordering], yerr=[np.array(push_sac_renamed[k]).std() for k in key_ordering], color=colors)
 plt.title('SAC Performance on Pushing Task')
 plt.xlabel('Approach')
 plt.ylabel('Distance to Goal')
