@@ -21,6 +21,7 @@ import os
 import envs.picking_env.picking_task
 import envs.pushing_env.pushing_task
 import envs.reaching_env.reaching_task
+import envs.complex_reaching_env.complex_reaching_task
 from utils import play_video, GroundingUtils
 import gym
 import numpy as np
@@ -34,6 +35,9 @@ from envs.reaching_env.multiple_subgoals.multiple_subgoals import ReachingMultip
 from envs.reaching_env.single_subgoal.single_subgoal import ReachingSingleSubgoalClassfiers
 from envs.reaching_env.grid_based.grid_based import ReachingGridBasedClassifiers
 import matplotlib.pyplot as plt
+from envs.complex_reaching_env.multiple_subgoals.multiple_subgoals import ReachingMultipleSubgoalsComplexClassfiers
+from envs.complex_reaching_env.single_subgoal.single_subgoal import ReachingSingleSubgoalComplexClassfiers
+from envs.complex_reaching_env.grid_based.grid_based_complex import ReachingGridBasedComplexClassifiers
 
 def eval_ppo(
     cfg=None,
@@ -153,12 +157,13 @@ def eval_sac(
 parser = argparse.ArgumentParser()
 parser.add_argument('-fdp', '--path_to_fd', type=str, default="/home/njk/Documents/GitHub/downward", help='Full abs path to fd installation folder.')
 args = parser.parse_args()
-args.seed = 3
+args.seed = 0
 
 reach_ppo_results = {}
 reach_sac_results = {}
 push_ppo_results = {}
 push_sac_results = {}
+maze_reach_ppo_results = {}
 
 all_data_folders = [f.path for f in os.scandir('data') if f.is_dir()]
 # Loop thru all folders and populate the above lists.
@@ -167,6 +172,8 @@ for data_folder in all_data_folders:
 
     if args_list[0] == 'URReacher-v1':
         args.domain = 'reach'
+    elif args_list[0] == 'URReacher-v2':
+        args.domain = 'mazereach'
     elif args_list[0] == 'URPusher-v1':
         args.domain = 'push'
     elif args_list[0] == 'URPicker-v1':
@@ -210,6 +217,18 @@ for data_folder in all_data_folders:
         elif args.pddl_type == "grid_based":
             env_kwargs.update(dict(granularity = args.granularity))
             classifiers = ReachingGridBasedClassifiers()
+        else:
+            raise ValueError(f"Unknown pddl type: {args.pddl_type}")
+    elif args.domain == 'mazereach':
+        env_name = "URReacher-v2"
+        env_kwargs.update(dict(with_obstacle=True))
+        if args.pddl_type == "single_subgoal":
+            classifiers = ReachingSingleSubgoalComplexClassfiers()
+        elif args.pddl_type == "multi_subgoal":
+            classifiers = ReachingMultipleSubgoalsComplexClassfiers()
+        elif args.pddl_type == "grid_based":
+            env_kwargs.update(dict(granularity = args.granularity))
+            classifiers = ReachingGridBasedComplexClassifiers()
         else:
             raise ValueError(f"Unknown pddl type: {args.pddl_type}")
     elif args.domain == 'push':
@@ -292,7 +311,7 @@ for data_folder in all_data_folders:
 
 
     final_ob = traj_info['lst_step_info'][0]['true_next_ob']
-    if args.domain == "reach":
+    if args.domain in ["reach", "mazereach"]:
         final_dist = np.linalg.norm(env.envs[0]._goal_pos[:2] - final_ob)
     elif args.domain == "push":
         final_dist = np.linalg.norm(env.envs[0]._goal_pos[:2] - final_ob[2:4])
@@ -312,13 +331,17 @@ for data_folder in all_data_folders:
         push_ppo_results[f"{args.reward_type}_{args.pddl_type}_{dynamic_shaping}"] = final_dist
     elif args.domain == "push" and args.algorithm == "sac":
         push_sac_results[f"{args.reward_type}_{args.pddl_type}_{dynamic_shaping}"] = final_dist
+    elif args.domain == "mazereach" and args.algorithm == "ppo":
+        maze_reach_ppo_results[f"{args.reward_type}_{args.pddl_type}_{dynamic_shaping}"] = final_dist
     else:
         raise ValueError(f"Domain not yet implemented for eval: {args.domain}")
 
 import ipdb; ipdb.set_trace()
-pickle_list = [reach_ppo_results, reach_sac_results, push_ppo_results, push_sac_results]
+pickle_list = [reach_ppo_results, reach_sac_results, push_ppo_results, push_sac_results, maze_reach_ppo_results]
 with open('results_seed3.pickle', 'wb') as handle:
     pickle.dump(pickle_list, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# with open('mazereach_results_seed0.pickle', 'wb') as handle:
+#     pickle.dump(maze_reach_ppo_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 fig, axs = plt.subplots(4)
 axs[0].bar(*zip(*sorted(reach_ppo_results.items())), color=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan', 'lime'])
