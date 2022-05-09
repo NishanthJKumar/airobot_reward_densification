@@ -13,7 +13,7 @@ We hypothesize that for many robotic tasks,
 
 We perform an extensive empirical evaluation of our system across different PDDL models with varying granularity, choices of potential function, choice of learning algorithm (PPO and SAC) and tasks.
 
-For more details on the project please have a look at our comprehensive report [here](assets/report.pdf). For a high-level understanding please have a look at our presentation [here](https://docs.google.com/presentation/d/1M5sPGWkCsGoGVnfnY0i7reYVwLuUrs1Fx4Vm10iyals/edit?usp=sharing). You can also find our implementation of the approach [here](https://github.com/NishanthJKumar/airobot_reward_densification).
+#### [Report](assets/report.pdf) | [Presentation](https://docs.google.com/presentation/d/1M5sPGWkCsGoGVnfnY0i7reYVwLuUrs1Fx4Vm10iyals/edit?usp=sharing) | [Code](https://github.com/NishanthJKumar/airobot_reward_densification)
 
 ---
 
