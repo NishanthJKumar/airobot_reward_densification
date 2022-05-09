@@ -69,8 +69,6 @@ reach_sac_combined = combine_dicts(reach_sac_results0, reach_sac_results1, reach
 push_ppo_combined = combine_dicts(push_ppo_results0, push_ppo_results1, push_ppo_results3)
 push_sac_combined = combine_dicts(push_sac_results0, push_sac_results1, push_sac_results3)
 
-colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan', 'lime']
-
 reach_ppo_renamed = create_renamed_dict(reach_ppo_combined)
 reach_sac_renamed = create_renamed_dict(reach_sac_combined)
 push_ppo_renamed = create_renamed_dict(push_ppo_combined)
@@ -82,28 +80,26 @@ key_ordering = ['sparse_hc', 'dense_hc',
 'pddl\ngrid_based\nbasic_drs', "pddl\nsingle\nsubgoal\ndist_drs", 
 "pddl\nmulti\nsubgoal\ndist_drs", 'pddl\ngrid_based\ndist_drs']
 
+width = 0.4
+
 plt.figure(0)
-plt.bar(key_ordering, [np.array(reach_ppo_renamed[k]).mean() for k in key_ordering], yerr=[np.array(reach_ppo_renamed[k]).std() for k in key_ordering], color=colors)
-plt.title('PPO Performance on Reaching Task')
-plt.xlabel('Approach')
-plt.ylabel('Distance to Goal')
+x_axis = np.arange(len(key_ordering))
+plt.bar(x_axis - width/2, [np.array(reach_ppo_renamed[k]).mean() for k in key_ordering], yerr=[np.array(reach_ppo_renamed[k]).std() for k in key_ordering], color='tab:blue', label='Reaching', width=width)
+plt.bar(x_axis + width/2, [np.array(push_ppo_renamed[k]).mean() for k in key_ordering], yerr=[np.array(push_ppo_renamed[k]).std() for k in key_ordering], color='tab:orange', label='Pushing', width=width)
+plt.title('PPO Performance on Reaching and Pushing Tasks', fontsize=22)
+plt.xticks(x_axis, key_ordering, fontsize=16)
+plt.yticks(fontsize=16)
+plt.legend(fontsize=18)
+plt.ylabel('Distance to Goal', fontsize=18)
 
 plt.figure(1)
-plt.bar(key_ordering, [np.array(reach_sac_renamed[k]).mean() for k in key_ordering], yerr=[np.array(reach_sac_renamed[k]).std() for k in key_ordering], color=colors)
-plt.title('SAC Performance on Reaching Task')
-plt.xlabel('Approach')
-plt.ylabel('Distance to Goal')
-
-plt.figure(2)
-plt.bar(key_ordering, [np.array(push_ppo_renamed[k]).mean() for k in key_ordering], yerr=[np.array(push_ppo_renamed[k]).std() for k in key_ordering], color=colors)
-plt.title('PPO Performance on Pushing Task')
-plt.xlabel('Approach')
-plt.ylabel('Distance to Goal')
-
-plt.figure(3)
-plt.bar(key_ordering, [np.array(push_sac_renamed[k]).mean() for k in key_ordering], yerr=[np.array(push_sac_renamed[k]).std() for k in key_ordering], color=colors)
-plt.title('SAC Performance on Pushing Task')
-plt.xlabel('Approach')
-plt.ylabel('Distance to Goal')
+x_axis = np.arange(len(key_ordering))
+plt.bar(x_axis - width/2, [np.array(reach_sac_renamed[k]).mean() for k in key_ordering], yerr=[np.array(reach_ppo_renamed[k]).std() for k in key_ordering], color='tab:blue', label='Reaching', width=width)
+plt.bar(x_axis + width/2, [np.array(push_sac_renamed[k]).mean() for k in key_ordering], yerr=[np.array(push_ppo_renamed[k]).std() for k in key_ordering], color='tab:orange', label='Pushing', width=width)
+plt.title('SAC Performance on Reaching and Pushing Tasks', fontsize=22)
+plt.xticks(x_axis, key_ordering, fontsize=16)
+plt.yticks(fontsize=16)
+plt.legend(fontsize=18)
+plt.ylabel('Distance to Goal', fontsize=18)
 
 plt.show()
