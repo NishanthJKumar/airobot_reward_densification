@@ -1,72 +1,458 @@
 ---
 layout: page
-title: simple site
-tagline: Easy websites with GitHub Pages
+title: Automatic Reward Densification
+<!-- tagline: Easy reward design using classical planning -->
 description: Minimal tutorial on making a simple website with GitHub Pages
 ---
 
-[Github Pages](https://pages.github.com) provide a simple way to make a
-website using
-[Markdown](https://daringfireball.net/projects/markdown/) and
-[git](https://git-scm.com).
+A core challenge with scaling up Deep Reinforcement Learning (Deep RL) for use in robotic tasks of practical interest is the task specification problem, which typically manifests as the difficulty of reward design. In order to reduce the difficulty of reward function design in continuous robotics environments, we propose to develop a method that automatically densifies sparse, goal-based reward in robotic tasks such that the optimal policy is preserved by leveraging task plans. 
 
-For me, the painful aspects of making a website are
+We hypothesize that for many robotic tasks, 
+- while it is difficult for humans to specify a dense reward that cannot be hacked, it is easy to specify an abstract plannable model in PDDL that conveys information about the dynamics of the domain, and 
+- that valid abstract plans within this model can be leveraged to automatically densify sparse reward via potential-based reward shaping sufficiently enough for state-of-the-art RL approaches to solve these tasks. 
 
-- Working with html and css
-- Finding a hosting site
-- Transferring stuff to the hosting site
+We perform an extensive empirical evaluation of our system across different PDDL models with varying granularity, choices of potential function, choice of learning algorithm (PPO and SAC) and tasks.
 
-With [GitHub Pages](https://pages.github.com), you just write things in
-[Markdown](https://daringfireball.net/projects/markdown/),
-[GitHub](https://github.com) hosts the site for you, and you just push
-material to your GitHub repository with `git add`, `git commit`, and
-`git push`.
-
-If you love [git](https://git-scm.com/) and
-[GitHub](https://github.com), you'll love
-[GitHub Pages](https://pages.github.com), too.
-
-The sites use [Jekyll](https://jekyllrb.com/), a
-[ruby](https://www.ruby-lang.org/en/) [gem](https://rubygems.org/), to
-convert Markdown files to html, and this part is done
-automatically when you push the materials to the `gh-pages` branch
-of a GitHub repository.
-
-The [GitHub](https://pages.github.com) and
-[Jekyll](https://jekyllrb.com) documentation is great, but I thought it
-would be useful to have a minimal tutorial, for those who just want to
-get going immediately with a simple site. To some readers, what GitHub
-has might be simpler and more direct.  But if you just want to create
-a site like the one you're looking at now, read on.
-
-Start by reading the [Overview page](pages/overview.html), which
-explains the basic structure of these sites. Then read
-[how to make an independent website](pages/independent_site.html). Then
-read any of the other things, such as
-[how to test your site locally](pages/local_test.html).
-
-- [Overview](pages/overview.html)
-- [Making an independent website](pages/independent_site.html)
-- [Making a personal site](pages/user_site.html)
-- [Making a site for a project](pages/project_site.html)
-- [Making a jekyll-free site](pages/nojekyll.html)
-- [Testing your site locally](pages/local_test.html)
-- [Resources](pages/resources.html)
-
-If anything here is confusing (or _wrong_!), or if I've missed
-important details, please
-[submit an issue](https://github.com/kbroman/simple_site/issues), or (even
-better) fork [the GitHub repository for this website](https://github.com/kbroman/simple_site),
-make modifications, and submit a pull request.
+For more details on the project please have a look at our comprehensive report [here](assets/report.pdf). For a high-level understanding please have a look at our presentation [here](https://docs.google.com/presentation/d/1M5sPGWkCsGoGVnfnY0i7reYVwLuUrs1Fx4Vm10iyals/edit?usp=sharing). You can also find our implementation of the approach [here](https://github.com/NishanthJKumar/airobot_reward_densification).
 
 ---
 
-The source for this minimal tutorial is [on github](https://github.com/kbroman/simple_site).
+### Environments
 
-Also see my [tutorials](https://kbroman.org/tutorials) on
-[git/github](https://kbroman.org/github_tutorial),
-[GNU make](https://kbroman.org/minimal_make),
-[knitr](https://kbroman.org/knitr_knutshell),
-[R packages](https://kbroman.org/pkg_primer),
-[data organization](https://kbroman.org/dataorg),
-and [reproducible research](https://kbroman.org/steps2rr).
+#### Reaching - PPO 
+
+<table class="wide">
+    <colgroup>
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+    </colgroup>
+    <tr>
+        <td colspan="3">
+            <p style="text-align:center"> Sparse Handcrafted </p>
+            <center>
+                <img src="assets/videos/reach_ppo_sparse_handcrafted.gif"/>
+            </center>
+        </td>
+        <td colspan="3">
+            <p style="text-align:center"> Dense Handcrafted </p>
+            <center>
+                <img src="assets/videos/reach_ppo_dense_handcrafted.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_ppo_simple_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_ppo_simple_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Grid Based </p>
+            <center>
+                <img src="assets/videos/reach_ppo_simple_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_ppo_plan_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_ppo_plan_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Grid Based </p>
+            <center>
+                <img src="assets/videos/reach_ppo_plan_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_ppo_dist_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_ppo_dist_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <center>
+                <img src="assets/videos/reach_ppo_dist_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+</table>
+
+---
+
+#### Reaching - SAC
+
+<table class="wide">
+    <colgroup>
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+    </colgroup>
+    <tr>
+        <td colspan="3">
+            <p style="text-align:center"> Sparse Handcrafted </p>
+            <center>
+                <img src="assets/videos/reach_sac_sparse_handcrafted.gif"/>
+            </center>
+        </td>
+        <td colspan="3">
+            <p style="text-align:center"> Dense Handcrafted </p>
+            <center>
+                <img src="assets/videos/reach_sac_dense_handcrafted.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_sac_simple_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_sac_simple_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Grid Based </p>
+            <center>
+                <img src="assets/videos/reach_sac_simple_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_sac_plan_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_sac_plan_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Grid Based </p>
+            <center>
+                <img src="assets/videos/reach_sac_plan_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_sac_dist_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/reach_sac_dist_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <center>
+                <img src="assets/videos/reach_sac_dist_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+</table>
+
+---
+
+#### Pushing - PPO
+
+<table class="wide">
+    <colgroup>
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+    </colgroup>
+    <tr>
+        <td colspan="3">
+            <p style="text-align:center"> Sparse Handcrafted </p>
+            <center>
+                <img src="assets/videos/push_ppo_sparse_handcrafted.gif"/>
+            </center>
+        </td>
+        <td colspan="3">
+            <p style="text-align:center"> Dense Handcrafted </p>
+            <center>
+                <img src="assets/videos/push_ppo_dense_handcrafted.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/push_ppo_simple_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/push_ppo_simple_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Grid Based </p>
+            <center>
+                <img src="assets/videos/push_ppo_simple_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/push_ppo_plan_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/push_ppo_plan_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Grid Based </p>
+            <center>
+                <img src="assets/videos/push_ppo_plan_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/push_ppo_dist_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/push_ppo_dist_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <center>
+                <img src="assets/videos/push_ppo_dist_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+</table>
+
+---
+
+##### Pushing - SAC
+
+<table class="wide">
+    <colgroup>
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+    </colgroup>
+    <tr>
+        <td colspan="3">
+            <p style="text-align:center"> Sparse Handcrafted </p>
+            <center>
+                <img src="assets/videos/push_sac_sparse_handcrafted.gif"/>
+            </center>
+        </td>
+        <td colspan="3">
+            <p style="text-align:center"> Dense Handcrafted </p>
+            <center>
+                <img src="assets/videos/push_sac_dense_handcrafted.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/push_sac_simple_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/push_sac_simple_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Simple - Grid Based </p>
+            <center>
+                <img src="assets/videos/push_sac_simple_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/push_sac_plan_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/push_sac_plan_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Plan-Based - Grid Based </p>
+            <center>
+                <img src="assets/videos/push_sac_plan_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/push_sac_dist_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/push_sac_dist_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <center>
+                <img src="assets/videos/push_sac_dist_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+</table>
+
+---
+
+#### Maze-Reach - PPO
+
+<table class="wide">
+    <colgroup>
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+        <col width="16.5%">
+    </colgroup>
+    <tr>
+        <td colspan="6">
+            <p style="text-align:center"> Sparse Handcrafted </p>
+            <center>
+                <img src="assets/videos/maze_reach_ppo_sparse_handcrafted.gif"/>
+            </center>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <center>
+                <img src="assets/videos/maze_reach_ppo_dist_single.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <center>
+                <img src="assets/videos/maze_reach_ppo_dist_multi.gif"/>
+            </center>
+        </td>
+        <td colspan="2">
+            <br>
+            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <center>
+                <img src="assets/videos/maze_reach_ppo_dist_grid.gif"/>
+            </center>
+        </td>
+    </tr>
+</table>
+
+---
