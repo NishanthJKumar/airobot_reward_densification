@@ -138,14 +138,14 @@ class URRobotComplexGym(gym.Env):
         self._subgoal1_pos = np.array([[0.28, -0.08, 1.0], [0.73, -0.08, 1.0]])
         self._subgoal_urdf_id = []
 
-        if self._pddl_type in ["single_subgoal", "multi_subgoal"]:
+        if self._pddl_type in ["single_subgoal", "multi_subgoal"] and not "handcrafted" in self.reward_type:
             for pos in self._subgoal2_pos:
                 self._subgoal_urdf_id.append(
                     self.robot.pb_client.load_geom(
                         "sphere", size=0.04, mass=0, base_pos=pos, rgba=[0, 0.8, 0.8, 0.8]
                     )
                 )
-        if self._pddl_type == "multi_subgoal":
+        if self._pddl_type == "multi_subgoal" and not "handcrafted" in self.reward_type:
             for pos in self._subgoal1_pos:
                 self._subgoal_urdf_id.append(
                     self.robot.pb_client.load_geom(
