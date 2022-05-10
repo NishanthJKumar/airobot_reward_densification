@@ -47,21 +47,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Single Subgoal </p>
+            <p style="text-align:center"> Plan Based - Single Subgoal </p>
             <center>
                 <img src="assets/videos/reach_ppo_simple_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Multi Subgoal </p>
+            <p style="text-align:center"> Plan Based - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/reach_ppo_simple_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Grid Based </p>
+            <p style="text-align:center"> Plan Based - Grid Based </p>
             <center>
                 <img src="assets/videos/reach_ppo_simple_grid.gif"/>
             </center>
@@ -70,21 +70,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Single Subgoal </p>
+            <p style="text-align:center"> Time Varying - Single Subgoal </p>
             <center>
                 <img src="assets/videos/reach_ppo_plan_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Multi Subgoal </p>
+            <p style="text-align:center"> Time Varying - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/reach_ppo_plan_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Grid Based </p>
+            <p style="text-align:center"> Time Varying - Grid Based </p>
             <center>
                 <img src="assets/videos/reach_ppo_plan_grid.gif"/>
             </center>
@@ -93,21 +93,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Single Subgoal </p>
             <center>
                 <img src="assets/videos/reach_ppo_dist_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/reach_ppo_dist_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <p style="text-align:center"> Distance Varying - Grid Based </p>
             <center>
                 <img src="assets/videos/reach_ppo_dist_grid.gif"/>
             </center>
@@ -145,21 +145,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Single Subgoal </p>
+            <p style="text-align:center"> Plan Based - Single Subgoal </p>
             <center>
                 <img src="assets/videos/reach_sac_simple_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Multi Subgoal </p>
+            <p style="text-align:center"> Plan Based - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/reach_sac_simple_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Grid Based </p>
+            <p style="text-align:center"> Plan Based - Grid Based </p>
             <center>
                 <img src="assets/videos/reach_sac_simple_grid.gif"/>
             </center>
@@ -168,21 +168,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Single Subgoal </p>
+            <p style="text-align:center"> Time Varying - Single Subgoal </p>
             <center>
                 <img src="assets/videos/reach_sac_plan_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Multi Subgoal </p>
+            <p style="text-align:center"> Time Varying - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/reach_sac_plan_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Grid Based </p>
+            <p style="text-align:center"> Time Varying - Grid Based </p>
             <center>
                 <img src="assets/videos/reach_sac_plan_grid.gif"/>
             </center>
@@ -191,21 +191,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Single Subgoal </p>
             <center>
                 <img src="assets/videos/reach_sac_dist_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/reach_sac_dist_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <p style="text-align:center"> Distance Varying - Grid Based </p>
             <center>
                 <img src="assets/videos/reach_sac_dist_grid.gif"/>
             </center>
@@ -243,21 +243,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Single Subgoal </p>
+            <p style="text-align:center"> Plan Based - Single Subgoal </p>
             <center>
                 <img src="assets/videos/push_ppo_simple_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Multi Subgoal </p>
+            <p style="text-align:center"> Plan Based - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/push_ppo_simple_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Grid Based </p>
+            <p style="text-align:center"> Plan Based - Grid Based </p>
             <center>
                 <img src="assets/videos/push_ppo_simple_grid.gif"/>
             </center>
@@ -266,21 +266,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Single Subgoal </p>
+            <p style="text-align:center"> Time Varying - Single Subgoal </p>
             <center>
                 <img src="assets/videos/push_ppo_plan_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Multi Subgoal </p>
+            <p style="text-align:center"> Time Varying - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/push_ppo_plan_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Grid Based </p>
+            <p style="text-align:center"> Time Varying - Grid Based </p>
             <center>
                 <img src="assets/videos/push_ppo_plan_grid.gif"/>
             </center>
@@ -289,21 +289,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Single Subgoal </p>
             <center>
                 <img src="assets/videos/push_ppo_dist_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/push_ppo_dist_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <p style="text-align:center"> Distance Varying - Grid Based </p>
             <center>
                 <img src="assets/videos/push_ppo_dist_grid.gif"/>
             </center>
@@ -341,21 +341,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Single Subgoal </p>
+            <p style="text-align:center"> Plan Based - Single Subgoal </p>
             <center>
                 <img src="assets/videos/push_sac_simple_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Multi Subgoal </p>
+            <p style="text-align:center"> Plan Based - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/push_sac_simple_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Simple - Grid Based </p>
+            <p style="text-align:center"> Plan Based - Grid Based </p>
             <center>
                 <img src="assets/videos/push_sac_simple_grid.gif"/>
             </center>
@@ -364,21 +364,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Single Subgoal </p>
+            <p style="text-align:center"> Time Varying - Single Subgoal </p>
             <center>
                 <img src="assets/videos/push_sac_plan_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Multi Subgoal </p>
+            <p style="text-align:center"> Time Varying - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/push_sac_plan_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Plan-Based - Grid Based </p>
+            <p style="text-align:center"> Time Varying - Grid Based </p>
             <center>
                 <img src="assets/videos/push_sac_plan_grid.gif"/>
             </center>
@@ -387,21 +387,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Single Subgoal </p>
             <center>
                 <img src="assets/videos/push_sac_dist_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/push_sac_dist_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <p style="text-align:center"> Distance Varying - Grid Based </p>
             <center>
                 <img src="assets/videos/push_sac_dist_grid.gif"/>
             </center>
@@ -433,21 +433,21 @@ We perform an extensive empirical evaluation of our system across different PDDL
     <tr>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Single Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Single Subgoal </p>
             <center>
                 <img src="assets/videos/maze_reach_ppo_dist_single.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Multi Subgoal </p>
+            <p style="text-align:center"> Distance Varying - Multi Subgoal </p>
             <center>
                 <img src="assets/videos/maze_reach_ppo_dist_multi.gif"/>
             </center>
         </td>
         <td colspan="2">
             <br>
-            <p style="text-align:center"> Distance-Based - Grid Based </p>
+            <p style="text-align:center"> Distance Varying - Grid Based </p>
             <center>
                 <img src="assets/videos/maze_reach_ppo_dist_grid.gif"/>
             </center>
